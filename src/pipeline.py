@@ -1,56 +1,65 @@
 import os
+from optparse import OptionParser
 from jobTree.scriptTree.target import Target 
 from jobTree.scriptTree.stack import Stack
-from jobTree.src.bioio import getLogLevelString, isNewer, logger
-import nanopore
+from jobTree.src.bioio import getLogLevelString, isNewer, logger, setLoggingFromOptions
 
 #The following specify which mappers and analyses get run
-mappers = [ nanopore.src.mappers.lastz.Lastz ]
-analyses = [ nanopore.src.analyses.coverage.Coverage ]
+from nanopore.src.mappers.lastz import Lastz
+from nanopore.src.analyses.coverage import Coverage
+mappers = [ Lastz ]
+analyses = [ Coverage ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
-    if not os.exists(outputDir): #If the output dir doesn't yet exist create it
+    if not os.path.exists(outputDir): #If the output dir doesn't yet exist create it
         os.mkdir(outputDir)
+        target.logToMaster("Creating output dir: %s" % outputDir)
+    else:
+        target.logToMaster("Root output dir already exists: %s" % outputDir)
     for readFastaFile in readFastaFiles:
         for referenceFastaFile in referenceFastaFiles:
             for mapper in mappers:
                 target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, \
                 args=(readFastaFile, referenceFastaFile, mapper, analyses,
                       os.path.join(outputDir, "experiment_%s_%s_%s" % \
-                        (readFastaFile, referenceFastaFile, mapper.__name__)))))
+                        (os.path.split(readFastaFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__)))))
 
 def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, experimentDir):
-    if not os.exists(experimentDir):
+    print "Experiment dir", experimentDir
+    if not os.path.exists(experimentDir):
         os.mkdir(experimentDir)
+        target.logToMaster("Creating experiment dir: %s" % experimentDir)
+    else:
+        target.logToMaster("Experiment dir already exists: %s" % experimentDir)
     samFile = os.path.join(experimentDir, "mapping.sam")
-    if not os.exists(samFile) or isNewer(readFastaFile, samFile) or isNewer(referenceFastaFile, samFile):
-        target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile, options))
+    if not os.path.exists(samFile) or isNewer(readFastaFile, samFile) or isNewer(referenceFastaFile, samFile):
+        target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile))
     target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, referenceFastaFile, samFile, analyses, experimentDir))) 
 
 def runAnalyses(target, readFastaFile, referenceFastaFile, samFile, analyses, experimentDir):
     for analysis in analyses:
         analysisDir = os.path.join(experimentDir, "analysis_" + analysis.__name__)
-        if not os.exists(analysisDir):
+        if not os.path.exists(analysisDir):
             os.mkdir(analysisDir)
         if isNewer(readFastaFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
-            target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir, options))
+            target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
 
 def main():
     #Parse the inputs args/options
-    parser = OptionParser(usage="usage: workingDir [options]", "%prog 0.1")
+    parser = OptionParser(usage="usage: workingDir [options]", version="%prog 0.1")
     Stack.addJobTreeOptions(parser)
     options, args = parser.parse_args()
     setLoggingFromOptions(options)
     
     if len(args) != 1:
-        raise RuntimeError("Expected only one argument, got : %s" % " ".join(args))
+        raise RuntimeError("Expected one argument, got %s arguments: %s" % (len(args), " ".join(args)))
     workingDir = args[0]
     
     #Assign the input files
-    getFastaFiles = lambda fastaDir : [ i for i in os.listdir(os.path.join(workingDir, fastaDir)) if ".fa" in i or ".fasta" in i ]
+    getFastaFiles = lambda fastaDir : [ os.path.join(workingDir, fastaDir, i) for i in os.listdir(os.path.join(workingDir, fastaDir)) if ".fa" in i or ".fasta" in i ]
     readFastaFiles = getFastaFiles("readFastaFiles")
-    referenceFastaFile = getFastaFiles("referenceFastaFiles")
+    referenceFastaFiles = getFastaFiles("referenceFastaFiles")
     outputDir = os.path.join(workingDir, "output")
     
     #Log the inputs
@@ -62,7 +71,7 @@ def main():
         logger.info("Got the following reference fasta files: %s" % referenceFastaFile)
     
     #This line invokes jobTree  
-    Stack(Target.makeTarget(setupExperiments, args=(readFastaFiles, referenceFastaFiles, mappers, analysers))).startJobTree(options) 
+    Stack(Target.makeTargetFn(setupExperiments, args=(readFastaFiles, referenceFastaFiles, mappers, analyses, outputDir))).startJobTree(options) 
 
 if __name__ == '__main__':
     from nanopore.src.pipeline import *

@@ -1,9 +1,14 @@
 
-all : 
-	rm -rf jobTree && python src/pipeline.py ./ &2> log.txt
+all :
+	echo Does nothing
 
-test : 
-	rm -rf testJobTree && python src/pipeline.py ./test --jobTree ./testJobTree pwd &2> testLog.txt
-	
+run :
+	rm -rf jobTree
+	python src/pipeline.py ./ --logInfo > log.txt 2>&1
+
+test :
+	rm -rf testJobTree testLog.txt
+	python src/pipeline.py tests --jobTree testJobTree --logInfo > testLog.txt 2>&1
+
 clean :
-	rm -rf output jobTree log.txt test/output testJobTree testLog.txt
+	rm -rf output jobTree log.txt tests/output testJobTree testLog.txt
