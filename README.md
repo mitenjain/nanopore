@@ -3,6 +3,9 @@ Code to analyse long read mappings, specifically tailored for Oxford Nanopore Re
 ### Requirements
 * git
 * python 2.7
+* pysam
+
+I'm pondering using virtualenv to eliminate the pysam dependency and allow other packages to be installed, but then you need to have virtualenv installed.
 
 ### Installation
 To install the code run:
