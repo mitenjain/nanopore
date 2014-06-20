@@ -13,3 +13,6 @@
 [submodule "submodules/lastz"]
 	path = submodules/lastz
 	url = git@github.com:UCSCReconGroup/lastz.git
+[submodule "submodules/jobTree"]
+	path = submodules/jobTree
+	url = git@github.com:benedictpaten/jobTree.git
