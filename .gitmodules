@@ -16,3 +16,6 @@
 [submodule "submodules/jobTree"]
 	path = submodules/jobTree
 	url = git@github.com:benedictpaten/jobTree.git
+[submodule "submodules/sonLib"]
+	path = submodules/sonLib
+	url = git@github.com:benedictpaten/sonLib.git
