@@ -7,3 +7,9 @@
 [submodule "subModules/sonLib"]
 	path = subModules/sonLib
 	url = git@github.com:benedictpaten/sonLib.git
+[submodule "submodules/bwa"]
+	path = submodules/bwa
+	url = git@github.com:lh3/bwa.git
+[submodule "submodules/lastz"]
+	path = submodules/lastz
+	url = git@github.com:UCSCReconGroup/lastz.git

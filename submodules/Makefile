@@ -1,11 +1,11 @@
 # order is important, libraries first
-modules = sonLib jobTree
+modules = sonLib jobTree bwa lastz
 .PHONY: all %.all clean %.clean
 
-all : ${modules:%=all.%}
+all : ${modules:%=all.%} 
 
 all.%:
-	cd $* && make all
+	cd $* && make
 
 clean:  ${modules:%=clean.%}
 	rm -rf lib/*.h bin/*.dSYM

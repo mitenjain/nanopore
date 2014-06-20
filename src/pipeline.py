@@ -6,8 +6,9 @@ from jobTree.src.bioio import getLogLevelString, isNewer, logger, setLoggingFrom
 
 #The following specify which mappers and analyses get run
 from nanopore.src.mappers.lastz import Lastz
+from nanopore.src.mappers.bwa import Bwa
 from nanopore.src.analyses.coverage import Coverage
-mappers = [ Lastz ]
+mappers = [ Lastz, Bwa ]
 analyses = [ Coverage ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
@@ -71,7 +72,10 @@ def main():
         logger.info("Got the following reference fasta files: %s" % referenceFastaFile)
     
     #This line invokes jobTree  
-    Stack(Target.makeTargetFn(setupExperiments, args=(readFastaFiles, referenceFastaFiles, mappers, analyses, outputDir))).startJobTree(options) 
+    i = Stack(Target.makeTargetFn(setupExperiments, args=(readFastaFiles, referenceFastaFiles, mappers, analyses, outputDir))).startJobTree(options) 
+    
+    if i != 0:
+        raise RuntimeError("Got failed jobs")
 
 if __name__ == '__main__':
     from nanopore.src.pipeline import *
