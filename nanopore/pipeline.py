@@ -5,9 +5,9 @@ from jobTree.scriptTree.stack import Stack
 from jobTree.src.bioio import getLogLevelString, isNewer, logger, setLoggingFromOptions
 
 #The following specify which mappers and analyses get run
-from nanopore.src.mappers.lastz import Lastz
-from nanopore.src.mappers.bwa import Bwa
-from nanopore.src.analyses.coverage import Coverage
+from nanopore.mappers.lastz import Lastz
+from nanopore.mappers.bwa import Bwa
+from nanopore.analyses.coverage import Coverage
 mappers = [ Lastz, Bwa ]
 analyses = [ Coverage ]
 
@@ -78,5 +78,5 @@ def main():
         raise RuntimeError("Got failed jobs")
 
 if __name__ == '__main__':
-    from nanopore.src.pipeline import *
+    from nanopore.pipeline import *
     main()

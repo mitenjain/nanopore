@@ -1,4 +1,4 @@
-from nanopore.src.mappers.abstractMapper import AbstractMapper
+from nanopore.mappers.abstractMapper import AbstractMapper
 from sonLib.bioio import system
 import os
 

@@ -1,4 +1,4 @@
-from nanopore.src.analyses.abstractAnalysis import AbstractAnalysis
+from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 import os
 
 class Coverage(AbstractAnalysis):
