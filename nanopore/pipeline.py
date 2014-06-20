@@ -9,7 +9,7 @@ from nanopore.mappers.lastz import Lastz
 from nanopore.mappers.bwa import Bwa
 from nanopore.mappers.last import Last
 from nanopore.analyses.coverage import Coverage
-mappers = [ Lastz, Bwa ] #Last is currently broken, Last ]
+mappers = [ Lastz, Bwa, Last ]
 analyses = [ Coverage ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
