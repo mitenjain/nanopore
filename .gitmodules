@@ -22,3 +22,9 @@
 [submodule "submodules/last"]
 	path = submodules/last
 	url = git@github.com:UCSCReconGroup/last.git
+[submodule "submodules/blasr"]
+	path = submodules/blasr
+	url = git@github.com:PacificBiosciences/blasr.git
+[submodule "submodules/hdf5"]
+	path = submodules/hdf5
+	url = git@github.com:UCSCReconGroup/hdf5.git
