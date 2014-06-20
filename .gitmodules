@@ -1,0 +1,9 @@
+[submodule "submodules"]
+	path = submodules
+	url = git@github.com:benedictpaten/jobTree.git
+[submodule "subModules/jobTree"]
+	path = subModules/jobTree
+	url = git@github.com:benedictpaten/jobTree.git
+[submodule "subModules/sonLib"]
+	path = subModules/sonLib
+	url = git@github.com:benedictpaten/sonLib.git

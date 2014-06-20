@@ -1,6 +1,6 @@
 
 all :
-	echo Does nothing
+	cd submodules && make all
 
 run :
 	rm -rf jobTree
