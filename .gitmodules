@@ -19,3 +19,6 @@
 [submodule "submodules/sonLib"]
 	path = submodules/sonLib
 	url = git@github.com:benedictpaten/sonLib.git
+[submodule "submodules/last"]
+	path = submodules/last
+	url = git@github.com:UCSCReconGroup/last.git

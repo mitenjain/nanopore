@@ -1,5 +1,5 @@
 # order is important, libraries first
-modules = sonLib jobTree bwa lastz
+modules = sonLib jobTree bwa lastz last
 .PHONY: all %.all clean %.clean
 
 all : ${modules:%=all.%} 
