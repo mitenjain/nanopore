@@ -2,13 +2,12 @@
 all :
 	cd submodules && make all
 
-run :
-	rm -rf jobTree
-	python src/pipeline.py ./ --logInfo > log.txt 2>&1
+run : all
+	./src/pipeline.sh ./ jobTree log.txt 
 
-test :
-	rm -rf testJobTree testLog.txt
-	python src/pipeline.py tests --jobTree testJobTree --logInfo > testLog.txt 2>&1
+test : all
+	./src/pipeline.sh tests testJobTree testLog.txt
 
 clean :
+	cd submodules && make clean
 	rm -rf output jobTree log.txt tests/output testJobTree testLog.txt
