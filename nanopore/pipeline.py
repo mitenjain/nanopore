@@ -10,8 +10,8 @@ from nanopore.mappers.bwa import Bwa
 from nanopore.mappers.last import Last
 from nanopore.mappers.blasr import Blasr
 from nanopore.analyses.substitutions import Substitutions
-mappers = [ Lastz, Bwa ] #Blasr ] #Blasr not yet working
-analyses = [ Substitutions ]
+mappers = [ Lastz, Bwa ] #Blasr ] #Blasr not yet working, Last not outputting nice SAM
+analyses = [ Substitutions, Indels, Coverage ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):

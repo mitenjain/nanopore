@@ -44,7 +44,7 @@ class SubstitutionMatrix():
         return { 'A':0, 'C':1, 'G':2, 'T':3 }[base]
 
 class Substitutions(AbstractAnalysis):
-    """This is just my first test analysis target
+    """Calculates stats on substitutions
     """
     def run(self):
         refSequences = dict(fastaRead(open(self.referenceFastaFile, 'r'))) #Hash of names to sequences
