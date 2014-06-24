@@ -1,7 +1,6 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from jobTree.src.bioio import fastaRead
-import pysam
-import re, subprocess, os
+import pysam, subprocess, os
 
 class KmerAnalysis(AbstractAnalysis):
     """Runs Karen's kmer analysis pipeline on a aligned sam and reference
@@ -46,7 +45,6 @@ class KmerAnalysis(AbstractAnalysis):
     def run(self, kmer_size=5):
         """Run karen's pipeline.
         """
-        self.cigar_regex = re.compile("\d+[MIDNSHPX=]")
         self.ref = dict(fastaRead(open(self.referenceFastaFile, "r")))
         outf = open(os.path.join(self.getLocalTempDir(),"karen"), "w")
         sam = pysam.Samfile(self.samFile, "r" )
@@ -58,8 +56,8 @@ class KmerAnalysis(AbstractAnalysis):
         c = subprocess.Popen(["perl", "kmer.pl", self.readFastaFile, str(kmer_size)]).communicate()
         c = subprocess.Popen(["perl", "kmer.pl", self.referenceFastaFile, str(kmer_size)]).communicate()
         c = subprocess.Popen(["perl", "cmpKmer.pl", self.readFastaFile + "." + str(kmer_size) + "mer.fa", self.referenceFastaFile + "." + str(kmer_size) + "mer.fa"]).communicate()
-        c = subprocess.Popen(["perl", "kmer_del.pl", "tmp", self.outputDir + "/kmer_del.out"]).communicate()
-        c = subprocess.Popen(["perl", "kmer_ins.pl", "tmp", self.outputDir + "/kmer_ins.out"]).communicate()
+        c = subprocess.Popen(["perl", "kmer_del.pl", "tmp", os.path.join(self.outputDir, "kmer_del.out")]).communicate()
+        c = subprocess.Popen(["perl", "kmer_ins.pl", "tmp", os.path.join(self.outputDir, "kmer_ins.out")]).communicate()
 
 
 
