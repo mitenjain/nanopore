@@ -8,7 +8,7 @@ open(FILE,"$ARGV[0]");
 open(RAND,"$ARGV[1]");
 my @rand;
 
-open(DEL,">cmpKmer.del.txt");
+open(DEL,">$ARGV[2]");
 my $kmerSize;
 while(<RAND>){
     chomp;

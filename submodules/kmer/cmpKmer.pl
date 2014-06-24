@@ -44,7 +44,7 @@ while(<RDS>){
     }
 }
 close RDS;
-open(OUT,">cmpKmer.out");
+open(OUT,">$ARGV[2]");
 foreach my $kRef(keys %kmerRef){
     my $refFreq=$kmerRef{$kRef}/$countRef;
     if(exists $kmerRds{$kRef}){

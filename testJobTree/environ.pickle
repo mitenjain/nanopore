@@ -18,7 +18,7 @@ S'|/usr/bin/lesspipe.sh %s'
 p9
 sS'SSH_CLIENT'
 p10
-S'128.114.61.130 53645 22'
+S'128.114.61.130 7344 22'
 p11
 sS'CVS_RSH'
 p12
@@ -93,11 +93,11 @@ S'/usr'
 p44
 sS'SSH_CONNECTION'
 p45
-S'128.114.61.130 53645 132.249.245.88 22'
+S'128.114.61.130 7344 132.249.245.88 22'
 p46
 sS'SSH_TTY'
 p47
-S'/dev/pts/61'
+S'/dev/pts/73'
 p48
 sS'HOSTNAME'
 p49
@@ -112,7 +112,7 @@ p53
 S'2'
 sS'PWD'
 p54
-S'/cluster/home/ifiddes/try4/nanopore'
+S'/cluster/home/ifiddes/nanopore'
 p55
 sS'MAIL'
 p56

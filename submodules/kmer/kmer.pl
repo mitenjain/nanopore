@@ -8,7 +8,7 @@ my $h;
 die "must provide input file\nusage: kmer.pl fastaFile k-merSize\n" unless ($ARGV[0]);
 die "must provide kmer size\nusage: kmer.pl fastaFile k-merSize\n" unless($ARGV[1]);
 
-my $outFile=$ARGV[0] . '.' . $ARGV[1] . 'mer.fa';
+my $outFile=$ARGV[2];
 open(OUT,">$outFile");
 open(FA,"$ARGV[0]");
 while(<FA>){

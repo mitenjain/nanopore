@@ -8,9 +8,8 @@ open(FILE,"$ARGV[0]");
 open(RAND,"$ARGV[1]");
 my @rand;
 
-open(INS,">cmpKmer.ins.txt");
+open(INS,">$ARGV[2]");
 my $kmerSize;
-
 while(<RAND>){
     chomp;
     my @l=split(/\t+/,$_);
