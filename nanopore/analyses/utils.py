@@ -15,7 +15,10 @@ class AlignedPair:
         self.pPair = pPair #Pointer to the previous aligned pair
         
     def isMatch(self):
-        return self.getRefBase() == self.getReadBase()
+        return self.getRefBase().upper() == self.getReadBase().upper() and self.getRefBase().upper() in "ACTG"
+    
+    def isMismatch(self):
+        return self.getRefBase().upper() != self.getReadBase().upper() and self.getRefBase().upper() in "ACTG" and self.getReadBase().upper() in "ACTG"
     
     def getRefBase(self):
         return self.refSeq[self.refPos]

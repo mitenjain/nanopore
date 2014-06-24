@@ -2,34 +2,56 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import AlignedPair
 import os
 import pysam
+import numpy
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import reverseComplement, fastaRead, prettyXml
 
+class IndelCounter():
+    def __init__(self, readSeqName, refSeqName):
+        self.readInsertionLengths = []
+        self.readDeletionLengths = []
+        self.blockLengths = []
+        self.readSeqName = readSeqName
+        self.refSeqName = refSeqName
+    
+    def addReadAlignment(self, alignedRead, refSeq, readSeq):
+        blockLength = 0
+        for aP in AlignedPair.iterator(alignedRead, refSeq, readSeq): 
+            if aP.getPrecedingReadInsertionLength() > 0:
+                self.readInsertionLengths.append(aP.getPrecedingReadInsertionLength())
+            if aP.getPrecedingReadDeletionLength() > 0:
+                self.readDeletionLengths.append(aP.getPrecedingReadDeletionLength())
+            if aP.getPrecedingReadInsertionLength() > 0 or aP.getPrecedingReadDeletionLength() > 0:
+                assert blockLength > 0
+                self.blockLengths.append(blockLength)
+                blockLength = 1
+            else:
+                blockLength += 1
+    
+    def getXML(self):
+        return ET.Element("indels", { "refSeqName":self.refSeqName, 
+                                     "readSeqName":self.readSeqName,
+                                     "totalReadInsertions":str(len(self.readInsertionLengths)),
+                                     "totalReadDeletions":str(len(self.readDeletionLengths)),
+                                     "avgReadInsertionLength":str(numpy.average(self.readInsertionLengths)),
+                                     "avgReadDeletionLength":str(numpy.average(self.readDeletionLengths)),
+                                     "medianReadInsertionLength":str(numpy.median(self.readInsertionLengths)),
+                                     "medianReadDeletionLength":str(numpy.median(self.readDeletionLengths)),
+                                     "readInsertionLengths":" ".join([ str(i) for i in self.readInsertionLengths ]),
+                                     "readDeletionLengths":" ".join([ str(i) for i in self.readDeletionLengths ]) })
+    
 class Indels(AbstractAnalysis):
     """Calculates stats on indels.
     """
     def run(self):
         refSequences = dict(fastaRead(open(self.referenceFastaFile, 'r'))) #Hash of names to sequences
         readSequences = dict(fastaRead(open(self.readFastaFile, 'r'))) #Hash of names to sequences
-        sM = SubstitutionMatrix() #The thing to store the counts in
         sam = pysam.Samfile(self.samFile, "r" )
-        insertionsLengths = []
-        deletionLengths = []
-        blockLengths = []
+        overallIndelCounter = IndelCounter("overall", "overall")
         for aR in sam: #Iterate on the sam lines
-            blockLength = 0
-            for aP in AlignedPair.iterator(aR, refSequences[sam.getrname(aR.rname)], readSequences[aR.qname]):
-                if aP.getPrecedingReadInsertionLength() > 0:
-                    insertionLengths.append(aP.getPrecedingReadInsertionLength())
-                if aP.getPrecedingReadDeletionLength() > 0:
-                    deletionLengths.append(aP.getPrecedingReadDeletionLength())
-                if aP.getPrecedingReadInsertionLength() > 0 or aP.getPrecedingReadDeletionLength() > 0:
-                    assert blockLength > 0
-                    blockLengths.append(blockLength)
-                    blockLength = 1
-                else:
-                    blockLenth += 1
+            refSeq = refSequences[sam.getrname(aR.rname)]
+            readSeq = readSequences[aR.qname]
+            overallIndelCounter.addReadAlignment(aR, refSeq, readSeq)
         sam.close()
         #Write out the substitution info
-        open(os.path.join(self.outputDir, "indexl.xml"), 'w').write(prettyXml(sM.getXML()))
-        
+        open(os.path.join(self.outputDir, "indels.xml"), 'w').write(prettyXml(overallIndelCounter.getXML()))
