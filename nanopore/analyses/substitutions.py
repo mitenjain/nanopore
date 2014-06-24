@@ -49,12 +49,12 @@ class Substitutions(AbstractAnalysis):
     def run(self):
         refSequences = dict(fastaRead(open(self.referenceFastaFile, 'r'))) #Hash of names to sequences
         readSequences = dict(fastaRead(open(self.readFastaFile, 'r'))) #Hash of names to sequences
-        dM = DistanceMatrix() #The thing to store the counts in
+        sM = SubstitutionMatrix() #The thing to store the counts in
         sam = pysam.Samfile(self.samFile, "r" )
         for aR in sam: #Iterate on the sam lines
-            for aP in alignedPairIt(aR, refSequences[sam.getrname(aR.rname)], readSequences[aR.qname]): #Walk through the matches mismatches:
-                dM.recordAlignedPair(aP.getRefBase(), aP.getReadBase())
+            for aP in AlignedPair.iterator(aR, refSequences[sam.getrname(aR.rname)], readSequences[aR.qname]): #Walk through the matches mismatches:
+                sM.addAlignedPair(aP.getRefBase(), aP.getReadBase())
         sam.close()
         #Write out the substitution info
-        open(os.path.join(self.outputDir, "substitutions.xml"), 'w').write(prettyXml(dM.getXML()))
+        open(os.path.join(self.outputDir, "substitutions.xml"), 'w').write(prettyXml(sM.getXML()))
         
