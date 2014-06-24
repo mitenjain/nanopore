@@ -1,0 +1,18 @@
+---JOBTREE SLAVE OUTPUT LOG---
+Parsed arguments and set up logging
+Starting the next job
+Starting the next job
+Traceback (most recent call last):
+  File "/cluster/home/ifiddes/try2/nanopore/submodules/jobTree/src/jobTreeSlave.py", line 271, in main
+    defaultMemory=defaultMemory, defaultCpu=defaultCpu, depth=depth)
+  File "/cluster/home/ifiddes/try2/nanopore/submodules/jobTree/scriptTree/stack.py", line 153, in execute
+    self.target.run()
+  File "/cluster/home/ifiddes/try2/nanopore/submodules/jobTree/scriptTree/target.py", line 197, in run
+    func(*((self,) + tuple(self.args)), **self.kwargs)
+  File "/cluster/home/ifiddes/try2/nanopore/nanopore/pipeline.py", line 50, in runAnalyses
+    target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
+TypeError: __init__() takes exactly 1 argument (5 given)
+Exiting the slave because of a failed job on host kolossus
+Due to failure we are reducing the remaining retry count of job /cluster/home/ifiddes/try2/nanopore/testJobTree/jobs/t0/job to 0
+We have set the default memory of the failed job to 2147483648 bytes
+Experiment dir tests/output/experiment_reads.fa_reference.fa_Lastz
