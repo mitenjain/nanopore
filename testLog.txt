@@ -18,7 +18,7 @@ Got parameters,rescue jobs frequency: 5400.0 max job duration: 9.22337203685e+18
 Checked batch system has no running jobs and no updated jobs
 Found 1 jobs to start and 0 parent jobs with children to run
 Starting the main loop
-Got message from job at time: 1403634674.07 : Root output dir already exists: tests/output
-Got message from job at time: 1403634674.07 : Experiment dir already exists: tests/output/experiment_reads.fa_reference.fa_Bwa
+Got message from job at time: 1403635221.98 : Root output dir already exists: tests/output
+Got message from job at time: 1403635221.98 : Experiment dir already exists: tests/output/experiment_reads.fa_reference.fa_Bwa
 Only failed jobs and their dependents (0 total) are remaining, so exiting.
 Finished the main loop

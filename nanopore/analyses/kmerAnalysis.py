@@ -1,7 +1,7 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from jobTree.src.bioio import fastaRead
 import pysam
-import re, subprocess
+import re, subprocess, os
 
 class KmerAnalysis(AbstractAnalysis):
     """Runs Karen's kmer analysis pipeline on a aligned sam and reference
@@ -48,8 +48,8 @@ class KmerAnalysis(AbstractAnalysis):
         """
         self.cigar_regex = re.compile("\d+[MIDNSHPX=]")
         self.ref = dict(fastaRead(open(self.referenceFastaFile, "r")))
-        #os path join
         outf = open(os.path.join(self.getLocalTempDir(),"karen"), "w")
+        sam = pysam.Samfile(self.samFile, "r" )
         for record in sam:
             rseq = self.ref[sam.getrname(record.tid)]
             seq, ref = self.convert_sam_record(record, rseq)
