@@ -1,0 +1,36 @@
+<html>
+
+<head>
+<title>Saving a Report</title>
+<style type="text/css">
+	body {
+		font-family: sans-serif;
+	}
+</style>
+</head>
+<body>
+<h1>Saving a Report</h1>
+<p>
+In addition to providing an interactive report FastQC also
+has the option to create an HTML version of this report
+for a more permanent record.  This HTML report can also
+be generated directly by running FastQC in non-interactive
+mode.
+</p>
+<p>
+To create a report simply select File &gt Save Report from
+the main menu.  By default a report will be created using
+the name of the fastq file with _fastqc.zip appended to the
+end.  The report will be created for whichever file tab
+was active when the menu option was selected.
+</p>
+<p>
+The report file which is created is actually a zip file.
+When uncompressed this will create a folder with the same
+name as the report file.  Inside this will be a series of
+files, but the one to look at is the fastqc_report.html
+file which links to the other files in the report.
+</p>
+
+</body>
+</html>

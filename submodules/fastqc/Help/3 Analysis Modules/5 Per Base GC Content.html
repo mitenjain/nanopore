@@ -1,0 +1,47 @@
+<html>
+
+<head>
+<title>Per Base GC Content</title>
+<style type="text/css">
+	body {
+		font-family: sans-serif;
+	}
+</style>
+</head>
+<body>
+<h1>Per Base GC Content</h1>
+<h2>Summary</h2>
+<p>
+Per Base GC Content plots out the GC content of each base
+position in a file.
+</p>
+<p><img src="per_base_gc_content.png"></p>
+<p>
+In a random library you would expect that there would be little
+to no difference between the different bases of a sequence run, so
+the line in this plot should run horizontally across the graph. The
+overall GC content should reflect the GC content of the underlying
+genome.
+</p>
+<p>
+If you see a GC bias which changes in different bases then this 
+could indicate an overrepresented sequence which is contaminating
+your library.  A bias which is consistent across all bases either
+indicates that the original library was sequence biased, or that there
+was a systematic problem during the sequencing of the library.
+</p>
+
+<h2>Warning</h2>
+<p>
+This module issues a warning it the GC content of any base strays more
+than 5% from the mean GC content.
+</p>
+
+<h2>Failure</h2>
+<p>
+This module will fail if the GC content of any base strays more than 10%
+from the mean GC content.
+</p>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<html>
+
+<head>
+<title>Overrepresented Kmers</title>
+<style type="text/css">
+	body {
+		font-family: sans-serif;
+	}
+</style>
+</head>
+<body>
+<h1>Overrepresented Kmers</h1>
+<h2>Summary</h2>
+<p>
+The analysis of overrepresented sequences will spot an increase in
+any exactly duplicated sequences, but there are a different subset
+of problems where it will not work.
+</p>
+<ul>
+<li>If you have very long sequences with poor sequence quality then
+random sequencing errors will dramatically reduce the counts for
+exactly duplicated sequences.
+</li>
+<li>If you have a partial sequence which is appearing at a variety
+of places within your sequence then this won't be seen either by the
+per base content plot or the duplicate sequence analysis.
+</li>
+</ul> 
+<p>
+This module counts the enrichment of every 5-mer within the sequence
+library.  It calculates an expected level at which this k-mer should
+have been seen based on the base content of the library as a whole and
+then uses the actual count to calculate an observed/expected ratio for
+that k-mer.  In addition to reporting a list of hits it will draw a
+graph for the top 6 hits to show the pattern of enrichment of that
+Kmer across the length of your reads.  This will show if you have a
+general enrichment, or if there is a pattern of bias at different
+points over your read length.
+</p>
+<p><img src="kmer_profiles.png" alt="Kmer profiles"></p>
+<p>
+Any k-mer showing more than a 3 fold overall enrichment or a 5 fold
+enrichment at any given base position will be reported by this module.
+</p>
+<p>
+To allow this module to run in a reasonable time only 20% of the whole
+library is analysed and the results are extrapolated to the rest of
+the library.
+</p>
+
+<h2>Warning</h2>
+<p>
+This module will issue a warning if any k-mer is enriched more than 3
+fold overall, or more than 5 fold at any individual position.
+</p>
+
+<h2>Failure</h2>
+<p>
+This module will issue a error if any k-mer is enriched more than 10
+fold at any individual base position.
+</p>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<html>
+
+<head>
+<title>Per Base Sequence Quality</title>
+<style type="text/css">
+	body {
+		font-family: sans-serif;
+	}
+</style>
+</head>
+<body>
+<h1>Per Base Sequence Quality</h1>
+<h2>Summary</h2>
+<p>
+This view shows an overview of the range of quality values across all bases
+at each position in the FastQ file.
+</p>
+<p><img src="per_base_quality.png"></p>
+<p>
+For each position a BoxWhisker type plot is drawn.  The elements of the
+plot are as follows:
+</p>
+<ul>
+<li>The central red line is the median value</li>
+<li>The yellow box represents the inter-quartile range (25-75%)</li>
+<li>The upper and lower whiskers represent the 10% and 90% points</li>
+<li>The blue line represents the mean quality</li>
+</ul>
+<p>
+The y-axis on the graph shows the quality scores.  The higher the score
+the better the base call.  The background of the graph divides the 
+y axis into very good quality calls (green), calls of reasonable quality
+(orange), and calls of poor quality (red).  The quality of calls on most
+platforms will degrade as the run progresses, so it is common to see
+base calls falling into the orange area towards the end of a read.
+</p>
+<p>
+It should be mentioned that there are number of different ways to encode
+a quality score in a FastQ file.  FastQC attempts to automatically determine
+which encoding method was used, but in some very limited datasets it is
+possible that it will guess this incorrectly (ironically only when your
+data is universally very good!).  The title of the graph will describe the
+encoding FastQC thinks your file used.
+</p>
+
+
+<h2>Warning</h2>
+<p>
+A warning will be issued if the lower quartile for any base is less
+than 10, or if the median for any base is less than 25.
+</p>
+
+<h2>Failure</h2>
+<p>
+This module will raise a failure if the lower quartile for any base is
+less than 5 or if the median for any base is less than 20.
+</p>
+
+</body>
+</html>

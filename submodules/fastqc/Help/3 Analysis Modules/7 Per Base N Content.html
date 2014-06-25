@@ -1,0 +1,43 @@
+<html>
+
+<head>
+<title>Per Base N Content</title>
+<style type="text/css">
+	body {
+		font-family: sans-serif;
+	}
+</style>
+</head>
+<body>
+<h1>Per Base N Content</h1>
+<h2>Summary</h2>
+<p>
+If a sequencer is unable to make a base call with sufficient confidence
+then it will normally substitute an N rather than a conventional base]
+call
+</p>
+<p>
+This module plots out the percentage of base calls at each position for
+which an N was called.
+</p>
+<p><img src="per_base_n_content.png"></p>
+
+<p>
+It's not unusual to see a very low proportion of Ns appearing in a sequence, 
+especially nearer the end of a sequence.  However, if this proportion rises
+above a few percent it suggests that the analysis pipeline was unable to
+interpret the data well enough to make valid base calls.
+</p>
+
+<h2>Warning</h2>
+<p>
+This module raises a warning if any position shows an N content of >5%.
+</p>
+
+<h2>Failure</h2>
+<p>
+This module will raise an error if any position shows an N content of >20%.
+</p>
+
+</body>
+</html>

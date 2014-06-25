@@ -1,0 +1,11 @@
+ÄcjobTree.scriptTree.stack
+Stack
+q)Åq}qUtargetqcnanopore.analyses.substitutions
+Substitutions
+q)Åq}q(U_Target__cpuqI9223372036854775807
+UreadFastqFileq	Utests/readFastqFiles/reads.fqq
+UsamFileqU?tests/output/experiment_reads.fq_reference.fa_Lastz/mapping.samqU_Target__childrenq]U_Target__followOnqNUloggingMessagesq]UimportStringsqc__builtin__
+set
+q]qU-nanopore.analyses.substitutions.SubstitutionsqaÖRqU	outputDirqUJtests/output/experiment_reads.fq_reference.fa_Lastz/analysis_SubstitutionsU_Target__timeqI9223372036854775807
+U_Target__memoryqI9223372036854775807
+UreferenceFastaFileqU&tests/referenceFastaFiles/reference.faqU_Target__childCommandsq]UglobalTempDirqNubsb.

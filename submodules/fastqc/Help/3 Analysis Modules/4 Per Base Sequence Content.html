@@ -1,0 +1,49 @@
+<html>
+
+<head>
+<title>Per Base Sequence Content</title>
+<style type="text/css">
+	body {
+		font-family: sans-serif;
+	}
+</style>
+</head>
+<body>
+<h1>Per Base Sequence Content</h1>
+<h2>Summary</h2>
+<p>
+Per Base Sequence Content plots out the proportion of each base
+position in a file for which each of the four normal DNA bases
+has been called.
+</p>
+<p><img src="per_base_sequence_content.png"></p>
+<p>
+In a random library you would expect that there would be little
+to no difference between the different bases of a sequence run, so
+the lines in this plot should run parallel with each other.  The
+relative amount of each base should reflect the overall amount of
+these bases in your genome, but in any case they should not be
+hugely imbalanced from each other.
+</p>
+<p>
+If you see strong biases which change in different bases then this 
+usually indicates an overrepresented sequence which is contaminating
+your library.  A bias which is consistent across all bases either
+indicates that the original library was sequence biased, or that there
+was a systematic problem during the sequencing of the library.
+</p>
+
+<h2>Warning</h2>
+<p>
+This module issues a warning if the difference between A and T, or G
+and C is greater than 10% in any position.
+</p>
+
+<h2>Failure</h2>
+<p>
+This module will fail if the difference between A and T, or G and C
+is greater than 20% in any position.
+</p>
+
+</body>
+</html>
