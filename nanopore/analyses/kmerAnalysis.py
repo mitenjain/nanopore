@@ -1,6 +1,6 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from jobTree.src.bioio import fastaRead, system
-import pysam, subprocess, os
+import pysam, os
 
 class KmerAnalysis(AbstractAnalysis):
     """Runs Karen's kmer analysis pipeline on a aligned sam and reference
