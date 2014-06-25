@@ -66,7 +66,7 @@ class AlignedPair:
 def samToBamFile(samInputFile, bamOutputFile):
     """Converts a sam file to a bam file (sorted)
     """
-	#system("samtools view -Sb %s > %s" % (mapping.sam, mapping.bam))
-	#system("samtools sort %s %s" % (mapping.bam, mapping.sorted))
-	pass
+    #system("samtools view -Sb %s > %s" % (mapping.sam, mapping.bam))
+    #system("samtools sort %s %s" % (mapping.bam, mapping.sorted))
+    pass
 
