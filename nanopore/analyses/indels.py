@@ -4,7 +4,7 @@ import os
 import pysam
 import numpy
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import reverseComplement, fastaRead, prettyXml
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml
 
 class IndelCounter():
     def __init__(self, readSeqName, refSeqName):
@@ -45,7 +45,7 @@ class Indels(AbstractAnalysis):
     """
     def run(self):
         refSequences = dict(fastaRead(open(self.referenceFastaFile, 'r'))) #Hash of names to sequences
-        readSequences = dict(fastaRead(open(self.readFastaFile, 'r'))) #Hash of names to sequences
+        readSequences = readSequences = dict([ (name, seq) for name, seq, quals in fastqRead(self.readFastqFile) ]) #Hash of names to sequences
         sam = pysam.Samfile(self.samFile, "r" )
         overallIndelCounter = IndelCounter("overall", "overall")
         for aR in sam: #Iterate on the sam lines

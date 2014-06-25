@@ -62,21 +62,20 @@ def main():
     workingDir = args[0]
     
     #Assign the input files
-    getFastaFiles = lambda fastaDir : [ os.path.join(workingDir, fastaDir, i) for i in os.listdir(os.path.join(workingDir, fastaDir)) if ".fa" in i or ".fasta" in i ]
-    readFastaFiles = getFastaFiles("readFastaFiles")
-    referenceFastaFiles = getFastaFiles("referenceFastaFiles")
+    readFastqFiles = [ os.path.join(workingDir, "readFastqFiles", i) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
+    referenceFastaFiles = [ os.path.join(workingDir, "referenceFastaFiles", i) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if ".fa" in i or ".fasta" in i ] 
     outputDir = os.path.join(workingDir, "output")
     
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)
     logger.info("Using the following output directory: %s" % outputDir)
-    for readFastaFile in readFastaFiles:
-        logger.info("Got the following read fasta files: %s" % readFastaFile)
+    for readFastqFile in readFastqFiles:
+        logger.info("Got the following read fastq file: %s" % readFastqFile)
     for referenceFastaFile in referenceFastaFiles:
         logger.info("Got the following reference fasta files: %s" % referenceFastaFile)
     
     #This line invokes jobTree  
-    i = Stack(Target.makeTargetFn(setupExperiments, args=(readFastaFiles, referenceFastaFiles, mappers, analyses, outputDir))).startJobTree(options) 
+    i = Stack(Target.makeTargetFn(setupExperiments, args=(readFastqFiles, referenceFastaFiles, mappers, analyses, outputDir))).startJobTree(options) 
     
     if i != 0:
         raise RuntimeError("Got failed jobs")

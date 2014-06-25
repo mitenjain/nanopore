@@ -3,7 +3,7 @@ from nanopore.analyses.utils import AlignedPair
 import os
 import pysam
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import reverseComplement, fastaRead, prettyXml
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml
 
 class CoverageCounter:
     """Counts coverage from a pairwise alignment
@@ -77,7 +77,7 @@ class Coverage(AbstractAnalysis):
     """
     def run(self):
         refSequences = dict(fastaRead(open(self.referenceFastaFile, 'r'))) #Hash of names to sequences
-        readSequences = dict(fastaRead(open(self.readFastaFile, 'r'))) #Hash of names to sequences
+        readSequences = dict([ (name, seq) for name, seq, quals in fastqRead(self.readFastqFile) ]) #Hash of names to sequences
         overallCoverageCounter = CoverageCounter("overall", "overall") #Thing to store the overall coverage in
         readCoverages = []
         sam = pysam.Samfile(self.samFile, "r" )

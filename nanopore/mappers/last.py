@@ -1,5 +1,5 @@
 from nanopore.mappers.abstractMapper import AbstractMapper
-from sonLib.bioio import system, fastaRead
+from sonLib.bioio import system, fastaRead, fastqRead
 import os
 
 class Last(AbstractMapper):
@@ -13,7 +13,14 @@ class Last(AbstractMapper):
             fH.write("@SQ\tSN:%s\tLN:%s\n" % (name, len(seq)))
         fH.close()
         
+        #Make fasta file, as last fastq seems broken
+        localReadFile = os.path.join(self.getLocalTempDir(), "reads.fa") #Index file
+        fH = open(localReadFile, 'w')
+        for name, seq, quals in fastqRead(self.readFastqFile):
+            fastaWrite(fH, name, seq)
+        fH.close()
+        
         system("cp %s %s" % (self.referenceFastaFile, localReferenceFastaFile)) #Copy across the ref file
         system("lastdb %s %s" % (indexFile, localReferenceFastaFile)) #Build the index
-        system("lastal %s %s > %s" % (indexFile, self.readFastaFile, mafFile)) #Build the alignment
+        system("lastal %s %s > %s" % (indexFile, localReadFile, mafFile)) #Build the alignment
         system("maf-convert.py sam %s >> %s" % (mafFile, self.outputSamFile)) #Now convert sam file
