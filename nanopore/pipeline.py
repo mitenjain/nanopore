@@ -12,6 +12,8 @@ from nanopore.mappers.blasr import Blasr
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import Coverage
 from nanopore.analyses.indels import Indels
+from nanopore.analyses.fastqc import FastQC
+from nanopore.analyses.qualimap import QualiMap
 mappers = [ Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working, Last not outputting nice SAM
 analyses = [ Substitutions, Coverage, Indels  ]
 
