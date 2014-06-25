@@ -2,7 +2,7 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from sonLib.bioio import system
 import os
 
-class QualiMap(AbstractMapper):
+class QualiMap(AbstractAnalysis):
     def run(self):
     	mapping.sam = self.samFile
 	system("samtools view -Sb %s > %s" % (mapping.sam, mapping.bam))
