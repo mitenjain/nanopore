@@ -1,5 +1,5 @@
 from nanopore.mappers.abstractMapper import AbstractMapper
-from sonLib.bioio import system, fastaRead, fastqRead
+from sonLib.bioio import system, fastaRead, fastqRead, fastaWrite
 import os
 
 class Last(AbstractMapper):

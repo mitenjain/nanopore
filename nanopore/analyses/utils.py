@@ -62,3 +62,8 @@ class AlignedPair:
                 assert aP.getReadBase().upper() == alignedRead.seq[readPos].upper()
                 pPair = aP
                 yield aP
+
+def samToBamFile(samInputFile, bamOutputFile):
+    """Converts a sam file to a bam file
+    """
+    pass
