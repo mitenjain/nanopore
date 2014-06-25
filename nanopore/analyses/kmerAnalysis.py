@@ -47,7 +47,7 @@ class KmerAnalysis(AbstractAnalysis):
         """
         self.ref = dict(fastaRead(open(self.referenceFastaFile, "r")))
         #outf = open(os.path.join(self.getLocalTempDir(), "karen_tmp_fastaish"), "w")
-        outf = open(os.path.join(self.outputDir,"karen_tmp_fastaish"), "w")
+        outf = open(os.path.join(self.getGlobalTempDir(),"karen_tmp_fastaish"), "w")
         sam = pysam.Samfile(self.samFile, "r" )
         for record in sam:
             rseq = self.ref[sam.getrname(record.tid)]
@@ -57,6 +57,6 @@ class KmerAnalysis(AbstractAnalysis):
         system("submodules/kmer/kmer.pl {} {} {}".format(self.readFastaFile, str(kmer_size), os.path.join(self.outputDir, "read_" + str(kmer_size) + "kmer")))
         system("submodules/kmer/kmer.pl {} {} {}".format(self.referenceFastaFile, str(kmer_size), os.path.join(self.outputDir, "ref_" + str(kmer_size) + "kmer")))
         system("submodules/kmer/cmpKmer.pl {} {} {}".format(os.path.join(self.outputDir, "ref_" + str(kmer_size) + "kmer"), os.path.join(self.outputDir, "read_" + str(kmer_size) + "kmer"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out")))
-        system("submodules/kmer/kmer_del.pl {} {} {}".format(os.path.join(self.outputDir, "karen_tmp_fastaish"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "kmer_del.out")))
-        system("submodules/kmer/kmer_ins.pl {} {} {}".format(os.path.join(self.outputDir, "karen_tmp_fastaish"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "kmer_ins.out")))
+        system("submodules/kmer/kmer_del.pl {} {} {}".format(os.path.join(self.getGlobalTempDir(), "karen_tmp_fastaish"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "kmer_del.out")))
+        system("submodules/kmer/kmer_ins.pl {} {} {}".format(os.path.join(self.getGlobalTempDir(), "karen_tmp_fastaish"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "kmer_ins.out")))
         

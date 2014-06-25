@@ -26,7 +26,7 @@ while(<FA>){
 	}
     }
     else{
-	$seq.=$_;
+	$seq.=uc($_);
     }
 }
 kmer($seq,$h);
