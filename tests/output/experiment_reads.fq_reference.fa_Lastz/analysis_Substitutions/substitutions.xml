@@ -1,0 +1,38 @@
+<?xml version="1.0" ?>
+<substitutions identity="0.687038626609" matches="16008.0" mismatches="7292.0">
+  <A identity="0.725540540541" matches="5369.0" mismatches="2031.0">
+    <A count="5369.0"/>
+    <C count="469.0"/>
+    <G count="889.0"/>
+    <T count="673.0"/>
+    <N count="0.0"/>
+  </A>
+  <C identity="0.624347413384" matches="2631.0" mismatches="1583.0">
+    <A count="482.0"/>
+    <C count="2631.0"/>
+    <G count="251.0"/>
+    <T count="850.0"/>
+    <N count="0.0"/>
+  </C>
+  <G identity="0.637908496732" matches="2928.0" mismatches="1662.0">
+    <A count="886.0"/>
+    <C count="283.0"/>
+    <G count="2928.0"/>
+    <T count="493.0"/>
+    <N count="0.0"/>
+  </G>
+  <T identity="0.715896279594" matches="5080.0" mismatches="2016.0">
+    <A count="660.0"/>
+    <C count="887.0"/>
+    <G count="469.0"/>
+    <T count="5080.0"/>
+    <N count="0.0"/>
+  </T>
+  <N identity="NaN" matches="0.0" mismatches="0.0">
+    <A count="0.0"/>
+    <C count="0.0"/>
+    <G count="0.0"/>
+    <T count="0.0"/>
+    <N count="0.0"/>
+  </N>
+</substitutions>
