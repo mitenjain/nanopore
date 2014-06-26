@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "./nanopore/pipeline.py", line 10, in <module>
-    from nanopore.mappers.last import Last
-  File "/cluster/home/ifiddes/miten/nanopore/nanopore/mappers/last.py", line 2, in <module>
-    from sonLib.bioio import system, fastaRead, fastqRead, fastaWrite
-ImportError: cannot import name fastqRead
