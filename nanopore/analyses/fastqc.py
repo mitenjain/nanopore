@@ -4,4 +4,4 @@ import os
 
 class FastQC(AbstractAnalysis):
     def run(self):
-        system("fastqc %s --outdir=%s" % (self.readFastQFile, self.outputDir))
+        system("fastqc %s --outdir=%s" % (self.readFastqFile, self.outputDir))
