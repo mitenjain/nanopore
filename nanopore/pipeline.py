@@ -14,7 +14,7 @@ from nanopore.analyses.coverage import Coverage
 from nanopore.analyses.indels import Indels
 mappers = [ Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working, Last not outputting nice SAM
 analyses = [ Substitutions, Coverage, Indels  ]
-
+ 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
     if not os.path.exists(outputDir): #If the output dir doesn't yet exist create it
