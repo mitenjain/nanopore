@@ -1,17 +1,0 @@
-ÄcjobTree.scriptTree.stack
-Stack
-q)Åq}qUtargetqcjobTree.scriptTree.target
-TargetFunctionWrappingTarget
-q)Åq}q(UfnNameqUrunAnalysesq	U_Target__cpuq
-I9223372036854775807
-Uargsq(Utests/readFastqFiles/reads.fqqU&tests/referenceFastaFiles/reference.faqU=tests/output/experiment_reads.fq_reference.fa_Bwa/mapping.samq]q(cnanopore.analyses.substitutions
-Substitutions
-qcnanopore.analyses.coverage
-Coverage
-qcnanopore.analyses.indels
-Indels
-qeU1tests/output/experiment_reads.fq_reference.fa_BwaqtUfnModuleqUnanopore.pipelineqU_Target__childrenq]U_Target__followOnqNUloggingMessagesq]UimportStringsqc__builtin__
-set
-q]qU6jobTree.scriptTree.target.TargetFunctionWrappingTargetqaÖRqU_Target__timeqI9223372036854775807
-U_Target__memoryqI9223372036854775807
-Ukwargsq }q!U_Target__childCommandsq"]UglobalTempDirq#Nubsb.
