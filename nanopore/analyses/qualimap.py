@@ -1,6 +1,6 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from sonLib.bioio import system
-from utils import samToBamFile
+from nanopore.analyses.utils import samToBamFile
 import os
 import pysam
 
