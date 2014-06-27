@@ -16,7 +16,7 @@ from nanopore.analyses.indels import Indels
 from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
 mappers = [ Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working, Last not outputting nice SAM
-analyses = [ Substitutions, Coverage, Indels, FastQC, KmerAnalysis  ] #, QualiMap
+analyses = [ Substitutions, Coverage, Indels, FastQC, KmerAnalysis, QualiMap ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
