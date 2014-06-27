@@ -1,6 +1,8 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from sonLib.bioio import system
+from utils import samToBamFile
 import os
+import pysam
 
 class QualiMap(AbstractAnalysis):
     def run(self):
