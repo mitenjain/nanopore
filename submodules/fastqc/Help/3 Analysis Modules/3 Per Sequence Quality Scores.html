@@ -26,6 +26,12 @@ quality then this could indicate some kind of systematic problem - possibly
 with just part of the run (for example one end of a flowcell).
 </p>
 
+<p>
+Results from this module will not be displayed if your input is a BAM/SAM
+file in which quality scores have not been recorded.
+</p>
+
+
 <h2>Warning</h2>
 <p>
 A warning is raised if the most frequently observed mean quality is below 27 -
@@ -37,6 +43,16 @@ this equates to a 0.2% error rate.
 An error is raised if the most frequently observed mean quality is below 20 -
 this equates to a 1% error rate.
 </p>
+
+<h2>Common reasons for warnings</h2>
+<p>
+This module is generally fairly robust and errors here usually indicate a general
+loss of quality within a run.  For long runs this may be alleviated through quality
+trimming.  If a bi-modal, or complex distribution is seen then the results should
+be evaluated in concert with the per-tile qualities (if available) since this might
+indicate the reason for the loss in quality of a subset of sequences.
+</p>
+
 
 </body>
 </html>

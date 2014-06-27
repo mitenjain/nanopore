@@ -1,3 +1,155 @@
+RELEASE NOTES FOR FastQC v0.11.2
+--------------------------------
+
+This is a minor bug-fix release which addresses some issues 
+reported with the v0.11.1 release.
+
+1) Added a proper implementation of a --limits command line
+option to allow users to specify a custom limits file for an 
+individual run.  This also fixed a bug seen if the user used the
+--adapter option.
+
+2) Fixed an error in the naming of the folder inside the zip file
+such that it couldn't be extracted into the same folder as the
+main HTML file.
+
+3) Fixed an overly large data structure which was causing some
+runs to terminate due to a lack of memory.
+
+4) Fixed a poor implementation in the Kmer module which was 
+causing unusually high memory usage.
+
+5) Fixed incorrect defaults for the warn/fail values in the per
+sequence quality module.
+
+RELEASE NOTES FOR FastQC V0.11.1
+--------------------------------
+
+FastQC v0.11.1 is the first release for a long time and is a 
+major update to the package.  This release adds some significant
+new features to the program which will hopefully make it more 
+useful.
+
+The major new features in this release are:
+
+1) Configurable thresholds for modules.  For all modules you can
+now alter a configuration file to set the thresholds used by the 
+program for warnings and errors so that you can flag up only the
+types of problem which you are concerned by.
+
+2) Optional modules.  The same configuration file used to set 
+the warn / error thresholds can also be used to selectively 
+disable modules you don't want to see at all.
+
+3) New per-tile quality analysis.  If you are running Illumina
+libraries through FastQC it will now analyse the quality calls
+on a per-tile basis and will flag up points in the run where the
+quality in individual tiles fell below the average quality for 
+that cycle.  This can help to spot technical problems during the
+run.
+
+4) New adapter content module.  A new module has been added to
+specifically search for the presence of adapters in your library.
+This operates in a similar way to the existing Kmer analysis but 
+allows you to specify individual adapter sequences to screen and
+will always show the results for each adapter so you can easily
+see what you might gain if you chose to adapter trim your library.
+
+5) Improved duplication plot.  The duplication plot has been given
+an overhaul so that it now reports values which are real read 
+numbers rather than always giving relative values.  This is thanks
+to work done by Brian Howard of sciome.com who worked out the right
+way to extrapolate from the data we sample to the full library.  It 
+also shows how the level of duplication would affect the library 
+both before and after deduplication, and the headline figure is now 
+much more  useful as it shows the percentage of the library which 
+would remain if you chose to deduplicate.
+
+6) Improved Kmer module.  The Kmer module has been changed so that
+instead of trying to search for individual Kmers which are present
+at higher than expected frequency (which actually happens all the 
+time in real libraries), it now looks for Kmers which are present 
+in significantly different amounts at different starting positions
+within the library.  This has allowed the use of longer Kmer 
+sequences to give a more useful result.
+
+7) Since file reports.  The default output format for the program 
+is now a single HTML file with all of the various graphs embedded 
+into it.  The .zip file output with the individual graphs is still 
+produced as are the associated data files, but you can just 
+distribute the one HTML file alone - the other data is no longer 
+required.
+
+8) Ability to read from stdin.  If you want to pipe a stream of
+data into fastqc rather than using a real file then you can just
+use  'stdin' as the filename to process and then stream uncompressed
+fastq data on stdin.
+
+9) Changed base groupings.  For long reads we used to use an 
+exponential series to group bases together to summarise the sequence
+content and qualities.  We've now switched the default to be that
+for grouped plots the first 9 individual bases will always be shown
+(since this often roots out problems in the libraries), after that
+there will be a series of evenly sized windows so that the same number
+of bases fall into each window.  You can bring back the old behaviour
+with the new --expgroup option, and you can remove grouping all together
+with the --nogroup option (although this will do bad things to your
+plots if you have really long reads).
+
+10) Dropped support for the Solaxa64 (but NOT Phred64) encoding.  We
+have removed the ability of the program to reliably detect the original
+Solexa64 encoding which was used in the GA pipeline prior to v1.3.
+This was a 64 offset encoding but which allowed scores which ranged
+down to -5.  Supporting this encoding meant that we would incorrectly 
+guess the encoding on Phred33 files which had no bases with quality 
+scores below 26, which could happen if you aggressively trimmed your
+data.  Supporting just Phred33 and Phred64 now means that we wouldn't
+mis-detect unless there were no bases with qualities below 31, which 
+is much less likely, even in trimmed data.  Since no Solexa64 data
+will have been produced since early 2009 it is unlikely that removing
+support for this format will adversely affect users of the program.
+
+
+RELEASE NOTES FOR FastQC V0.10.1
+--------------------------------
+
+FastQC v0.10.1 is a bugfix release which works around two problems
+people have encountered with previous releases:
+
+1) A work-round has been put into place for a limitation in the
+java gzip decompressor, where it would read only the first
+compressed block in a file created by concatenating multiple 
+gzipped files directly, rather than decompressing and recompressing
+them.
+
+2) Users who had installed the program in directories containing
+characters required to be encoded in URLs (= & ? etc) were finding
+that the report generation generated an error.  This encoding has
+now been fixed and the program should now have no limits in the 
+name of the directory in which it can be installed.
+
+One additional feature is that in the fastqc wrapper you can now
+specify the location of the java interpreter on the command line
+using the --java parameter, rather than having to have it included
+in the path.
+
+One other change in this release is that the package names for all
+of the java classes have been changed to reflect a change in the
+official project URL.  This means that the launchers for the 
+program have had to be updated to use these new names.  If you have
+created your own launcher, or had copied any of the old ones you'll
+need to update this to use the launchers included in this version
+of the program.
+
+The new URL for the project is:
+
+www.bioinformatics.babraham.ac.uk/projects/fastqc/
+
+..and if you want to report bugs the bugzilla URL is now:
+
+www.bioinformatics.babraham.ac.uk/bugzilla/
+
+
 RELEASE NOTES FOR FastQC V0.10.0
 --------------------------------
 
