@@ -3,7 +3,9 @@ from nanopore.analyses.utils import AlignedPair
 import os
 import pysam
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml, system
+from collections import Counter
+from math import log
 
 class SubstitutionMatrix():
     """Represents a nucleotide substitution matrix. Also allows 
@@ -17,6 +19,16 @@ class SubstitutionMatrix():
     
     def getCount(self, refBase, readBase):
         return self.matrix[self._index(refBase) * 5 + self._index(readBase)]
+
+    def getFreqs(self, refBase, bases):
+        """
+        Get list of relative frequencies for a refBase against all bases (passed as string)
+        """
+        freqs = list()
+        for b in bases:
+            freqs.append(self.getCount(refBase, b))
+        return [x / sum(freqs) for x in freqs]
+        #return [-log(x) / sum(freqs) for x in freqs]
     
     def getXML(self):
         def _identity(matches, mismatches):
@@ -57,4 +69,15 @@ class Substitutions(AbstractAnalysis):
         sam.close()
         #Write out the substitution info
         open(os.path.join(self.outputDir, "substitutions.xml"), 'w').write(prettyXml(sM.getXML()))
+        bases = "ACGT"
+        outf = open(os.path.join(self.outputDir, "subst.tsv"), "w")
+        #outf = open(os.path.join(self.getLocalTempDir(), "subst.tsv"), "w")
+        outf.write("A\tC\tG\tT\n")
+        for x in bases:
+            freqs = sM.getFreqs(x, bases)
+            outf.write("{}\t{}\n".format(x, "\t".join(map(str,freqs)), "\n"))
+        outf.close()
+        analysis = self.outputDir.split("/")[-2].split("_")[-1] + "_Substitution_Levels"
+        #system("Rscript nanopore/analyses/substitutions_plot.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.png"), analysis))        
+        system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.png"), analysis))        
         

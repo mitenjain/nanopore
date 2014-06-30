@@ -18,7 +18,7 @@ S'|/usr/bin/lesspipe.sh %s'
 p9
 sS'SSH_CLIENT'
 p10
-S'128.114.61.130 37421 22'
+S'128.114.61.130 61237 22'
 p11
 sS'CVS_RSH'
 p12
@@ -93,11 +93,11 @@ S'/usr'
 p44
 sS'SSH_CONNECTION'
 p45
-S'128.114.61.130 37421 132.249.245.88 22'
+S'128.114.61.130 61237 132.249.245.88 22'
 p46
 sS'SSH_TTY'
 p47
-S'/dev/pts/68'
+S'/dev/pts/76'
 p48
 sS'HOSTNAME'
 p49
