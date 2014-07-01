@@ -1,9 +1,9 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from nanopore.analyses.utils import AlignedPair
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary
 import os
 import pysam
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml
+from jobTree.src.bioio import reverseComplement, prettyXml
 
 class SubstitutionMatrix():
     """Represents a nucleotide substitution matrix. Also allows 
@@ -47,8 +47,8 @@ class Substitutions(AbstractAnalysis):
     """Calculates stats on substitutions
     """
     def run(self):
-        refSequences = dict(fastaRead(open(self.referenceFastaFile, 'r'))) #Hash of names to sequences
-        readSequences = readSequences = dict([ (name, seq) for name, seq, quals in fastqRead(self.readFastqFile) ]) #Hash of names to sequences
+        refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
+        readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sM = SubstitutionMatrix() #The thing to store the counts in
         sam = pysam.Samfile(self.samFile, "r" )
         for aR in sam: #Iterate on the sam lines

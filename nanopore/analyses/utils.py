@@ -1,5 +1,5 @@
 import pysam
-from jobTree.src.bioio import reverseComplement, fastaRead
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead
 
 class AlignedPair:
     """Represents an aligned pair of positions.
@@ -73,3 +73,10 @@ def samToBamFile(samInputFile, bamOutputFile):
 
     samfile.close()
     bamfile.close()
+    
+def getFastaDictionary(fastaFile):
+    return dict([ (name.split()[0], seq) for name, seq in fastaRead(open(fastaFile, 'r'))]) #Hash of names to sequences
+
+def getFastqDictionary(fastqFile):
+    return dict([ (name.split()[0], seq) for name, seq, quals in fastqRead(open(fastqFile, 'r'))]) #Hash of names to sequences
+

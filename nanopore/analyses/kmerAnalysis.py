@@ -1,5 +1,6 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from jobTree.src.bioio import fastaRead, fastqRead, system
+from jobTree.src.bioio import fastqRead, system
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary
 import pysam, os
 
 class KmerAnalysis(AbstractAnalysis):
@@ -45,7 +46,7 @@ class KmerAnalysis(AbstractAnalysis):
     def run(self, kmer_size=5):
         """Run karen's pipeline.
         """
-        self.ref = dict(fastaRead(open(self.referenceFastaFile, "r")))
+        self.ref = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         #outf = open(os.path.join(self.getLocalTempDir(), "karen_tmp_fastaish"), "w")
         outf = open(os.path.join(self.getGlobalTempDir(),"karen_tmp_fastaish"), "w")
         sam = pysam.Samfile(self.samFile, "r" )
@@ -57,6 +58,7 @@ class KmerAnalysis(AbstractAnalysis):
         readf = os.path.join(self.getGlobalTempDir(), "reads.fasta")
         readf_handle = open(readf, "w")
         for name, seq, quals in fastqRead(self.readFastqFile):
+            name = name.split()[0]
             readf_handle.write(">{}\n{}\n".format(name, seq))
         readf_handle.close()
         system("submodules/kmer/kmer.pl {} {} {}".format(readf, str(kmer_size), os.path.join(self.outputDir, "read_" + str(kmer_size) + "kmer")))

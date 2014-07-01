@@ -10,7 +10,7 @@ class Last(AbstractMapper):
         #Hack to make last work, creating SQ line
         fH = open(self.outputSamFile, 'w')
         for name, seq in fastaRead(open(self.referenceFastaFile, 'r')):
-            fH.write("@SQ\tSN:%s\tLN:%s\n" % (name, len(seq)))
+            fH.write("@SQ\tSN:%s\tLN:%s\n" % (name.split()[0], len(seq)))
         fH.close()
         
         #Make fasta file, as last fastq seems broken
