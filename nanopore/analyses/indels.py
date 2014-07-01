@@ -4,7 +4,7 @@ import os
 import pysam
 import numpy
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import reverseComplement, prettyXml
+from jobTree.src.bioio import reverseComplement, prettyXml, system 
 
 class IndelCounter():
     def __init__(self, readSeqName, refSeqName):
@@ -54,4 +54,15 @@ class Indels(AbstractAnalysis):
             overallIndelCounter.addReadAlignment(aR, refSeq, readSeq)
         sam.close()
         #Write out the substitution info
-        open(os.path.join(self.outputDir, "indels.xml"), 'w').write(prettyXml(overallIndelCounter.getXML()))
+        open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(overallIndelCounter.getXML()))
+        stats = dict(ET.parse(os.path.join(self.outputDir, "indels.xml")).findall(".")[0].items())
+        outf = open(os.path.join(self.outputDir, "stats.tsv"), "w")
+        for key in stats:
+            if key == "readInsertionLengths":
+                open(os.path.join(self.getLocalTempDir(), "r_insert.txt"), "w").write(stats[key])
+            elif key == "readDeletionLengths":
+                open(os.path.join(self.getLocalTempDir(), "r_delete.txt"), "w").write(stats[key])
+            else:
+                outf.write("{}\t{}\n".format(key, str(stats[key])))
+        outf.close()
+        system("Rscript nanopore/analyses/indel_plot.R {} {} {} {}".format(os.path.join(self.outputDir, "stats.tsv"), os.path.join(self.getLocalTempDir(), "r_insert.txt"), os.path.join(self.getLocalTempDir(), "r_delete.txt"), os.path.join(self.outputDir, "indel_hist.png")))
