@@ -4,6 +4,8 @@ Code to analyse long read mappings, specifically tailored for Oxford Nanopore Re
 * git
 * python 2.7
 * pysam
+* R 2.15.1 or newer
+* Lattice package for R (http://cran.r-project.org/web/packages/lattice/index.html)
 
 I'm pondering using virtualenv to eliminate the pysam dependency and allow other packages to be installed, but then you need to have virtualenv installed.
 

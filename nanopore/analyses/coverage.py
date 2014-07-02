@@ -3,7 +3,7 @@ from nanopore.analyses.utils import AlignedPair
 import os
 import pysam
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml, system
 
 class CoverageCounter:
     """Counts coverage from a pairwise alignment
@@ -93,4 +93,10 @@ class Coverage(AbstractAnalysis):
         for readCoverage in readCoverages:
             parentNode.append(readCoverage.getXML())
         open(os.path.join(self.outputDir, "coverages.xml"), 'w').write(prettyXml(parentNode))
-        
+        outf = open(os.path.join(self.outputDir, "coverages.tsv"), "w")
+        outf.write("alignmentIdentity\talignmentCoverage\treadIdentity\treadCoverage\treferenceIdentity\treferenceCoverage\n")
+        for readCoverage in readCoverages:
+            outf.write("\t".join(map(str, [readCoverage.getAlignmentIdentity(), readCoverage.getAlignmentCoverage(), readCoverage.getReadIdentity(), readCoverage.getReadCoverage(), readCoverage.getReferenceIdentity(), readCoverage.getReferenceIdentity()])))
+            outf.write("\n")
+        outf.close()
+        system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, "coverages.tsv"), os.path.join(self.outputDir, "coverage_histograms.pdf")))

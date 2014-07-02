@@ -8,7 +8,7 @@ f <- args[1]
 out <- args[2]
 inf <- args[3]
 
-png(out)
+pdf(out)
 
 myPanel <- function(x, y, z, ...) {
     panel.levelplot(x, y, z, ...)

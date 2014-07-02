@@ -7,16 +7,16 @@ stats <- read.table(args[1], row.names=1)
 insert <- scan(args[2])
 delete <- scan(args[3])
 out <- args[4]
-png(out)
 
-#plotrix contains a function to add tables to plots
-#library(plotrix)
 
-#set it for two plots and extra room for the table
-#op <- par(oma=c(0,0,0,7), mfrow=c(1,2), xpd=T)
+pdf(out)
+
+
 par(mfrow=c(1,2))
 
-hist(insert, main="Insertions (to reference)", xlab="Size")
-hist(delete, main="Deletions (from reference)", xlab="Size")
+
+hist(insert, main="Size of insertions (to reference)", xlab="Size (bp)")
+hist(delete, main="Size of deletions (from reference)", xlab="Size (bp)")
+
 
 dev.off()
