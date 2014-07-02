@@ -46,22 +46,19 @@ class KmerAnalysis(AbstractAnalysis):
         """Run karen's pipeline.
         """
         self.ref = dict(fastaRead(open(self.referenceFastaFile, "r")))
-        #outf = open(os.path.join(self.getLocalTempDir(), "karen_tmp_fastaish"), "w")
-        outf = open(os.path.join(self.getGlobalTempDir(),"karen_tmp_fastaish"), "w")
+        outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
         sam = pysam.Samfile(self.samFile, "r" )
         for record in sam:
             rseq = self.ref[sam.getrname(record.tid)]
             seq, ref = self.convert_sam_record(record, rseq)
             outf.write("{}\t{}\n".format(seq, ref))
         outf.close()
-        readf = os.path.join(self.getGlobalTempDir(), "reads.fasta")
+        readf = os.path.join(self.getLocalTempDir(), "reads.fasta")
         readf_handle = open(readf, "w")
         for name, seq, quals in fastqRead(self.readFastqFile):
             readf_handle.write(">{}\n{}\n".format(name, seq))
         readf_handle.close()
-        system("submodules/kmer/kmer.pl {} {} {}".format(readf, str(kmer_size), os.path.join(self.outputDir, "read_" + str(kmer_size) + "kmer")))
-        system("submodules/kmer/kmer.pl {} {} {}".format(self.referenceFastaFile, str(kmer_size), os.path.join(self.outputDir, "ref_" + str(kmer_size) + "kmer")))
-        system("submodules/kmer/cmpKmer.pl {} {} {}".format(os.path.join(self.outputDir, "ref_" + str(kmer_size) + "kmer"), os.path.join(self.outputDir, "read_" + str(kmer_size) + "kmer"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out")))
-        system("submodules/kmer/kmer_del.pl {} {} {}".format(os.path.join(self.getGlobalTempDir(), "karen_tmp_fastaish"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "kmer_del.out")))
-        system("submodules/kmer/kmer_ins.pl {} {} {}".format(os.path.join(self.getGlobalTempDir(), "karen_tmp_fastaish"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "kmer_ins.out")))
-        
+        system("nanopore/analyses/kmer.pl {} {} {}".format(readf, str(kmer_size), os.path.join(self.outputDir, "read_" + str(kmer_size) + "mer")))
+        system("nanopore/analyses/kmer.pl {} {} {}".format(self.referenceFastaFile, str(kmer_size), os.path.join(self.outputDir, "ref_" + str(kmer_size) + "mer")))
+        system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.outputDir, "ref_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, "read_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out")))
+        system("nanopore/analyses/kmer_indel.pl {} {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tab_delim_align"), self.referenceFastaFile, os.path.join(self.outputDir, str(kmer_size) + "mer_deletions.txt"), os.path.join(self.outputDir, str(kmer_size) + "mer_insertions.txt"), str(kmer_size)))
