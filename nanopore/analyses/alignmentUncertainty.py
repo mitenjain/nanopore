@@ -56,7 +56,6 @@ class AlignmentUncertainty(AbstractAnalysis):
                 "averagePosteriorMatchProbabilitesPerRead":",".join([ str(i) for i in avgPosteriorMatchProbabilityInCigar ]), 
                 "alignedPairsInCigar":",".join([ str(i) for i in alignedPairsInCigar ]) })
         open(os.path.join(self.outputDir, "alignmentUncertainty.xml"), "w").write(prettyXml(node))
-	open(os.path.join(self.outputDir, "alignmentUncertainty.xml"), "w").write(prettyXml(node))
         outf = open(os.path.join(self.getLocalTempDir(), "tmp_uncertainty"), "w")
         outf.write("\t".join([ str(i) for i in avgPosteriorMatchProbabilityInCigar ])); outf.write("\n")
         outf.close()
