@@ -15,8 +15,10 @@ from nanopore.analyses.kmerAnalysis import KmerAnalysis
 from nanopore.analyses.indels import Indels
 from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
-mappers = [ Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working, Last not outputting nice SAM
-analyses = [ Substitutions, Coverage, Indels, FastQC, QualiMap ] #KmerAnalysis,
+from nanopore.analyses.alignmentUncertainty import AlignmentUncertainty
+
+mappers = [ Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
+analyses = [ Substitutions, Coverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
@@ -41,17 +43,17 @@ def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, 
     else:
         target.logToMaster("Experiment dir already exists: %s" % experimentDir)
     samFile = os.path.join(experimentDir, "mapping.sam")
-    if not os.path.exists(samFile) or isNewer(readFastaFile, samFile) or isNewer(referenceFastaFile, samFile):
+    if (not os.path.exists(samFile)) or isNewer(readFastaFile, samFile) or isNewer(referenceFastaFile, samFile):
         target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile))
     target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, referenceFastaFile, samFile, analyses, experimentDir))) 
 
 def runAnalyses(target, readFastaFile, referenceFastaFile, samFile, analyses, experimentDir):
     for analysis in analyses:
         analysisDir = os.path.join(experimentDir, "analysis_" + analysis.__name__)
+        #if not os.path.exists(analysisDir) or isNewer(readFastaFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
         if not os.path.exists(analysisDir):
             os.mkdir(analysisDir)
-        if isNewer(readFastaFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
-            target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
+        target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
 
 def main():
     #Parse the inputs args/options

@@ -1,5 +1,5 @@
 # order is important, libraries first
-modules = sonLib jobTree bwa lastz last
+modules = sonLib jobTree bwa lastz last cactus
 .PHONY: all %.all clean %.clean
 
 export HDF5INCLUDEDIR=$(PWD)/hdf5Build/include

@@ -65,4 +65,4 @@ class Indels(AbstractAnalysis):
             else:
                 outf.write("{}\t{}\n".format(key, str(stats[key])))
         outf.close()
-        system("Rscript nanopore/analyses/indel_plot.R {} {} {} {}".format(os.path.join(self.outputDir, "stats.tsv"), os.path.join(self.getLocalTempDir(), "r_insert.txt"), os.path.join(self.getLocalTempDir(), "r_delete.txt"), os.path.join(self.outputDir, "indel_hist.png")))
+        #system("Rscript nanopore/analyses/indel_plot.R {} {} {} {}".format(os.path.join(self.outputDir, "stats.tsv"), os.path.join(self.getLocalTempDir(), "r_insert.txt"), os.path.join(self.getLocalTempDir(), "r_delete.txt"), os.path.join(self.outputDir, "indel_hist.png")))

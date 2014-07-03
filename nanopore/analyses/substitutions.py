@@ -79,4 +79,4 @@ class Substitutions(AbstractAnalysis):
         outf.close()
         analysis = self.outputDir.split("/")[-2].split("_")[-1] + "_Substitution_Levels"
         #system("Rscript nanopore/analyses/substitutions_plot.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.png"), analysis))        
-        system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.png"), analysis))
+        #system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.png"), analysis))

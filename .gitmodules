@@ -28,3 +28,6 @@
 [submodule "submodules/hdf5"]
 	path = submodules/hdf5
 	url = git@github.com:UCSCReconGroup/hdf5.git
+[submodule "submodules/cactus"]
+	path = submodules/cactus
+	url = git@github.com:benedictpaten/cactus.git

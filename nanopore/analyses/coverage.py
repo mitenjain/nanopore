@@ -82,6 +82,7 @@ class Coverage(AbstractAnalysis):
         readCoverages = []
         sam = pysam.Samfile(self.samFile, "r" )
         for aR in sam: #Iterate on the sam lines
+            print "Oooh", aR.rname
             refSeq = refSequences[sam.getrname(aR.rname)]
             readSeq = readSequences[aR.qname]
             overallCoverageCounter.addReadAlignment(aR, refSeq, readSeq)
@@ -93,4 +94,3 @@ class Coverage(AbstractAnalysis):
         for readCoverage in readCoverages:
             parentNode.append(readCoverage.getXML())
         open(os.path.join(self.outputDir, "coverages.xml"), 'w').write(prettyXml(parentNode))
-        
