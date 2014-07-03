@@ -1,0 +1,80 @@
+Logging set at level: INFO
+Logging to file: None
+Using the following working directory: tests
+Using the following output directory: tests/output
+Got the following read fastq file: tests/readFastqFiles/reads.fq
+Got the following reference fasta files: tests/referenceFastaFiles/reference.fa
+Logging set at level: INFO
+Logging to file: None
+Starting to create the job tree setup for the first time
+Setting up the thread pool with 4 threads given the max threads 4 and the max cpus 9223372036854775807
+Using the single machine batch system
+Written the config file
+Finished the job tree setup
+Adding the first job
+Added the first job
+Written the environment for the jobs to the environment file
+Got parameters,rescue jobs frequency: 5400.0 max job duration: 9.22337203685e+18
+Checked batch system has no running jobs and no updated jobs
+Found 1 jobs to start and 0 parent jobs with children to run
+Starting the main loop
+Got message from job at time: 1404420805.74 : Root output dir already exists: tests/output
+Got message from job at time: 1404420805.78 : Experiment dir already exists: tests/output/experiment_reads.fq_reference.fa_Bwa
+Got message from job at time: 1404420805.81 : Experiment dir already exists: tests/output/experiment_reads.fq_reference.fa_Last
+Got message from job at time: 1404420805.84 : Experiment dir already exists: tests/output/experiment_reads.fq_reference.fa_Lastz
+The job seems to have left a log file, indicating failure: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t1/t3/t0/job
+Reporting file: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t1/t3/t0/log.txt
+log.txt:	---JOBTREE SLAVE OUTPUT LOG---
+log.txt:	Parsed arguments and set up logging
+log.txt:	Traceback (most recent call last):
+log.txt:	  File "/Users/benedictpaten/git/nanopore/submodules/jobTree/src/jobTreeSlave.py", line 271, in main
+log.txt:	    defaultMemory=defaultMemory, defaultCpu=defaultCpu, depth=depth)
+log.txt:	  File "/Users/benedictpaten/git/nanopore/submodules/jobTree/scriptTree/stack.py", line 153, in execute
+log.txt:	    self.target.run()
+log.txt:	  File "/Users/benedictpaten/git/nanopore/nanopore/analyses/kmerAnalysis.py", line 53, in run
+log.txt:	    rseq = self.ref[sam.getrname(record.tid)]
+log.txt:	KeyError: 'HUMAN'
+log.txt:	Exiting the slave because of a failed job on host eduroam-249-5.ucsc.edu
+log.txt:	Due to failure we are reducing the remaining retry count of job /Users/benedictpaten/git/nanopore/testJobTree/jobs/t1/t3/t0/job to 0
+log.txt:	We have set the default memory of the failed job to 2147483648 bytes
+Job: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t1/t3/t0/job is completely failed
+The job seems to have left a log file, indicating failure: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t2/t3/t0/job
+Reporting file: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t2/t3/t0/log.txt
+log.txt:	---JOBTREE SLAVE OUTPUT LOG---
+log.txt:	Parsed arguments and set up logging
+log.txt:	Traceback (most recent call last):
+log.txt:	  File "/Users/benedictpaten/git/nanopore/submodules/jobTree/src/jobTreeSlave.py", line 271, in main
+log.txt:	    defaultMemory=defaultMemory, defaultCpu=defaultCpu, depth=depth)
+log.txt:	  File "/Users/benedictpaten/git/nanopore/submodules/jobTree/scriptTree/stack.py", line 153, in execute
+log.txt:	    self.target.run()
+log.txt:	  File "/Users/benedictpaten/git/nanopore/nanopore/analyses/kmerAnalysis.py", line 53, in run
+log.txt:	    rseq = self.ref[sam.getrname(record.tid)]
+log.txt:	KeyError: 'HUMAN'
+log.txt:	Exiting the slave because of a failed job on host eduroam-249-5.ucsc.edu
+log.txt:	Due to failure we are reducing the remaining retry count of job /Users/benedictpaten/git/nanopore/testJobTree/jobs/t2/t3/t0/job to 0
+log.txt:	We have set the default memory of the failed job to 2147483648 bytes
+Job: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t2/t3/t0/job is completely failed
+The job seems to have left a log file, indicating failure: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t0/t3/t0/job
+Reporting file: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t0/t3/t0/log.txt
+log.txt:	---JOBTREE SLAVE OUTPUT LOG---
+log.txt:	Parsed arguments and set up logging
+log.txt:	Traceback (most recent call last):
+log.txt:	  File "/Users/benedictpaten/git/nanopore/submodules/jobTree/src/jobTreeSlave.py", line 271, in main
+log.txt:	    defaultMemory=defaultMemory, defaultCpu=defaultCpu, depth=depth)
+log.txt:	  File "/Users/benedictpaten/git/nanopore/submodules/jobTree/scriptTree/stack.py", line 153, in execute
+log.txt:	    self.target.run()
+log.txt:	  File "/Users/benedictpaten/git/nanopore/nanopore/analyses/kmerAnalysis.py", line 53, in run
+log.txt:	    rseq = self.ref[sam.getrname(record.tid)]
+log.txt:	KeyError: 'HUMAN'
+log.txt:	Exiting the slave because of a failed job on host eduroam-249-5.ucsc.edu
+log.txt:	Due to failure we are reducing the remaining retry count of job /Users/benedictpaten/git/nanopore/testJobTree/jobs/t0/t3/t0/job to 0
+log.txt:	We have set the default memory of the failed job to 2147483648 bytes
+Job: /Users/benedictpaten/git/nanopore/testJobTree/jobs/t0/t3/t0/job is completely failed
+Only failed jobs and their dependents (3 total) are remaining, so exiting.
+Finished the main loop
+Traceback (most recent call last):
+  File "./nanopore/pipeline.py", line 90, in <module>
+    main()
+  File "/Users/benedictpaten/git/nanopore/nanopore/pipeline.py", line 86, in main
+    raise RuntimeError("Got failed jobs")
+RuntimeError: Got failed jobs
