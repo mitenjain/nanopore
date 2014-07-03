@@ -46,9 +46,10 @@ class KmerAnalysis(AbstractAnalysis):
     def run(self, kmer_size=5):
         """Run karen's pipeline.
         """
-        self.ref = dict(fastaRead(open(self.referenceFastaFile, "r")))
+        self.ref = getFastaDictionary(self.referenceFastaFile)
         outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
-        sam = pysam.Samfile(self.samFile, "r" )
+	outf = open(os.path.join(self.outputDir, "test"), "w")
+	sam = pysam.Samfile(self.samFile, "r" )
         for record in sam:
             rseq = self.ref[sam.getrname(record.tid)]
             seq, ref = self.convert_sam_record(record, rseq)
