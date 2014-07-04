@@ -1,6 +1,6 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from jobTree.src.bioio import fastqRead, system
-from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, fastaRead
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, fastaRead, samIterator
 import pysam, os
 
 class KmerAnalysis(AbstractAnalysis):
@@ -50,7 +50,7 @@ class KmerAnalysis(AbstractAnalysis):
         outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
 	outf = open(os.path.join(self.outputDir, "test"), "w")
 	sam = pysam.Samfile(self.samFile, "r" )
-        for record in sam:
+        for record in samIterator(sam):
             rseq = self.ref[sam.getrname(record.tid)]
             seq, ref = self.convert_sam_record(record, rseq)
             outf.write("{}\t{}\n".format(seq, ref))

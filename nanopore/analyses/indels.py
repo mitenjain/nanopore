@@ -1,5 +1,5 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, samIterator
 import os
 import pysam
 import numpy
@@ -48,7 +48,7 @@ class Indels(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sam = pysam.Samfile(self.samFile, "r" )
         overallIndelCounter = IndelCounter("overall", "overall")
-        for aR in sam: #Iterate on the sam lines
+        for aR in samIterator(sam): #Iterate on the sam lines
             refSeq = refSequences[sam.getrname(aR.rname)]
             readSeq = readSequences[aR.qname]
             overallIndelCounter.addReadAlignment(aR, refSeq, readSeq)

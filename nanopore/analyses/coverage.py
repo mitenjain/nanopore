@@ -1,5 +1,5 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, samIterator
 import os
 import pysam
 import xml.etree.cElementTree as ET
@@ -81,8 +81,7 @@ class Coverage(AbstractAnalysis):
         overallCoverageCounter = CoverageCounter("overall", "overall") #Thing to store the overall coverage in
         readCoverages = []
         sam = pysam.Samfile(self.samFile, "r" )
-        for aR in sam: #Iterate on the sam lines
-            print "Oooh", aR.rname
+        for aR in samIterator(sam): #Iterate on the sam lines
             refSeq = refSequences[sam.getrname(aR.rname)]
             readSeq = readSequences[aR.qname]
             overallCoverageCounter.addReadAlignment(aR, refSeq, readSeq)

@@ -59,6 +59,9 @@ class AlignedPair:
         for readPos, refPos in alignedRead.aligned_pairs: #Iterate over the block
             if readPos != None and refPos != None:
                 assert refPos >= alignedRead.pos and refPos < alignedRead.aend
+                if refPos >= len(refSeq): #This is masking a one off error in the BWA sam files?
+                    continue
+                    #raise RuntimeError("HELLO %s %s %s %s" % (refPos, alignedRead.pos, alignedRead.aend, len(refSeq)))
                 aP = AlignedPair(refPos, refSeq, abs(readOffset + readPos), alignedRead.is_reverse, readSeq, pPair)
                 assert aP.getReadBase().upper() == alignedRead.query[readPos].upper()
                 pPair = aP
@@ -72,8 +75,8 @@ def getExonerateCigarFormatString(alignedRead, sam):
     translation = { 0:"M", 1:"I", 2:"D" }
     cigarString = " ".join([ "%s %i" % (translation[op], length) for op, length in alignedRead.cigar if op in translation ]) 
     completeCigarString = "cigar: %s %i %i + %s %i %i + 1 %s" % (
-     alignedRead.qname, 0, alignedRead.qend - alignedRead.qstart, 
-     sam.getrname(alignedRead.rname), alignedRead.pos, alignedRead.aend, cigarString)
+    alignedRead.qname, 0, alignedRead.qend - alignedRead.qstart, 
+    sam.getrname(alignedRead.rname), alignedRead.pos, alignedRead.aend, cigarString)
     pA = cigarReadFromString(completeCigarString) #This checks it's an okay cigar
     assert sum([ op.length for op in pA.operationList if op.type == PairwiseAlignment.PAIRWISE_MATCH ]) == len([ readPos for readPos, refPos in alignedRead.aligned_pairs if readPos != None and refPos != None ])
     return completeCigarString
@@ -99,3 +102,10 @@ def getFastqDictionary(fastqFile):
     """
     return dict([ (name.split()[0], seq) for name, seq, quals in fastqRead(open(fastqFile, 'r'))]) #Hash of names to sequences
 
+def samIterator(sam):
+    """Creates an iterator over the aligned reads in a sam file, filtering out
+    any reads that have no reference alignment.
+    """
+    for aR in sam:
+        if aR.rname != -1:
+            yield aR

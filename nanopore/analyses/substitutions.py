@@ -1,5 +1,5 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, samIterator
 import os
 import pysam
 import xml.etree.cElementTree as ET
@@ -63,7 +63,7 @@ class Substitutions(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sM = SubstitutionMatrix() #The thing to store the counts in
         sam = pysam.Samfile(self.samFile, "r" )
-        for aR in sam: #Iterate on the sam lines
+        for aR in samIterator(sam): #Iterate on the sam lines
             for aP in AlignedPair.iterator(aR, refSequences[sam.getrname(aR.rname)], readSequences[aR.qname]): #Walk through the matches mismatches:
                 sM.addAlignedPair(aP.getRefBase(), aP.getReadBase())
         sam.close()

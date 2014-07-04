@@ -1,5 +1,5 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, getExonerateCigarFormatString
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, getExonerateCigarFormatString, samIterator
 import os
 import pysam
 import numpy
@@ -19,7 +19,7 @@ class AlignmentUncertainty(AbstractAnalysis):
         alignedPairsInCigar = []
         posteriorMatchProbabilities = []
 
-        for aR in sam: #Iterate on the sam lines
+        for aR in samIterator(sam): #Iterate on the sam lines
             #Exonerate format Cigar string
             cigarString = getExonerateCigarFormatString(aR, sam)
             
