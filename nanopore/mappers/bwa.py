@@ -8,3 +8,14 @@ class Bwa(AbstractMapper):
         system("cp %s %s" % (self.referenceFastaFile, localReferenceFastaFile))
         system("bwa index %s" % localReferenceFastaFile)
         system("bwa mem -x pacbio %s %s > %s" % (localReferenceFastaFile, self.readFastqFile, self.outputSamFile))
+        
+
+class BwaChain(Bwa):
+    def run(self):
+        Bwa.run(self)
+        self.chainSamFile()
+
+class BwaRealign(Bwa):
+    def run(self):
+        Bwa.run(self)
+        self.realignSamFile()
