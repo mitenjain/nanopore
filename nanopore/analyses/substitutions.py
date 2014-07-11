@@ -4,9 +4,8 @@ import os
 import pysam
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import reverseComplement, prettyXml, system
-from collections import Counter
-from math import log
 from itertools import product
+from collections import Counter
 
 class KmerSubstMatrix():
     def __init__(self, kmer=5):
@@ -20,7 +19,6 @@ class KmerSubstMatrix():
 
     def getCount(self, refKmer, readKmer):
         return self.matrix[refKmer][readKmer]
-
 
 class SubstitutionMatrix():
     """Represents a nucleotide substitution matrix. Also allows 
@@ -43,6 +41,7 @@ class SubstitutionMatrix():
         for b in bases:
             freqs.append(self.getCount(refBase, b))
         return [x / sum(freqs) for x in freqs]
+        #return [-log(x) / sum(freqs) for x in freqs]
     
     def getXML(self):
         def _identity(matches, mismatches):
@@ -69,7 +68,6 @@ class SubstitutionMatrix():
             return 4
         return { 'A':0, 'C':1, 'G':2, 'T':3 }[base]
 
-
 class Substitutions(AbstractAnalysis):
     """Calculates stats on substitutions
     """
@@ -91,11 +89,10 @@ class Substitutions(AbstractAnalysis):
         outf.write("A\tC\tG\tT\n")
         for x in bases:
             freqs = sM.getFreqs(x, bases)
-            outf.write("{}\t{}\n".format(x, "\t".join(map(str, freqs)), "\n"))
+            outf.write("{}\t{}\n".format(x, "\t".join(map(str,freqs)), "\n"))
         outf.close()
         analysis = self.outputDir.split("/")[-2].split("_")[-1] + "_Substitution_Levels"
         system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.pdf"), analysis))        
-        
         kmer = 5 #change this to be passed in maybe?
         kM = KmerSubstMatrix(kmer)
         sam = pysam.Samfile(self.samFile, "r")
@@ -126,11 +123,4 @@ class Substitutions(AbstractAnalysis):
                     line.append("NA")
             outf.write("\t".join(line)); outf.write("\n")
         outf.close()
-        system("Rscript nanopore/analyses/kmer_substitution_plot.R {} {} {} ".format(os.path.join(self.outputDir, "kmer_subst.tsv"), os.path.join(self.outputDir, "kmer_substitution"), analysis))
-
-
-
-
-
-
-
+        system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.pdf"), analysis))        
