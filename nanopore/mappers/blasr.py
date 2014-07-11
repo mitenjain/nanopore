@@ -5,3 +5,13 @@ import os
 class Blasr(AbstractMapper):
     def run(self):
         system("blasr %s %s -sam > %s" % (self.referenceFastaFile, self.readFastqFile, self.outputSamFile))
+
+class BlasrChain(Blasr):
+    def run(self):
+        Blasr.run(self)
+        self.chainSamFile()
+
+class BlasrRealign(Blasr):
+    def run(self):
+        Blasr.run(self)
+        self.realignSamFile()

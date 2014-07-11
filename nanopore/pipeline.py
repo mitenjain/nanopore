@@ -5,10 +5,10 @@ from jobTree.scriptTree.stack import Stack
 from jobTree.src.bioio import getLogLevelString, isNewer, logger, setLoggingFromOptions
 
 #The following specify which mappers and analyses get run
-from nanopore.mappers.lastz import Lastz
-from nanopore.mappers.bwa import Bwa
-from nanopore.mappers.last import Last
-from nanopore.mappers.blasr import Blasr
+from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign
+from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign
+from nanopore.mappers.last import Last, LastChain, LastRealign
+from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import Coverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
@@ -17,7 +17,7 @@ from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
 from nanopore.analyses.alignmentUncertainty import AlignmentUncertainty
 
-mappers = [ Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
+mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
 analyses = [ Substitutions, Coverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
@@ -36,7 +36,6 @@ def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analy
                         (os.path.split(readFastaFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__)))))
 
 def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, experimentDir):
-    print "Experiment dir", experimentDir
     if not os.path.exists(experimentDir):
         os.mkdir(experimentDir)
         target.logToMaster("Creating experiment dir: %s" % experimentDir)
