@@ -23,7 +23,7 @@ from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 
 mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, Blasr, BlasrChain, BlasrRealign, BlasrParams ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
-analyses = [ Substitutions, Coverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis, Consensus ]
+analyses = [ Substitutions, LocalCoverage, GlobalCoverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis, Consensus ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
