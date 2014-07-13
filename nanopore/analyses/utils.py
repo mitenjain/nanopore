@@ -35,13 +35,20 @@ class AlignedPair:
             return -self.readPos
         return self.readPos
     
-    def getPrecedingReadInsertionLength(self):
+    def getPrecedingReadInsertionLength(self, globalAlignment=False):
         if self.pPair == None:
+            if globalAlignment:
+                if self.isReversed:
+                    assert len(self.readSeq) - self.readPos - 1 >= 0
+                    return len(self.readSeq) - self.readPos - 1
+                return self.readPos
             return 0
         return self._indelLength(self.readPos, self.pPair.readPos)
     
-    def getPrecedingReadDeletionLength(self):
+    def getPrecedingReadDeletionLength(self, globalAlignment=False):
         if self.pPair == None:
+            if globalAlignment:
+                return self.refPos
             return 0
         return self._indelLength(self.refPos, self.pPair.refPos)
     
