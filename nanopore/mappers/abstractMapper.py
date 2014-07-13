@@ -1,5 +1,5 @@
 from jobTree.scriptTree.target import Target
-from nanopore.analyses.utils import chainSamFile, realignSamFile
+from nanopore.analyses.utils import chainSamFile, realignSamFileTargetFn
 import os
 from sonLib.bioio import system
 from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, getExonerateCigarFormatString, samIterator
@@ -23,8 +23,6 @@ class AbstractMapper(Target):
     def realignSamFile(self):
         """Chains and then realigns the resulting global alignments.
         """
-        tempSamFile = os.path.join(self.getLocalTempDir(), "temp.sam")
+        tempSamFile = os.path.join(self.getGlobalTempDir(), "temp.sam")
         system("cp %s %s" % (self.outputSamFile, tempSamFile))
-        tempDir = os.path.join(self.getLocalTempDir(), "tempDir")
-        os.mkdir(tempDir)
-        realignSamFile(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile, tempDir)
+        self.addChildTargetFn(realignSamFileTargetFn, args=(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile))

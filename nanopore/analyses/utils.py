@@ -1,6 +1,7 @@
 import pysam
 from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, cigarRead
 import os
+import sys
 
 class AlignedPair:
     """Represents an aligned pair of positions.
@@ -34,13 +35,20 @@ class AlignedPair:
             return -self.readPos
         return self.readPos
     
-    def getPrecedingReadInsertionLength(self):
+    def getPrecedingReadInsertionLength(self, globalAlignment=False):
         if self.pPair == None:
+            if globalAlignment:
+                if self.isReversed:
+                    assert len(self.readSeq) - self.readPos - 1 >= 0
+                    return len(self.readSeq) - self.readPos - 1
+                return self.readPos
             return 0
         return self._indelLength(self.readPos, self.pPair.readPos)
     
-    def getPrecedingReadDeletionLength(self):
+    def getPrecedingReadDeletionLength(self, globalAlignment=False):
         if self.pPair == None:
+            if globalAlignment:
+                return self.refPos
             return 0
         return self._indelLength(self.refPos, self.pPair.refPos)
     
@@ -281,40 +289,54 @@ def chainSamFile(samFile, outputSamFile, readFastqFile, referenceFastaFile, chai
     sam.close()
     outputSam.close()
 
-def realignSamFile(samFile, outputSamFile, readFastqFile, 
-                   referenceFastaFile, tempDir, chainFn=chainFn):
-    """Chains and then realigns the resulting global alignments.
+def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, chainFn=chainFn):
+    """Chains and then realigns the resulting global alignments, using jobTree to do it in parallel on a cluster.
     """
-    
     #Chain the sam file
-    tempSamFile = os.path.join(tempDir, "temp.sam")
+    tempSamFile = os.path.join(target.getGlobalTempDir(), "temp.sam")
     chainSamFile(samFile, tempSamFile, readFastqFile, referenceFastaFile, chainFn)
     
     #Load reference sequences
     refSequences = getFastaDictionary(referenceFastaFile) #Hash of names to sequences
     
-    #Setup the input and output sam files
+    #Read through the SAM file
     sam = pysam.Samfile(tempSamFile, "r" )
-    outputSam = pysam.Samfile(outputSamFile, "wh", template=sam)
-    
-    for aR in samIterator(sam): #Iterate on the sam lines realigning them - this could be parallelized. 
+    tempCigarFiles = []
+    for aR, index in zip(samIterator(sam), xrange(sys.maxint)): #Iterate on the sam lines realigning them in parallel
         #Exonerate format Cigar string
         cigarString = getExonerateCigarFormatString(aR, sam)
         
-        #Temporary files
-        tempCigarFile = os.path.join(tempDir, "rescoredCigar.cig")
-        tempRefFile = os.path.join(tempDir, "ref.fa")
-        tempReadFile = os.path.join(tempDir, "read.fa")
+        #Temporary cigar file
+        tempCigarFiles.append(os.path.join(target.getGlobalTempDir(), "rescoredCigar_%i.cig" % index))
         
-        #Write the temporary files.
-        fastaWrite(tempRefFile, sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)]) 
-        fastaWrite(tempReadFile, aR.qname, aR.query)
-        
-        #Call to cactus_realign
-        system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 --gapGamma=0.0 > %s" % (cigarString, tempRefFile, tempReadFile, tempCigarFile))
-        
+        #Add a child target to do the alignment
+        target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1]))
+    
+    target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, tempCigarFiles))
+    #Finish up
+    sam.close()
+    
+def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile):
+    #Temporary files
+    tempRefFile = os.path.join(target.getLocalTempDir(), "ref.fa")
+    tempReadFile = os.path.join(target.getLocalTempDir(), "read.fa")
+    
+    #Write the temporary files.
+    fastaWrite(tempRefFile, referenceSequenceName, referenceSequence) 
+    fastaWrite(tempReadFile, querySequenceName, querySequence)
+    
+    #Call to cactus_realign
+    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 --gapGamma=0.0 > %s" % (exonerateCigarString, tempRefFile, tempReadFile, outputCigarFile))
+    assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) == 1
+
+def realignSamFile2TargetFn(target, samFile, outputSamFile, tempCigarFiles):
+    #Setup input and output sam files
+    sam = pysam.Samfile(samFile, "r" )
+    
+    #Replace the cigar lines with the realigned cigar lines
+    outputSam = pysam.Samfile(outputSamFile, "wh", template=sam)
+    for aR, tempCigarFile in zip(samIterator(sam), tempCigarFiles): #Iterate on the sam lines realigning them in parallel
         #Load the cigar
-        assert len([ pA for pA in cigarRead(open(tempCigarFile)) ]) == 1
         pA = [ i for i in cigarRead(open(tempCigarFile)) ][0]
         
         #Convert to sam line

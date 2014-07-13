@@ -8,7 +8,7 @@ from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml
 class CoverageCounter:
     """Counts coverage from a pairwise alignment
     """
-    def __init__(self, readSeqName, refSeqName):
+    def __init__(self, readSeqName, refSeqName, globalAlignment=False):
         self.matches = 0
         self.mismatches = 0
         self.ns = 0
@@ -16,8 +16,10 @@ class CoverageCounter:
         self.totalReadDeletionLength = 0
         self.readSeqName = readSeqName
         self.refSeqName = refSeqName
+        self.globalAlignment = globalAlignment
         
     def addReadAlignment(self, alignedRead, refSeq, readSeq):
+        totalReadInsertionLength, totalReadDeletionLength = 0, 0
         for aP in AlignedPair.iterator(alignedRead, refSeq, readSeq): 
             if aP.isMatch():
                 self.matches += 1
@@ -25,8 +27,20 @@ class CoverageCounter:
                 self.mismatches += 1
             else:
                 self.ns += 1
-            self.totalReadInsertionLength += aP.getPrecedingReadInsertionLength()
-            self.totalReadDeletionLength += aP.getPrecedingReadDeletionLength()
+            totalReadInsertionLength += aP.getPrecedingReadInsertionLength(self.globalAlignment)
+            totalReadDeletionLength += aP.getPrecedingReadDeletionLength(self.globalAlignment)
+        if self.globalAlignment: #If global alignment account for any trailing indels
+            assert len(refSeq) - aP.refPos - 1 >= 0
+            self.totalReadDeletionLength +=  len(refSeq) - aP.refPos - 1
+            if alignedRead.is_reverse:
+                totalReadInsertionLength += aP.readPos
+            else:
+                assert len(readSeq) - aP.readPos - 1 >= 0
+                totalReadInsertionLength += len(readSeq) - aP.readPos - 1
+        assert totalReadInsertionLength <= len(readSeq)
+        assert totalReadDeletionLength <= len(refSeq)
+        self.totalReadInsertionLength += totalReadInsertionLength
+        self.totalReadDeletionLength += totalReadDeletionLength
             
     def getReadCoverage(self):
         return self._formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadInsertionLength)
@@ -72,21 +86,21 @@ class CoverageCounter:
                                 "totalReadInsertionLength":str(self.totalReadInsertionLength),
                                 "totalReadDeletionLength":str(self.totalReadDeletionLength) })
 
-class Coverage(AbstractAnalysis):
-    """Calculates coverage.
+class LocalCoverage(AbstractAnalysis):
+    """Calculates coverage, treating alignments as local alignments.
     """
-    def run(self):
+    def run(self, globalAlignment=False):
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
-        overallCoverageCounter = CoverageCounter("overall", "overall") #Thing to store the overall coverage in
+        overallCoverageCounter = CoverageCounter("overall", "overall", globalAlignment=globalAlignment) #Thing to store the overall coverage in
         readCoverages = []
         sam = pysam.Samfile(self.samFile, "r" )
         for aR in samIterator(sam): #Iterate on the sam lines
             refSeq = refSequences[sam.getrname(aR.rname)]
             readSeq = readSequences[aR.qname]
             overallCoverageCounter.addReadAlignment(aR, refSeq, readSeq)
-            readCoverages.append(CoverageCounter(aR.qname, sam.getrname(aR.rname)))
-            readCoverages[-1].addReadAlignment(aR, refSeq, readSeq)   
+            readCoverages.append(CoverageCounter(aR.qname, sam.getrname(aR.rname), globalAlignment=globalAlignment))
+            readCoverages[-1].addReadAlignment(aR, refSeq, readSeq)
         sam.close()
         #Write out the coverage info
         parentNode = overallCoverageCounter.getXML()
@@ -101,3 +115,9 @@ class Coverage(AbstractAnalysis):
             outf.write("\n")
         outf.close()
         system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, "coverages.tsv"), os.path.join(self.outputDir, "coverage_histograms.pdf")))
+
+class GlobalCoverage(LocalCoverage):
+    def run(self):
+        """Calculates coverage, treating alignments as global alignments.
+        """
+        LocalCoverage.run(self, globalAlignment=True)
