@@ -71,9 +71,9 @@ def main():
     workingDir = args[0]
     
     # call reference mutator script; introduces 1%, and 5% mutations (No nucleotide bias used for now)
-    MutateReference(workingDir)
+    #MutateReference(workingDir)
     # call read sampler script; samples 75, 50, and 25% reads
-    SampleReads(workingDir)
+    #SampleReads(workingDir)
 
     #Assign the input files
     readFastqFiles = [ os.path.join(workingDir, "readFastqFiles", i) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
