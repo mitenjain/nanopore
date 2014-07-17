@@ -4,7 +4,7 @@ import os
 
 class Blasr(AbstractMapper):
     def run(self):
-        system("blasr %s %s -sam > %s" % (self.referenceFastaFile, self.readFastqFile, self.outputSamFile))
+        system("blasr %s %s -sam > %s" % (self.readFastqFile, self.referenceFastaFile, self.outputSamFile))
 
 class BlasrChain(Blasr):
     def run(self):

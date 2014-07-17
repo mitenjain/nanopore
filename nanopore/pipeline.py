@@ -16,9 +16,14 @@ from nanopore.analyses.indels import Indels
 from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
 from nanopore.analyses.alignmentUncertainty import AlignmentUncertainty
+from nanopore.mappers.blasr_params import BlasrParams
+from nanopore.mappers.last_params import LastParams
+from nanopore.analyses.mutate_reference import MutateReference
+from nanopore.analyses.read_sampler import SampleReads
+from nanopore.analyses.consensus import Consensus
 
-mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
-analyses = [ Substitutions, LocalCoverage, GlobalCoverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis ]
+mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, Blasr, BlasrChain, BlasrRealign, BlasrParams ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
+analyses = [ Substitutions, LocalCoverage, GlobalCoverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis, Consensus ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
@@ -65,6 +70,11 @@ def main():
         raise RuntimeError("Expected one argument, got %s arguments: %s" % (len(args), " ".join(args)))
     workingDir = args[0]
     
+    # call reference mutator script; introduces 1%, and 5% mutations (No nucleotide bias used for now)
+    #MutateReference(workingDir)
+    # call read sampler script; samples 75, 50, and 25% reads
+    #SampleReads(workingDir)
+
     #Assign the input files
     readFastqFiles = [ os.path.join(workingDir, "readFastqFiles", i) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
     referenceFastaFiles = [ os.path.join(workingDir, "referenceFastaFiles", i) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if ".fa" in i or ".fasta" in i ] 
