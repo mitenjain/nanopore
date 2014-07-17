@@ -9,6 +9,8 @@ from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign
 from nanopore.mappers.last import Last, LastChain, LastRealign
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign
+from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign
+from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
@@ -16,13 +18,11 @@ from nanopore.analyses.indels import Indels
 from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
 from nanopore.analyses.alignmentUncertainty import AlignmentUncertainty
-from nanopore.mappers.blasr_params import BlasrParams
-from nanopore.mappers.last_params import LastParams
 from nanopore.analyses.mutate_reference import MutateReference
 from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 
-mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
+mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
 analyses = [ Substitutions, LocalCoverage, GlobalCoverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis, Consensus ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper

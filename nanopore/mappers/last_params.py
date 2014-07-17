@@ -24,3 +24,13 @@ class LastParams(AbstractMapper):
         system("lastdb %s %s" % (indexFile, localReferenceFastaFile)) #Build the index
         system("lastal -s 2 -T 0 -Q 0 -a 1 %s %s > %s" % (indexFile, localReadFile, mafFile)) #Build the alignment
         system("maf-convert.py sam %s >> %s" % (mafFile, self.outputSamFile)) #Now convert sam file
+
+class LastParamsChain(LastParams):
+    def run(self):
+        LastParams.run(self)
+        self.chainSamFile()
+        
+class LastParamsRealign(LastParams):
+    def run(self):
+        LastParams.run(self)
+        self.realignSamFile()
