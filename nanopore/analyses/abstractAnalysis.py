@@ -9,3 +9,9 @@ class AbstractAnalysis(Target):
         self.referenceFastaFile = referenceFastaFile
         self.samFile = samFile
         self.outputDir = outputDir
+    
+    @staticmethod
+    def formatRatio(numerator, denominator):
+        if denominator == 0:
+            return float("nan")
+        return float(numerator)/denominator

@@ -43,37 +43,31 @@ class CoverageCounter:
         self.totalReadDeletionLength += totalReadDeletionLength
             
     def getReadCoverage(self):
-        return self._formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadInsertionLength)
+        return AbstractAnalysis.formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadInsertionLength)
     
     def getReferenceCoverage(self):
-        return self._formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadDeletionLength)
+        return AbstractAnalysis.formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadDeletionLength)
     
     def getAlignmentCoverage(self):
-        return self._formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadInsertionLength + self.totalReadDeletionLength)
+        return AbstractAnalysis.formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadInsertionLength + self.totalReadDeletionLength)
     
     def getIdentity(self):
-        return self._formatRatio(self.matches, self.matches + self.mismatches)
+        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches)
     
     def getReadIdentity(self):
-        return self._formatRatio(self.matches, self.matches + self.mismatches + self.totalReadInsertionLength)
+        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches + self.totalReadInsertionLength)
     
     def getReferenceIdentity(self):
-        return self._formatRatio(self.matches, self.matches + self.mismatches + self.totalReadDeletionLength)
+        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches + self.totalReadDeletionLength)
     
     def getAlignmentIdentity(self):
-        return self._formatRatio(self.matches, self.matches + self.mismatches + self.totalReadInsertionLength + self.totalReadDeletionLength)
+        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches + self.totalReadInsertionLength + self.totalReadDeletionLength)
     
     def getAlignedReferenceLength(self):
         return self.matches + self.mismatches + self.totalReadDeletionLength
     
     def getAlignedReadLength(self):
         return self.matches + self.mismatches + self.totalReadInsertionLength
-    
-    @staticmethod
-    def _formatRatio(numerator, denominator):
-        if denominator == 0:
-            return float("nan")
-        return float(numerator)/denominator
     
     def getXML(self):
         return ET.Element("coverage", { "refSeqName":self.refSeqName, "readSeqName":self.readSeqName, "readCoverage":str(self.getReadCoverage()), "referenceCoverage":str(self.getReferenceCoverage()), 

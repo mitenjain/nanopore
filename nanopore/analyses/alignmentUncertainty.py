@@ -51,8 +51,8 @@ class AlignmentUncertainty(AbstractAnalysis):
         sam.close()
         #Write out the substitution info
         node = ET.Element("alignmentUncertainty", { 
-                "averagePosteriorMatchProbabilityPerRead":str(sum(avgPosteriorMatchProbabilityInCigar)/len(avgPosteriorMatchProbabilityInCigar)),
-                "averagePosteriorMatchProbability":str(float(sum([ avgMatchProb*alignedPairs for avgMatchProb, alignedPairs in zip(avgPosteriorMatchProbabilityInCigar, alignedPairsInCigar) ]))/sum(alignedPairsInCigar)),
+                "averagePosteriorMatchProbabilityPerRead":str(self.formatRatio(sum(avgPosteriorMatchProbabilityInCigar), len(avgPosteriorMatchProbabilityInCigar))),
+                "averagePosteriorMatchProbability":str(self.formatRatio(float(sum([ avgMatchProb*alignedPairs for avgMatchProb, alignedPairs in zip(avgPosteriorMatchProbabilityInCigar, alignedPairsInCigar) ])),sum(alignedPairsInCigar))),
                 "averagePosteriorMatchProbabilitesPerRead":",".join([ str(i) for i in avgPosteriorMatchProbabilityInCigar ]), 
                 "alignedPairsInCigar":",".join([ str(i) for i in alignedPairsInCigar ]) })
         open(os.path.join(self.outputDir, "alignmentUncertainty.xml"), "w").write(prettyXml(node))
