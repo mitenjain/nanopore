@@ -1,5 +1,5 @@
 # order is important, libraries first
-modules = sonLib jobTree bwa lastz last cactus
+modules = sonLib jobTree bwa lastz last cactus samtools-0.1.19
 .PHONY: all %.all clean %.clean
 
 export HDF5INCLUDEDIR=$(PWD)/hdf5Build/include

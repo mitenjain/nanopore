@@ -270,17 +270,19 @@ def chainSamFile(samFile, outputSamFile, readFastqFile, referenceFastaFile, chai
     readSequences = getFastqDictionary(readFastqFile) #Hash of names to sequences
     readsToAlignedReads = {}
     for aR in samIterator(sam): #Iterate on the sam lines and put into buckets by read
-        if aR.qname not in readsToAlignedReads:
-            readsToAlignedReads[aR.qname] = []
-        readsToAlignedReads[aR.qname].append(aR)
+        assert aR.qname in readSequences
+        key = (aR.qname,aR.rname)
+        if key not in readsToAlignedReads:
+            readsToAlignedReads[key] = []
+        readsToAlignedReads[key].append(aR)
     #Now write out the sam file
     outputSam = pysam.Samfile(outputSamFile, "wh", template=sam)
     
     #Chain together the reads
     chainedAlignedReads = []
-    for readName in readsToAlignedReads.keys():
+    for readName, refID in readsToAlignedReads.keys():
         alignedReads = readsToAlignedReads[readName]
-        refSeq = refSequences[sam.getrname(readsToAlignedReads[readName][0].rname)]
+        refSeq = refSequences[sam.getrname(refID)]
         readSeq = readSequences[readName]
         chainedAlignedReads.append(mergeChainedAlignedReads(chainFn(alignedReads, refSeq, readSeq), refSeq, readSeq))
     chainedAlignedReads.sort() #Sort by reference coordinate

@@ -41,7 +41,7 @@ class SubstitutionMatrix():
         for b in bases:
             freqs.append(self.getCount(refBase, b))
         if sum(freqs) == 0:
-            return [ "NaN" ] * len(freqs)
+            return [ 0.0 ] * len(freqs)
         return [x / sum(freqs) for x in freqs]
         #return [-log(x) / sum(freqs) for x in freqs]
     
