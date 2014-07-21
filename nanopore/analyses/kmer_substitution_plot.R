@@ -17,7 +17,7 @@ levelplot(as.matrix(data), scales=list(x=list(rot=45, cex=0.9),
 	y=list(rot=45, cex=0.9)), col.regions=colorRampPalette(c("white","red"))(256), 
 	main=out, xlab="Read Kmer", ylab="Reference Kmer")
 
-#dev.off()
+dev.off()
 
 #png(paste(out, "heatmap.png", sep="_"), width=5000, height=5000)
 

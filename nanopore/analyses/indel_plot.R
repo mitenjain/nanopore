@@ -8,15 +8,14 @@ insert <- scan(args[2])
 delete <- scan(args[3])
 out <- args[4]
 
+if ( length(insert) > 0 && length(delete) > 0 ) {
+	pdf(out)
 
-pdf(out)
+	par(mfrow=c(1,2))
 
+	hist(insert, main="Size of insertions (to reference)", xlab="Size (bp)")
+	hist(delete, main="Size of deletions (from reference)", xlab="Size (bp)")
 
-par(mfrow=c(1,2))
+	dev.off()
 
-
-hist(insert, main="Size of insertions (to reference)", xlab="Size (bp)")
-hist(delete, main="Size of deletions (from reference)", xlab="Size (bp)")
-
-
-dev.off()
+}

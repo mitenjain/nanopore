@@ -17,10 +17,12 @@ myPanel <- function(x, y, z, ...) {
 
 d <- read.table(f, header = T, row.names = 1)
 
+if ( sum(rowSums(d)) > 0 ) {
 
-levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
-#use the version below if you want two colors
-#levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel)
+	levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
+	#use the version below if you want two colors
+	#levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel)
 
-dev.off()
+	dev.off()
 
+}

@@ -4,8 +4,12 @@ args <- commandArgs(trailingOnly = T)
 
 data <- read.table(args[1], sep="\t")
 
-pdf(args[2])
+if ( dim(data)[1] > 0 ) {
 
-hist(t(data), main = "Average Posterior Match Probability", xlab="Probability")
+	pdf(args[2])
 
-dev.off()
+	hist(t(data), main = "Average Posterior Match Probability", xlab="Probability")
+
+	dev.off()
+
+}

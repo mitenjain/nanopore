@@ -101,14 +101,14 @@ class LocalCoverage(AbstractAnalysis):
         for readCoverage in readCoverages:
             parentNode.append(readCoverage.getXML())
         open(os.path.join(self.outputDir, "coverages.xml"), 'w').write(prettyXml(parentNode))
-
-        outf = open(os.path.join(self.outputDir, "coverages.tsv"), "w")
-        outf.write("alignmentIdentity\talignmentCoverage\treadIdentity\treadCoverage\treferenceIdentity\treferenceCoverage\n")
-        for readCoverage in readCoverages:
-            outf.write("\t".join(map(str, [readCoverage.getAlignmentIdentity(), readCoverage.getAlignmentCoverage(), readCoverage.getReadIdentity(), readCoverage.getReadCoverage(), readCoverage.getReferenceIdentity(), readCoverage.getReferenceIdentity()])))
-            outf.write("\n")
-        outf.close()
-        system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, "coverages.tsv"), os.path.join(self.outputDir, "coverage_histograms.pdf")))
+        if len(readCoverages) > 0:
+            outf = open(os.path.join(self.outputDir, "coverages.tsv"), "w")
+            outf.write("alignmentIdentity\talignmentCoverage\treadIdentity\treadCoverage\treferenceIdentity\treferenceCoverage\n")
+            for readCoverage in readCoverages:
+                outf.write("\t".join(map(str, [readCoverage.getAlignmentIdentity(), readCoverage.getAlignmentCoverage(), readCoverage.getReadIdentity(), readCoverage.getReadCoverage(), readCoverage.getReferenceIdentity(), readCoverage.getReferenceIdentity()])))
+                outf.write("\n")
+            outf.close()
+            system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, "coverages.tsv"), os.path.join(self.outputDir, "coverage_histograms.pdf")))
 
 class GlobalCoverage(LocalCoverage):
     def run(self):
