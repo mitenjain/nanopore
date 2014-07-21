@@ -73,7 +73,7 @@ class SubstitutionMatrix():
 class Substitutions(AbstractAnalysis):
     """Calculates stats on substitutions
     """
-    def run(self):
+    def run(self, kmer=5):
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sM = SubstitutionMatrix() #The thing to store the counts in
@@ -95,7 +95,6 @@ class Substitutions(AbstractAnalysis):
         outf.close()
         analysis = self.outputDir.split("/")[-2].split("_")[-1] + "_Substitution_Levels"
         system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.pdf"), analysis))        
-        kmer = 5 #change this to be passed in maybe?
         kM = KmerSubstMatrix(kmer)
         sam = pysam.Samfile(self.samFile, "r")
         for aR in samIterator(sam):
@@ -125,4 +124,4 @@ class Substitutions(AbstractAnalysis):
                     line.append("NA")
             outf.write("\t".join(line)); outf.write("\n")
         outf.close()
-        system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.pdf"), analysis))        
+        system("Rscript nanopore/analyses/kmer_substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "kmer_subst.tsv"), os.path.join(self.outputDir, "kmer_substitution_plot.pdf"), analysis))        

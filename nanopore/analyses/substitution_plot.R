@@ -8,7 +8,7 @@ f <- args[1]
 out <- args[2]
 inf <- args[3]
 
-pdf(out)
+
 
 myPanel <- function(x, y, z, ...) {
     panel.levelplot(x, y, z, ...)
@@ -17,7 +17,9 @@ myPanel <- function(x, y, z, ...) {
 
 d <- read.table(f, header = T, row.names = 1)
 
-if ( sum(rowSums(d)) > 0 ) {
+if ( sum(d) > 0 ) {
+
+	pdf(out)
 
 	levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
 	#use the version below if you want two colors
