@@ -281,7 +281,7 @@ def chainSamFile(samFile, outputSamFile, readFastqFile, referenceFastaFile, chai
     #Chain together the reads
     chainedAlignedReads = []
     for readName, refID in readsToAlignedReads.keys():
-        alignedReads = readsToAlignedReads[readName]
+        alignedReads = readsToAlignedReads[(readName, refID)]
         refSeq = refSequences[sam.getrname(refID)]
         readSeq = readSequences[readName]
         chainedAlignedReads.append(mergeChainedAlignedReads(chainFn(alignedReads, refSeq, readSeq), refSeq, readSeq))
