@@ -90,7 +90,7 @@ def getAggregateCoverageStats(readCoverages, tagName, refSequences, readSequence
         l.sort()
         return l[0], numpy.average(l), numpy.median(l), l[-1], " ".join(map(str, l))
     attribs = { "numberOfReadAlignments":str(len(readCoverages)), "numberOfReads":str(len(readSequences)), 
-               "numberOfReferenceSequences":str(len(refSequences)), "numberOfReadsWithoutAnyAlignment":len(readsToReadCoverages) }
+               "numberOfReferenceSequences":str(len(refSequences)), "numberOfReadsWithoutAnyAlignment":str(len(readsToReadCoverages)) }
     for fnStringName in "readCoverage", "referenceCoverage", "alignmentCoverage", "identity", "readIdentity", "referenceIdentity", "alignmentIdentity":
         for attribName, value in zip([ "min" + fnStringName, "avg" + fnStringName, "median" + fnStringName, "max" + fnStringName, "distribution" + fnStringName ], list(stats(fnStringName))):
             attribs[attribName] = str(value)
