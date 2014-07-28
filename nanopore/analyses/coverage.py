@@ -82,14 +82,15 @@ class CoverageCounter:
                                 "totalReadInsertionLength":str(self.totalReadInsertionLength),
                                 "totalReadDeletionLength":str(self.totalReadDeletionLength) })
 
-def getAggregateCoverageStats(readCoverages, tagName, refSequences, readSequences):
+def getAggregateCoverageStats(readCoverages, tagName, refSequences, readSequences, readsToReadCoverages):
     """Calculates aggregate stats across a set of read alignments
     """
     def stats(fnStringName):
         l = map(lambda x : getattr(x, fnStringName)(), readCoverages)
         l.sort()
         return l[0], numpy.average(l), numpy.median(l), l[-1], " ".join(map(str, l))
-    attribs = { "numberOfReadAlignments":str(len(readCoverages)), "numberOfReads":str(len(readSequences)), "numberOfReferenceSequences":str(len(refSequences)) }
+    attribs = { "numberOfReadAlignments":str(len(readCoverages)), "numberOfReads":str(len(readSequences)), 
+               "numberOfReferenceSequences":str(len(refSequences)), "numberOfReadsWithoutAnyAlignment":len(readsToReadCoverages) }
     for fnStringName in "readCoverage", "referenceCoverage", "alignmentCoverage", "identity", "readIdentity", "referenceIdentity", "alignmentIdentity":
         for attribName, value in zip([ "min" + fnStringName, "avg" + fnStringName, "median" + fnStringName, "max" + fnStringName, "distribution" + fnStringName ], list(stats(fnStringName))):
             attribs[attribName] = str(value)
@@ -105,17 +106,19 @@ class LocalCoverage(AbstractAnalysis):
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sam = pysam.Samfile(self.samFile, "r" )
-        readsToReadCoverages = dict([ (readName, []) for readName in readSequences ])
+        readsToReadCoverages = {}
         for aR in samIterator(sam): #Iterate on the sam lines
             refSeq = refSequences[sam.getrname(aR.rname)]
             readSeq = readSequences[aR.qname]
             coverageCounter = CoverageCounter(aR.qname, sam.getrname(aR.rname), globalAlignment=globalAlignment)
             coverageCounter.addReadAlignment(aR, refSeq, readSeq)
+            if aR.qname in readsToReadCoverages:
+                readsToReadCoverages[aR.qname] = []
             readsToReadCoverages[aR.qname].append(coverageCounter)
         sam.close()
         #Write out the coverage info for differing subsets of the read alignments
         for readCoverages, outputName in [ (reduce(lambda x, y : x + y, readsToReadCoverages.values()), "coverage_all"), (map(lambda x : max(x, key=lambda y : y.readCoverage()), readsToReadCoverages.values()), "coverage_bestPerRead") ]:
-            parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences)
+            parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences, readsToReadCoverages)
             open(os.path.join(self.outputDir, outputName + ".xml"), 'w').write(prettyXml(parentNode))
     
             if len(readCoverages) > 0:
