@@ -117,18 +117,18 @@ class LocalCoverage(AbstractAnalysis):
             readsToReadCoverages[aR.qname].append(coverageCounter)
         sam.close()
         #Write out the coverage info for differing subsets of the read alignments
-        for readCoverages, outputName in [ (reduce(lambda x, y : x + y, readsToReadCoverages.values()), "coverage_all"), (map(lambda x : max(x, key=lambda y : y.readCoverage()), readsToReadCoverages.values()), "coverage_bestPerRead") ]:
-            parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences, readsToReadCoverages)
-            open(os.path.join(self.outputDir, outputName + ".xml"), 'w').write(prettyXml(parentNode))
-    
-            if len(readCoverages) > 0:
-                outf = open(os.path.join(self.outputDir, outputName + ".tsv"), "w")
-                outf.write("alignmentIdentity\talignmentCoverage\treadIdentity\treadCoverage\treferenceIdentity\treferenceCoverage\n")
-                for readCoverage in readCoverages:
-                    outf.write("\t".join(map(str, [readCoverage.alignmentIdentity(), readCoverage.alignmentCoverage(), readCoverage.readIdentity(), readCoverage.readCoverage(), readCoverage.referenceIdentity(), readCoverage.referenceIdentity()])))
-                    outf.write("\n")
-                outf.close()
-                system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, outputName + ".tsv"), os.path.join(self.outputDir, outputName + ".pdf")))
+        if len(readsToReadCoverages.values()) > 0:
+            for readCoverages, outputName in [ (reduce(lambda x, y : x + y, readsToReadCoverages.values()), "coverage_all"), (map(lambda x : max(x, key=lambda y : y.readCoverage()), readsToReadCoverages.values()), "coverage_bestPerRead") ]:
+                parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences, readsToReadCoverages)
+                open(os.path.join(self.outputDir, outputName + ".xml"), 'w').write(prettyXml(parentNode))
+                if len(readCoverages) > 0:
+                    outf = open(os.path.join(self.outputDir, outputName + ".tsv"), "w")
+                    outf.write("alignmentIdentity\talignmentCoverage\treadIdentity\treadCoverage\treferenceIdentity\treferenceCoverage\n")
+                    for readCoverage in readCoverages:
+                        outf.write("\t".join(map(str, [readCoverage.alignmentIdentity(), readCoverage.alignmentCoverage(), readCoverage.readIdentity(), readCoverage.readCoverage(), readCoverage.referenceIdentity(), readCoverage.referenceIdentity()])))
+                        outf.write("\n")
+                    outf.close()
+                    system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, outputName + ".tsv"), os.path.join(self.outputDir, outputName + ".pdf")))
 
 class GlobalCoverage(LocalCoverage):
     def run(self):
