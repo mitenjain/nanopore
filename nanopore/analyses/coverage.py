@@ -112,7 +112,7 @@ class LocalCoverage(AbstractAnalysis):
             readSeq = readSequences[aR.qname]
             coverageCounter = CoverageCounter(aR.qname, sam.getrname(aR.rname), globalAlignment=globalAlignment)
             coverageCounter.addReadAlignment(aR, refSeq, readSeq)
-            if aR.qname in readsToReadCoverages:
+            if aR.qname not in readsToReadCoverages:
                 readsToReadCoverages[aR.qname] = []
             readsToReadCoverages[aR.qname].append(coverageCounter)
         sam.close()
