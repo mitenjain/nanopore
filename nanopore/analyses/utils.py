@@ -136,6 +136,7 @@ def makeFastaSequenceNamesUnique(inputFastaFile, outputFastaFile):
     fileHandle = open(outputFastaFile, 'w')
     for name, seq in fastaRead(open(inputFastaFile, 'r')):
         while name in names:
+            logger.critical("Got a duplicate fasta sequence name: %s" % name)
             name += "i"
         names.add(name)
         fastaWrite(fileHandle, name, seq)
@@ -149,6 +150,7 @@ def makeFastqSequenceNamesUnique(inputFastqFile, outputFastqFile):
     fileHandle = open(outputFastqFile, 'w')
     for name, seq, quals in fastqRead(open(inputFastqFile, 'r')):
         while name in names:
+            logger.critical("Got a duplicate fastq sequence name: %s" % name)
             name += "i"
         names.add(name)
         fastqWrite(fileHandle, name, seq, quals)
