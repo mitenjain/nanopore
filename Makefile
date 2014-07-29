@@ -1,13 +1,14 @@
 maxThreads = 4
+batchSystem = singleMachine
 
 all :
 	cd submodules && make all
 
 run : all
-	./nanopore/pipeline.sh ./ jobTree log.txt ${maxThreads}
+	./nanopore/pipeline.sh ./ jobTree log.txt ${maxThreads} ${batchSystem}
 
 test : all
-	./nanopore/pipeline.sh tests testJobTree testLog.txt ${maxThreads}
+	./nanopore/pipeline.sh tests testJobTree testLog.txt ${maxThreads} ${batchSystem}
 
 clean :
 	cd submodules && make clean
