@@ -3,7 +3,7 @@ from sonLib.bioio import system, fastaRead, fastqRead, fastaWrite
 import os
 
 class Last(AbstractMapper):
-    def run(self):
+    def run(self, params=""):
         localReferenceFastaFile = os.path.join(self.getLocalTempDir(), "ref.fa") #Because we don't want to have any crufty files created in the local temp dir.
         indexFile = os.path.join(self.getLocalTempDir(), "my-index") #Index file
         mafFile = os.path.join(self.getLocalTempDir(), "out.maf") #MAF file
@@ -22,7 +22,7 @@ class Last(AbstractMapper):
         
         system("cp %s %s" % (self.referenceFastaFile, localReferenceFastaFile)) #Copy across the ref file
         system("lastdb %s %s" % (indexFile, localReferenceFastaFile)) #Build the index
-        system("lastal %s %s > %s" % (indexFile, localReadFile, mafFile)) #Build the alignment
+        system("lastal %s %s %s > %s" % (params, indexFile, localReadFile, mafFile)) #Build the alignment
         system("maf-convert.py sam %s >> %s" % (mafFile, self.outputSamFile)) #Now convert sam file
 
 class LastChain(Last):
