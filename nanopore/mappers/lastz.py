@@ -1,10 +1,14 @@
 from nanopore.mappers.abstractMapper import AbstractMapper
 from sonLib.bioio import system, fastaRead
+from nanopore.analyses.utils import normaliseQualValues
 import pysam
+import os
 
 class Lastz(AbstractMapper):
     def run(self):
-        system("lastz %s %s --format=sam > %s" % (self.referenceFastaFile, self.readFastqFile, self.outputSamFile))
+        tempFastqFile = os.path.join(self.getLocalTempDir(), "temp.fastq")
+        normaliseQualValues(self.readFastqFile, tempFastqFile)
+        system("lastz %s %s --format=sam > %s" % (self.referenceFastaFile, tempFastqFile, self.outputSamFile))
         try:
             pysam.Samfile(self.outputSamFile, "r" ).close()
         except ValueError:
