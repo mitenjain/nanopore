@@ -1,5 +1,5 @@
 import pysam
-from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, cigarRead
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, cigarRead, logger
 import os
 import sys
 
@@ -67,10 +67,12 @@ class AlignedPair:
         for readPos, refPos in alignedRead.aligned_pairs: #Iterate over the block
             if readPos != None and refPos != None:
                 assert refPos >= alignedRead.pos and refPos < alignedRead.aend
-                if refPos >= len(refSeq): #This is masking a one off error in the BWA sam files?
+                if refPos >= len(refSeq): #This is masking an (apparently minor?) one off error in the BWA sam files?
+                    logger.critical("Detected an aligned reference position out of bounds! Reference length: %s, reference coordinate: %s" % (len(refSeq), refPos))
                     continue
-                    #raise RuntimeError("HELLO %s %s %s %s" % (refPos, alignedRead.pos, alignedRead.aend, len(refSeq)))
                 aP = AlignedPair(refPos, refSeq, abs(readOffset + readPos), alignedRead.is_reverse, readSeq, pPair)
+                if aP.getReadBase().upper() != alignedRead.query[readPos].upper():
+                    logger.critical("Detected a discrepancy between the absolute read sequence and the aligned read sequence. Bases: %s %s, read-position: %s, is reversed: %s, absolute read offset: %s, length absolute read sequence %s, length aligned read sequence %s, cigar string %s" % (aP.getReadBase().upper(), alignedRead.query[readPos].upper(), readPos, alignedRead.is_reverse, readOffset, len(readSeq), len(alignedRead.query), alignedRead.cigarstring))
                 assert aP.getReadBase().upper() == alignedRead.query[readPos].upper()
                 pPair = aP
                 yield aP
