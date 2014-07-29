@@ -72,7 +72,7 @@ class AlignedPair:
                     continue
                 aP = AlignedPair(refPos, refSeq, abs(readOffset + readPos), alignedRead.is_reverse, readSeq, pPair)
                 if aP.getReadBase().upper() != alignedRead.query[readPos].upper():
-                    logger.critical("Detected a discrepancy between the absolute read sequence and the aligned read sequence. Bases: %s %s, read-position: %s, is reversed: %s, absolute read offset: %s, length absolute read sequence %s, length aligned read sequence %s, cigar string %s" % (aP.getReadBase().upper(), alignedRead.query[readPos].upper(), readPos, alignedRead.is_reverse, readOffset, len(readSeq), len(alignedRead.query), alignedRead.cigarstring))
+                    logger.critical("Detected a discrepancy between the absolute read sequence and the aligned read sequence. Bases: %s %s, read-position: %s, is reversed: %s, absolute read offset: %s, length absolute read sequence %s, length aligned read sequence %s, length aligned read sequence plus soft clipping %s, cigar string %s" % (aP.getReadBase().upper(), alignedRead.query[readPos].upper(), readPos, alignedRead.is_reverse, readOffset, len(readSeq), len(alignedRead.query), len(alignedRead.seq), alignedRead.cigarstring))
                 assert aP.getReadBase().upper() == alignedRead.query[readPos].upper()
                 pPair = aP
                 yield aP
