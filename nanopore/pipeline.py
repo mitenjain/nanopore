@@ -83,7 +83,7 @@ def main():
     processedFastqFiles = os.path.join(outputDir, "processedReadFastqFiles")
     if not os.path.exists(processedFastqFiles):
         os.mkdir(processedFastqFiles)
-    #This should be fixed to work with odd numbers of qual values
+    #This should be fixed to work with odd numbers of qual values, though this may be masking bug in input seqs.
     readFastqFiles = [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", i), os.path.join(processedFastqFiles, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
         
     #Assign/process (uniquify the names of) the input reference fasta files
