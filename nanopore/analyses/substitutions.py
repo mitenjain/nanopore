@@ -43,7 +43,6 @@ class SubstitutionMatrix():
         if sum(freqs) == 0:
             return [ 0.0 ] * len(freqs)
         return [x / sum(freqs) for x in freqs]
-        #return [-log(x) / sum(freqs) for x in freqs]
     
     def getXML(self):
         def _identity(matches, mismatches):
@@ -124,4 +123,4 @@ class Substitutions(AbstractAnalysis):
                     line.append("NA")
             outf.write("\t".join(line)); outf.write("\n")
         outf.close()
-        system("Rscript nanopore/analyses/kmer_substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "kmer_subst.tsv"), os.path.join(self.outputDir, "kmer_substitution_plot.pdf"), analysis))        
+        system("Rscript nanopore/analyses/kmer_substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "kmer_subst.tsv"), os.path.join(self.outputDir, "kmer_substitution"), analysis))        
