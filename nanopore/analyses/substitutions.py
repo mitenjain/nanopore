@@ -73,6 +73,7 @@ class Substitutions(AbstractAnalysis):
     """Calculates stats on substitutions
     """
     def run(self, kmer=5):
+        AbstractAnalysis.run(self) #Call base method to do some logging
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sM = SubstitutionMatrix() #The thing to store the counts in
@@ -123,4 +124,4 @@ class Substitutions(AbstractAnalysis):
                     line.append("NA")
             outf.write("\t".join(line)); outf.write("\n")
         outf.close()
-        system("Rscript nanopore/analyses/kmer_substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "kmer_subst.tsv"), os.path.join(self.outputDir, "kmer_substitution"), analysis))        
+        system("Rscript nanopore/analyses/kmer_substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "kmer_subst.tsv"), os.path.join(self.outputDir, "kmer_substitution"), analysis))

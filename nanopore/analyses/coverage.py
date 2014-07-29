@@ -103,6 +103,7 @@ class LocalCoverage(AbstractAnalysis):
     """Calculates coverage, treating alignments as local alignments.
     """
     def run(self, globalAlignment=False):
+        AbstractAnalysis.run(self) #Call base method to do some logging
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sam = pysam.Samfile(self.samFile, "r" )

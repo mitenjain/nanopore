@@ -44,6 +44,7 @@ class Indels(AbstractAnalysis):
     """Calculates stats on indels.
     """
     def run(self):
+        AbstractAnalysis.run(self) #Call base method to do some logging
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sam = pysam.Samfile(self.samFile, "r" )

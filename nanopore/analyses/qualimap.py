@@ -6,6 +6,7 @@ import pysam
 
 class QualiMap(AbstractAnalysis):
     def run(self):
+        AbstractAnalysis.run(self) #Call base method to do some logging
         localBamFile = os.path.join(self.getLocalTempDir(), "mapping.bam")
         localSortedBamFile = os.path.join(self.getLocalTempDir(), "mapping.sorted")
         samToBamFile(self.samFile, localBamFile)

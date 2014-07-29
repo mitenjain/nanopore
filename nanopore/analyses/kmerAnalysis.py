@@ -43,9 +43,11 @@ class KmerAnalysis(AbstractAnalysis):
                 #ignore padding as well
                 continue
         return ("".join(read).upper(), "".join(ref).upper())
+    
     def run(self, kmer_size=5):
         """Run karen's pipeline.
         """
+        AbstractAnalysis.run(self) #Call base method to do some logging
         self.ref = getFastaDictionary(self.referenceFastaFile)
         outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
 	outf = open(os.path.join(self.outputDir, "test"), "w")
