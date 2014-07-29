@@ -64,6 +64,7 @@ class AlignedPair:
         """
         readOffset = getAbsoluteReadOffset(alignedRead, refSeq, readSeq)
         pPair = None
+        assert len(alignedRead.seq) <= len(readSeq)
         for readPos, refPos in alignedRead.aligned_pairs: #Iterate over the block
             if readPos != None and refPos != None:
                 assert refPos >= alignedRead.pos and refPos < alignedRead.aend
@@ -72,7 +73,7 @@ class AlignedPair:
                     continue
                 aP = AlignedPair(refPos, refSeq, abs(readOffset + readPos), alignedRead.is_reverse, readSeq, pPair)
                 if aP.getReadBase().upper() != alignedRead.query[readPos].upper():
-                    logger.critical("Detected a discrepancy between the absolute read sequence and the aligned read sequence. Bases: %s %s, read-position: %s, is reversed: %s, absolute read offset: %s, length absolute read sequence %s, length aligned read sequence %s, length aligned read sequence plus soft clipping %s, cigar string %s" % (aP.getReadBase().upper(), alignedRead.query[readPos].upper(), readPos, alignedRead.is_reverse, readOffset, len(readSeq), len(alignedRead.query), len(alignedRead.seq), alignedRead.cigarstring))
+                    logger.critical("Detected a discrepancy between the absolute read sequence and the aligned read sequence. Bases: %s %s, read-position: %s, is reversed: %s, absolute read offset: %s, length absolute read sequence %s, length aligned read sequence %s, length aligned read sequence plus soft clipping %s, read name: %s, cigar string %s" % (aP.getReadBase().upper(), alignedRead.query[readPos].upper(), readPos, alignedRead.is_reverse, readOffset, len(readSeq), len(alignedRead.query), len(alignedRead.seq), alignedRead.qname, alignedRead.cigarstring))
                 assert aP.getReadBase().upper() == alignedRead.query[readPos].upper()
                 pPair = aP
                 yield aP
@@ -122,7 +123,13 @@ def getFastaDictionary(fastaFile):
 def getFastqDictionary(fastqFile):
     """Returns a dictionary of the first words of fastq headers to their corresponding fastq sequence
     """
-    return dict([ (name.split()[0], seq) for name, seq, quals in fastqRead(open(fastqFile, 'r'))]) #Hash of names to sequences
+    d = {}
+    for name, seq, quals in fastqRead(open(fastqFile, 'r')):
+        key = name.split()[0]
+        assert key not in d
+        d[key] = seq
+    return d
+    #return dict([ (name.split()[0], seq) for name, seq, quals in fastqRead(open(fastqFile, 'r'))]) #Hash of names to sequences
 
 def samIterator(sam):
     """Creates an iterator over the aligned reads in a sam file, filtering out
