@@ -3,6 +3,7 @@ from optparse import OptionParser
 from jobTree.scriptTree.target import Target 
 from jobTree.scriptTree.stack import Stack
 from jobTree.src.bioio import getLogLevelString, isNewer, logger, setLoggingFromOptions
+from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
 from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign
@@ -27,11 +28,6 @@ analyses = [ Substitutions, LocalCoverage, GlobalCoverage, Indels, AlignmentUnce
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
-    if not os.path.exists(outputDir): #If the output dir doesn't yet exist create it
-        os.mkdir(outputDir)
-        target.logToMaster("Creating output dir: %s" % outputDir)
-    else:
-        target.logToMaster("Root output dir already exists: %s" % outputDir)
     for readFastaFile in readFastaFiles:
         for referenceFastaFile in referenceFastaFiles:
             for mapper in mappers:
@@ -74,11 +70,26 @@ def main():
     #MutateReference(workingDir)
     # call read sampler script; samples 75, 50, and 25% reads
     #SampleReads(workingDir)
-
-    #Assign the input files
-    readFastqFiles = [ os.path.join(workingDir, "readFastqFiles", i) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
-    referenceFastaFiles = [ os.path.join(workingDir, "referenceFastaFiles", i) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if ".fa" in i or ".fasta" in i ] 
+    
+    #Create (if necessary) the output dir
     outputDir = os.path.join(workingDir, "output")
+    if not os.path.exists(outputDir):
+        logger.info("Creating output dir: %s" % outputDir)
+        os.mkdir(outputDir)
+    else:
+        logger.info("Root output dir already exists: %s" % outputDir)
+
+    #Assign/process (uniquify the names of) the input read fastq files
+    processedFastqFiles = os.path.join(outputDir, "processedReadFastqFiles")
+    if not os.path.exists(processedFastqFiles):
+        os.mkdir(processedFastqFiles)
+    readFastqFiles = [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", i), os.path.join(processedFastqFiles, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
+        
+    #Assign/process (uniquify the names of) the input reference fasta files
+    processedFastaFiles = os.path.join(outputDir, "processedReferenceFastaFiles")
+    if not os.path.exists(processedFastaFiles):
+        os.mkdir(processedFastaFiles)
+    referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if ".fa" in i or ".fasta" in i ]
     
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)

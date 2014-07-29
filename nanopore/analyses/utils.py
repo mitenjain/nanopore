@@ -1,5 +1,5 @@
 import pysam
-from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, cigarRead, logger
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, fastqWrite, cigarRead, logger
 import os
 import sys
 
@@ -118,18 +118,42 @@ def samToBamFile(samInputFile, bamOutputFile):
 def getFastaDictionary(fastaFile):
     """Returns a dictionary of the first words of fasta headers to their corresponding fasta sequence
     """
-    return dict([ (name.split()[0], seq) for name, seq in fastaRead(open(fastaFile, 'r'))]) #Hash of names to sequences
+    names = map(lambda x : x[0].split()[0], fastaRead(open(fastaFile, 'r')))
+    assert len(names) == len(set(names)) #Check all the names are unique
+    return dict(map(lambda x : (x[0].split()[0], x[1]), fastaRead(open(fastaFile, 'r')))) #Hash of names to sequences
 
 def getFastqDictionary(fastqFile):
     """Returns a dictionary of the first words of fastq headers to their corresponding fastq sequence
     """
-    d = {}
-    for name, seq, quals in fastqRead(open(fastqFile, 'r')):
-        key = name.split()[0]
-        assert key not in d
-        d[key] = seq
-    return d
-    #return dict([ (name.split()[0], seq) for name, seq, quals in fastqRead(open(fastqFile, 'r'))]) #Hash of names to sequences
+    names = map(lambda x : x[0].split()[0], fastqRead(open(fastqFile, 'r')))
+    assert len(names) == len(set(names)) #Check all the names are unique
+    return dict(map(lambda x : (x[0].split()[0], x[1]), fastqRead(open(fastqFile, 'r')))) #Hash of names to sequences
+
+def makeFastaSequenceNamesUnique(inputFastaFile, outputFastaFile):
+    """Makes a fasta file with unique names
+    """
+    names = set()
+    fileHandle = open(outputFastaFile, 'w')
+    for name, seq in fastaRead(open(inputFastaFile, 'r')):
+        while name in names:
+            name += "i"
+        names.add(name)
+        fastaWrite(fileHandle, name, seq)
+    fileHandle.close()
+    return outputFastaFile
+
+def makeFastqSequenceNamesUnique(inputFastqFile, outputFastqFile):
+    """Makes a fastq file with unique names
+    """
+    names = set()
+    fileHandle = open(outputFastqFile, 'w')
+    for name, seq, quals in fastqRead(open(inputFastqFile, 'r')):
+        while name in names:
+            name += "i"
+        names.add(name)
+        fastqWrite(fileHandle, name, seq, quals)
+    fileHandle.close()
+    return outputFastqFile
 
 def samIterator(sam):
     """Creates an iterator over the aligned reads in a sam file, filtering out
