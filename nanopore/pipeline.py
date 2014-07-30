@@ -23,18 +23,25 @@ from nanopore.analyses.mutate_reference import MutateReference
 from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 
+from nanopore.metaAnalyses.mapperSummary import MapperSummary
+
 mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
 analyses = [ Substitutions, LocalCoverage, GlobalCoverage, Indels, AlignmentUncertainty, FastQC, QualiMap, KmerAnalysis, Consensus ]
+metaAnalyses = [ MapperSummary ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
-def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, outputDir):
+def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
+    experiments = []
     for readFastaFile in readFastaFiles:
         for referenceFastaFile in referenceFastaFiles:
             for mapper in mappers:
-                target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, \
-                args=(readFastaFile, referenceFastaFile, mapper, analyses,
-                      os.path.join(outputDir, "experiment_%s_%s_%s" % \
-                        (os.path.split(readFastaFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__)))))
+                experimentDir = os.path.join(outputDir, "experiment_%s_%s_%s" % \
+                        (os.path.split(readFastaFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__))
+                experiment = (readFastaFile, referenceFastaFile, mapper, analyses,
+                      experimentDir)
+                target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
+                experiments.append(experiment)
+    target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
 
 def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
@@ -54,6 +61,13 @@ def runAnalyses(target, readFastaFile, referenceFastaFile, samFile, analyses, ex
         if not os.path.exists(analysisDir):
             os.mkdir(analysisDir)
         target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
+    
+def runMetaAnalyses(target, metaAnalyses, outputDir, experiments):
+    for metaAnalysis in metaAnalyses:
+        metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + metaAnalysis.__name__)
+        if not os.path.exists(metaAnalysisDir):
+            os.mkdir(metaAnalysisDir)
+        target.addChildTarget(metaAnalysis(metaAnalysisDir, experiments))
 
 def main():
     #Parse the inputs args/options
@@ -101,7 +115,7 @@ def main():
         logger.info("Got the following reference fasta files: %s" % referenceFastaFile)
     
     #This line invokes jobTree  
-    i = Stack(Target.makeTargetFn(setupExperiments, args=(readFastqFiles, referenceFastaFiles, mappers, analyses, outputDir))).startJobTree(options) 
+    i = Stack(Target.makeTargetFn(setupExperiments, args=(readFastqFiles, referenceFastaFiles, mappers, analyses, metaAnalyses, outputDir))).startJobTree(options) 
     
     if i != 0:
         raise RuntimeError("Got failed jobs")

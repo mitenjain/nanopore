@@ -163,7 +163,7 @@ def normaliseQualValues(inputFastqFile, outputFastqFile):
     fileHandle = open(outputFastqFile, 'w')
     for name, seq, quals in fastqRead(open(inputFastqFile, 'r')):
         if quals == None:
-            quals = '*' * len(seq)
+            quals = [33] * len(seq)
         fastqWrite(fileHandle, name, seq, quals)
     fileHandle.close()
     return outputFastqFile
