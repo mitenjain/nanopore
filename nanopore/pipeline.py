@@ -3,6 +3,8 @@ from optparse import OptionParser
 from jobTree.scriptTree.target import Target 
 from jobTree.scriptTree.stack import Stack
 from jobTree.src.bioio import getLogLevelString, isNewer, logger, setLoggingFromOptions
+from nanopore.analyses.abstractAnalysis import AbstractAnalysis
+
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
@@ -37,8 +39,7 @@ def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analy
             for mapper in mappers:
                 experimentDir = os.path.join(outputDir, "experiment_%s_%s_%s" % \
                         (os.path.split(readFastaFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__))
-                experiment = (readFastaFile, referenceFastaFile, mapper, analyses,
-                      experimentDir)
+                experiment = (readFastaFile, referenceFastaFile, mapper, analyses, experimentDir)
                 target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
                 experiments.append(experiment)
     target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
@@ -50,18 +51,28 @@ def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, 
     else:
         target.logToMaster("Experiment dir already exists: %s" % experimentDir)
     samFile = os.path.join(experimentDir, "mapping.sam")
-    if (not os.path.exists(samFile)) or isNewer(readFastaFile, samFile) or isNewer(referenceFastaFile, samFile):
+    remapped = False
+    if not os.path.exists(samFile):
+        target.logToMaster("Starting mapper %s for reference file %s and read file %s" % (mapper.__name__, referenceFastaFile, readFastaFile))
         target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile))
-    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, referenceFastaFile, samFile, analyses, experimentDir))) 
+        remapped = True
+    else:
+        target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastaFile))
+    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, referenceFastaFile, samFile, analyses, experimentDir, remapped))) 
 
-def runAnalyses(target, readFastaFile, referenceFastaFile, samFile, analyses, experimentDir):
+def runAnalyses(target, readFastaFile, referenceFastaFile, samFile, analyses, experimentDir, remapped):
     for analysis in analyses:
         analysisDir = os.path.join(experimentDir, "analysis_" + analysis.__name__)
         #if not os.path.exists(analysisDir) or isNewer(readFastaFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
         if not os.path.exists(analysisDir):
             os.mkdir(analysisDir)
-        target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
-    
+        if remapped or not AbstractAnalysis.isFinished(analysisDir):
+            target.logToMaster("Starting analysis %s for reference file %s and read file %s" % (analysis.__name__, referenceFastaFile, readFastaFile))
+            AbstractAnalysis.reset(analysisDir)
+            target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
+        else:
+            target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastaFile))
+
 def runMetaAnalyses(target, metaAnalyses, outputDir, experiments):
     for metaAnalysis in metaAnalyses:
         metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + metaAnalysis.__name__)

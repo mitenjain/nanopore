@@ -13,7 +13,7 @@ class IndelCounter():
         self.blockLengths = []
         self.readSeqName = readSeqName
         self.refSeqName = refSeqName
-    
+
     def addReadAlignment(self, alignedRead, refSeq, readSeq):
         blockLength = 0
         for aP in AlignedPair.iterator(alignedRead, refSeq, readSeq): 
@@ -27,7 +27,7 @@ class IndelCounter():
                 blockLength = 1
             else:
                 blockLength += 1
-    
+
     def getXML(self):
         return ET.Element("indels", { "refSeqName":self.refSeqName, 
                                      "readSeqName":self.readSeqName,
@@ -39,7 +39,7 @@ class IndelCounter():
                                      "medianReadDeletionLength":str(numpy.median(self.readDeletionLengths)),
                                      "readInsertionLengths":" ".join([ str(i) for i in self.readInsertionLengths ]),
                                      "readDeletionLengths":" ".join([ str(i) for i in self.readDeletionLengths ]) })
-    
+
 class Indels(AbstractAnalysis):
     """Calculates stats on indels.
     """
@@ -67,3 +67,4 @@ class Indels(AbstractAnalysis):
                 outf.write("{}\t{}\n".format(key, str(stats[key])))
         outf.close()
         system("Rscript nanopore/analyses/indel_plot.R {} {} {} {}".format(os.path.join(self.outputDir, "stats.tsv"), os.path.join(self.getLocalTempDir(), "r_insert.txt"), os.path.join(self.getLocalTempDir(), "r_delete.txt"), os.path.join(self.outputDir, "indel_hist.pdf")))
+        self.finish()

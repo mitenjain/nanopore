@@ -206,7 +206,7 @@ def mergeChainedAlignedReads(chainedAlignedReads, refSequence, readSequence):
     #cAR.isize=0
     #cAR.qual = "<" * len(readSequence)
     #cAR.tags = aR.tags 
-    
+    cAR.rnext = -1
     cAR.pos = 0
     cAR.is_reverse = aR.is_reverse
     if cAR.is_reverse:

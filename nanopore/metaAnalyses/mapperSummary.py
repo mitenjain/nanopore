@@ -18,4 +18,3 @@ class MapperSummary(AbstractMetaAnalysis):
                                globalCoverageXML.attrib["medianidentity"],
                                alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"]]))
         fH.close()
-        

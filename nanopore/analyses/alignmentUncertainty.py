@@ -62,4 +62,6 @@ class AlignmentUncertainty(AbstractAnalysis):
             outf.write("\t".join([ str(i) for i in avgPosteriorMatchProbabilityInCigar ])); outf.write("\n")
             outf.close()
             system("Rscript nanopore/analyses/match_hist.R {} {}".format(os.path.join(self.getLocalTempDir(), "tmp_uncertainty"), os.path.join(self.outputDir, "posterior_prob_hist.pdf")))
+        #Indicate everything is all done
+        self.finish()
 

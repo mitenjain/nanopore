@@ -55,14 +55,16 @@ class Consensus(AbstractAnalysis):
         pysam.sort(localBamFile, localSortedBamFile)
         pysam.index(localSortedBamFile + ".bam")
         pysam.faidx(self.referenceFastaFile)
- 
-	consensus_vcf = os.path.join(self.outputDir, "Consensus.vcf")
+        
+        consensus_vcf = os.path.join(self.outputDir, "Consensus.vcf")
         consensus_fastq = os.path.join(self.outputDir, "Consensus.fastq")
 
-	system("samtools mpileup -uf %s %s | bcftools view -cg - > %s" \
+        system("samtools mpileup -uf %s %s | bcftools view -cg - > %s" \
                 % (self.referenceFastaFile, localSortedBamFile + ".bam", consensus_vcf))
-	system("vcfutils.pl vcf2fq %s > %s" % (consensus_vcf, consensus_fastq))
-	system("rm -rf %s" % (self.referenceFastaFile + ".fai"))
+        system("vcfutils.pl vcf2fq %s > %s" % (consensus_vcf, consensus_fastq))
+        system("rm -rf %s" % (self.referenceFastaFile + ".fai"))
+        
+        self.finish()
 
         #formatted_consensus_fastq = os.path.join(getLocalTempDir(), "Consensus.fastq")
         

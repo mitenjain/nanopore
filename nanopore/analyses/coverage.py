@@ -130,6 +130,7 @@ class LocalCoverage(AbstractAnalysis):
                         outf.write("\n")
                     outf.close()
                     system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, outputName + ".tsv"), os.path.join(self.outputDir, outputName + ".pdf")))
+        self.finish()
 
 class GlobalCoverage(LocalCoverage):
     def run(self):

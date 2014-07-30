@@ -12,3 +12,4 @@ class QualiMap(AbstractAnalysis):
         samToBamFile(self.samFile, localBamFile)
         pysam.sort(localBamFile, localSortedBamFile)
         system("qualimap bamqc -bam %s -outdir %s" % (localSortedBamFile + ".bam", self.outputDir))
+        self.finish()

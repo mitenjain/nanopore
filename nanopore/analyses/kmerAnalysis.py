@@ -50,8 +50,8 @@ class KmerAnalysis(AbstractAnalysis):
         AbstractAnalysis.run(self) #Call base method to do some logging
         self.ref = getFastaDictionary(self.referenceFastaFile)
         outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
-	outf = open(os.path.join(self.outputDir, "test"), "w")
-	sam = pysam.Samfile(self.samFile, "r" )
+        outf = open(os.path.join(self.outputDir, "test"), "w")
+        sam = pysam.Samfile(self.samFile, "r" )
         for record in samIterator(sam):
             rseq = self.ref[sam.getrname(record.tid)]
             seq, ref = self.convert_sam_record(record, rseq)
@@ -67,3 +67,4 @@ class KmerAnalysis(AbstractAnalysis):
         system("nanopore/analyses/kmer.pl {} {} {}".format(self.referenceFastaFile, str(kmer_size), os.path.join(self.outputDir, "ref_" + str(kmer_size) + "mer")))
         system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.outputDir, "ref_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, "read_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out")))
         system("nanopore/analyses/kmer_indel.pl {} {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tab_delim_align"), self.referenceFastaFile, os.path.join(self.outputDir, str(kmer_size) + "mer_deletions.txt"), os.path.join(self.outputDir, str(kmer_size) + "mer_insertions.txt"), str(kmer_size)))
+        self.finish()

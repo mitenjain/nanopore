@@ -125,3 +125,4 @@ class Substitutions(AbstractAnalysis):
             outf.write("\t".join(line)); outf.write("\n")
         outf.close()
         system("Rscript nanopore/analyses/kmer_substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "kmer_subst.tsv"), os.path.join(self.outputDir, "kmer_substitution"), analysis))
+        self.finish()
