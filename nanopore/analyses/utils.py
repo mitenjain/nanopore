@@ -153,9 +153,6 @@ def makeFastqSequenceNamesUnique(inputFastqFile, outputFastqFile):
             logger.critical("Got a duplicate fastq sequence name: %s" % name)
             name += "i"
         names.add(name)
-        #We do this because lastz does not like to have mismatched numbers of qual values
-        if quals == None:
-            quals = '!' * len(seq)
         fastqWrite(fileHandle, name, seq, quals)
     fileHandle.close()
     return outputFastqFile
@@ -166,7 +163,7 @@ def normaliseQualValues(inputFastqFile, outputFastqFile):
     fileHandle = open(outputFastqFile, 'w')
     for name, seq, quals in fastqRead(open(inputFastqFile, 'r')):
         if quals == None:
-            quals = '!' * len(seq)
+            quals = '*' * len(seq)
         fastqWrite(fileHandle, name, seq, quals)
     fileHandle.close()
     return outputFastqFile
