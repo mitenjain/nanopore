@@ -6,41 +6,52 @@ import pysam
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml, system
 
-class CoverageCounter:
+class ReadAlignmentCoverageCounter:
     """Counts coverage from a pairwise alignment.
     Global alignment means the entire reference and read sequences (trailing indels).
     """
-    def __init__(self, readSeqName, refSeqName, globalAlignment=False):
+    def __init__(self, readSeqName, readSeq, refSeqName, refSeq, alignedRead, globalAlignment=False):
         self.matches = 0
         self.mismatches = 0
         self.ns = 0
         self.totalReadInsertionLength = 0
+        self.totalReadInsertions = 0
         self.totalReadDeletionLength = 0
+        self.totalReadDeletions = 0
         self.readSeqName = readSeqName
+        self.readSeq = readSeq
         self.refSeqName = refSeqName
+        self.refSeq = refSeq
         self.globalAlignment = globalAlignment
         
-    def addReadAlignment(self, alignedRead, refSeq, readSeq):
+        #Now process the read alignment
         totalReadInsertionLength, totalReadDeletionLength = 0, 0
-        for aP in AlignedPair.iterator(alignedRead, refSeq, readSeq): 
+        for aP in AlignedPair.iterator(alignedRead, self.refSeq, self.readSeq): 
             if aP.isMatch():
                 self.matches += 1
             elif aP.isMismatch():
                 self.mismatches += 1
             else:
                 self.ns += 1
-            totalReadInsertionLength += aP.getPrecedingReadInsertionLength(self.globalAlignment)
-            totalReadDeletionLength += aP.getPrecedingReadDeletionLength(self.globalAlignment)
+            if aP.getPrecedingReadInsertionLength(self.globalAlignment) > 0:
+                self.totalReadInsertions += 1
+                totalReadInsertionLength += aP.getPrecedingReadInsertionLength(self.globalAlignment)
+            if aP.getPrecedingReadDeletionLength(self.globalAlignment) > 0:
+                self.totalReadDeletions += aP.getPrecedingReadDeletionLength(self.globalAlignment)
+                totalReadDeletionLength += aP.getPrecedingReadDeletionLength(self.globalAlignment)
         if self.globalAlignment: #If global alignment account for any trailing indels
-            assert len(refSeq) - aP.refPos - 1 >= 0
-            self.totalReadDeletionLength += len(refSeq) - aP.refPos - 1
+            assert len(self.refSeq) - aP.refPos - 1 >= 0
+            if len(self.refSeq) - aP.refPos - 1 > 0:
+                self.totalReadDeletions += 1
+                self.totalReadDeletionLength += len(self.refSeq) - aP.refPos - 1
             if alignedRead.is_reverse:
+                self.totalReadInsertions += 1
                 totalReadInsertionLength += aP.readPos
             else:
-                assert len(readSeq) - aP.readPos - 1 >= 0
-                totalReadInsertionLength += len(readSeq) - aP.readPos - 1
-        assert totalReadInsertionLength <= len(readSeq)
-        assert totalReadDeletionLength <= len(refSeq)
+                assert len(self.readSeq) - aP.readPos - 1 >= 0
+                totalReadInsertionLength += len(self.readSeq) - aP.readPos - 1
+        assert totalReadInsertionLength <= len(self.readSeq)
+        assert totalReadDeletionLength <= len(self.refSeq)
         self.totalReadInsertionLength += totalReadInsertionLength
         self.totalReadDeletionLength += totalReadDeletionLength
             
@@ -50,53 +61,49 @@ class CoverageCounter:
     def referenceCoverage(self):
         return AbstractAnalysis.formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadDeletionLength)
     
-    def alignmentCoverage(self):
-        return AbstractAnalysis.formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadInsertionLength + self.totalReadDeletionLength)
-    
     def identity(self):
         return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches)
     
-    def readIdentity(self):
-        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches + self.totalReadInsertionLength)
+    def deletionsPerReadBase(self):
+        return AbstractAnalysis.formatRatio(self.totalReadDeletions, len(self.readSeq))
     
-    def referenceIdentity(self):
-        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches + self.totalReadDeletionLength)
+    def insertionsPerReadBase(self):
+        return AbstractAnalysis.formatRatio(self.totalReadInsertions, len(self.readSeq))
     
-    def alignmentIdentity(self):
-        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches + self.totalReadInsertionLength + self.totalReadDeletionLength)
-    
-    def alignedReferenceLength(self):
-        return self.matches + self.mismatches + self.totalReadDeletionLength
-    
-    def alignedReadLength(self):
-        return self.matches + self.mismatches + self.totalReadInsertionLength
+    def readLength(self):
+        return len(self.readSeq)
     
     def getXML(self):
-        return ET.Element("coverage", { "refSeqName":self.refSeqName, "readSeqName":self.readSeqName, "readCoverage":str(self.readCoverage()), "referenceCoverage":str(self.referenceCoverage()), 
-                                "alignmentCoverage":str(self.alignmentCoverage()), "identity":str(self.identity()), 
-                                "readIdentity":str(self.readIdentity()), "referenceIdentity":str(self.referenceIdentity()), 
-                                "alignmentIdentity":str(self.alignmentIdentity()),
-                                "alignedReferenceLength":str(self.alignedReferenceLength()),
-                                "alignedReadLength":str(self.alignedReadLength()),
-                                "matches":str(self.matches), "mismatches":str(self.mismatches), "ns":str(self.ns), 
-                                "totalReadInsertionLength":str(self.totalReadInsertionLength),
-                                "totalReadDeletionLength":str(self.totalReadDeletionLength) })
+        return ET.Element("readAlignmentCoverage", { "refSeqName":self.refSeqName, 
+                                       "readSeqName":self.readSeqName, "readLength":str(self.readLength()),
+                                       "readCoverage":str(self.readCoverage()), 
+                                       "referenceCoverage":str(self.referenceCoverage()), 
+                                "identity":str(self.identity()), 
+                                "insertionsPerReadBase":str(self.insertionsPerReadBase()),
+                                "deletionsPerReadBase":str(self.deletionsPerReadBase()) })
 
-def getAggregateCoverageStats(readCoverages, tagName, refSequences, readSequences, readsToReadCoverages):
-    """Calculates aggregate stats across a set of read alignments
+def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, readSequences, readsToReadAlignmentCoverages):
+    """Calculates aggregate stats across a set of read alignments, plots distributions.
     """
+    mappedReadLengths = [ len(readSequences[i]) for i in readSequences.keys() if i in readsToReadAlignmentCoverages ]
+    unmappedReadLengths = [ len(readSequences[i]) for i in readSequences.keys() if i not in readsToReadAlignmentCoverages ]
     def stats(fnStringName):
-        l = map(lambda x : getattr(x, fnStringName)(), readCoverages)
+        l = map(lambda x : getattr(x, fnStringName)(), readAlignmentCoverages)
         l.sort()
         return l[0], numpy.average(l), numpy.median(l), l[-1], " ".join(map(str, l))
-    attribs = { "numberOfReadAlignments":str(len(readCoverages)), "numberOfReads":str(len(readSequences)), 
-               "numberOfReferenceSequences":str(len(refSequences)), "numberOfReadsWithoutAnyAlignment":str(len(readsToReadCoverages)) }
-    for fnStringName in "readCoverage", "referenceCoverage", "alignmentCoverage", "identity", "readIdentity", "referenceIdentity", "alignmentIdentity":
+    
+    attribs = { "numberOfReadAlignments":str(len(readAlignmentCoverages)), 
+                "numberOfReads":str(len(readSequences)), "numberOfReferenceSequences":str(len(refSequences)), 
+                "numberOfMappedReads":str(len(mappedReadLengths)), "mappedReadLengths":" ".join(map(str, mappedReadLengths)),
+                "numberOfUnmappedReads":str(len(unmappedReadLengths)), "unmappedReadLengths":" ".join(map(str, unmappedReadLengths)), }
+    
+    for fnStringName in "readCoverage", "referenceCoverage", "identity", "deletionsPerReadBase", "insertionsPerReadBase", "readLength":
         for attribName, value in zip([ "min" + fnStringName, "avg" + fnStringName, "median" + fnStringName, "max" + fnStringName, "distribution" + fnStringName ], list(stats(fnStringName))):
             attribs[attribName] = str(value)
+            
     parentNode = ET.Element(tagName, attribs)
-    for readCoverage in readCoverages:
-            parentNode.append(readCoverage.getXML())
+    for readAlignmentCoverage in readAlignmentCoverages:
+        parentNode.append(readAlignmentCoverage.getXML())
     return parentNode
 
 class LocalCoverage(AbstractAnalysis):
@@ -111,17 +118,30 @@ class LocalCoverage(AbstractAnalysis):
         for aR in samIterator(sam): #Iterate on the sam lines
             refSeq = refSequences[sam.getrname(aR.rname)]
             readSeq = readSequences[aR.qname]
-            coverageCounter = CoverageCounter(aR.qname, sam.getrname(aR.rname), globalAlignment=globalAlignment)
-            coverageCounter.addReadAlignment(aR, refSeq, readSeq)
+            readAlignmentCoverageCounter = ReadAlignmentCoverageCounter(aR.qname, readSeq, sam.getrname(aR.rname), refSeq, aR, globalAlignment)
             if aR.qname not in readsToReadCoverages:
                 readsToReadCoverages[aR.qname] = []
-            readsToReadCoverages[aR.qname].append(coverageCounter)
+            readsToReadCoverages[aR.qname].append(readAlignmentCoverageCounter)
         sam.close()
         #Write out the coverage info for differing subsets of the read alignments
         if len(readsToReadCoverages.values()) > 0:
             for readCoverages, outputName in [ (reduce(lambda x, y : x + y, readsToReadCoverages.values()), "coverage_all"), (map(lambda x : max(x, key=lambda y : y.readCoverage()), readsToReadCoverages.values()), "coverage_bestPerRead") ]:
                 parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences, readsToReadCoverages)
                 open(os.path.join(self.outputDir, outputName + ".xml"), 'w').write(prettyXml(parentNode))
+                
+                #Mapped/unmapped read length distributions
+                
+                ###Read coverage plot (x-axis: read coverage, y-axis: counts)
+                
+                ###Read coverage vs. read identity scatter density plot 
+                
+                ###Read coverage vs. read length scatter density plot 
+                
+                ###Read lengths vs. read identity scatter density plot 
+                
+                ###Read coverage vs. deletions+insertions per base scatter density plot 
+                
+                """
                 if len(readCoverages) > 0:
                     outf = open(os.path.join(self.outputDir, outputName + ".tsv"), "w")
                     outf.write("alignmentIdentity\talignmentCoverage\treadIdentity\treadCoverage\treferenceIdentity\treferenceCoverage\n")
@@ -130,6 +150,7 @@ class LocalCoverage(AbstractAnalysis):
                         outf.write("\n")
                     outf.close()
                     system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, outputName + ".tsv"), os.path.join(self.outputDir, outputName + ".pdf")))
+                """
         self.finish()
 
 class GlobalCoverage(LocalCoverage):
