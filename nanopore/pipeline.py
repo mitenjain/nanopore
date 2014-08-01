@@ -10,6 +10,7 @@ from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSeque
 #The following specify which mappers and analyses get run
 from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign
+from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign
 from nanopore.mappers.last import Last, LastChain, LastRealign
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign
 from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign
@@ -27,7 +28,7 @@ from nanopore.analyses.consensus import Consensus
 
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 
-mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
+mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
 analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, FastQC, QualiMap, Consensus ]
 metaAnalyses = [ CoverageSummary ]
 

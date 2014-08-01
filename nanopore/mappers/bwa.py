@@ -3,12 +3,11 @@ from sonLib.bioio import system
 import os
 
 class Bwa(AbstractMapper):
-    def run(self):
+    def run(self, args=""):
         localReferenceFastaFile = os.path.join(self.getLocalTempDir(), "ref.fa") #Because BWA builds these crufty index files, copy to a temporary directory
         system("cp %s %s" % (self.referenceFastaFile, localReferenceFastaFile))
         system("bwa index %s" % localReferenceFastaFile)
-        system("bwa mem -x pacbio %s %s > %s" % (localReferenceFastaFile, self.readFastqFile, self.outputSamFile))
-        
+        system("bwa mem %s %s %s > %s" % (args, localReferenceFastaFile, self.readFastqFile, self.outputSamFile))
 
 class BwaChain(Bwa):
     def run(self):
