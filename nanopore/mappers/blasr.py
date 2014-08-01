@@ -2,6 +2,7 @@ from nanopore.mappers.abstractMapper import AbstractMapper
 from nanopore.analyses.utils import getFastqDictionary
 from sonLib.bioio import system
 import os
+import pysam
 
 class Blasr(AbstractMapper):
     def run(self):
