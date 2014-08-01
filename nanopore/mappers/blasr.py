@@ -10,7 +10,7 @@ class Blasr(AbstractMapper):
         system("blasr %s %s -sam > %s" % (self.readFastqFile, self.referenceFastaFile, tempSamFile))
         #Blasr seems to corrupt the names of read sequences, so lets correct them.
         sam = pysam.Samfile(tempSamFile, "r" )
-        outputSam = pysam.Samfile(self.outputSamFile, "w", template=sam)
+        outputSam = pysam.Samfile(self.outputSamFile, "wh", template=sam)
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         for aR in sam: #Iterate on the sam lines and put into buckets by read
             if aR.qname not in readSequences:
