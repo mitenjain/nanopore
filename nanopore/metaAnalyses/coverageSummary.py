@@ -1,6 +1,7 @@
 from nanopore.metaAnalyses.abstractMetaAnalysis import AbstractMetaAnalysis
 import os
 import xml.etree.cElementTree as ET
+from jobTree.src.bioio import system
 
 class CoverageSummary(AbstractMetaAnalysis):
     """Calculates meta-coverage across all the samples.
@@ -8,8 +9,11 @@ class CoverageSummary(AbstractMetaAnalysis):
     def run(self):
         fH = open(os.path.join(self.outputDir, "summary.csv"), 'w')
         
-        fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability"]) + "\n")
+        fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
         
+        #tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
+        tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
+
         for readFastqFile in self.readFastqFiles:
             for referenceFastaFile in self.referenceFastaFiles:
                 ###Read coverage plot (x-axis: read coverage, y-axis: counts, series: mappers)
@@ -26,10 +30,14 @@ class CoverageSummary(AbstractMetaAnalysis):
                     analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
                     globalCoverageXML = ET.parse(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")).getroot()
                     alignmentUncertaintyXML = ET.parse(os.path.join(resultsDir, "analysis_AlignmentUncertainty", "alignmentUncertainty.xml")).getroot()
+                    tmp.write(",".join([mapper.__name__] + globalCoverageXML.attrib["distributionreadCoverage"].split()) + "\n")
                     fH.write(",".join([readFastqFile, referenceFastaFile, mapper.__name__,
                                globalCoverageXML.attrib["medianreadCoverage"], globalCoverageXML.attrib["medianreferenceCoverage"],
                                globalCoverageXML.attrib["medianidentity"], 
                                globalCoverageXML.attrib["mediandeletionsPerReadBase"],
                                globalCoverageXML.attrib["medianinsertionsPerReadBase"],
-                               alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"]]) + "\n")
+                               alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
+                               globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")
         fH.close()
+        tmp.close()
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(os.path.join(self.outputDir, "summary.csv"), os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "plots.pdf")))
