@@ -28,7 +28,7 @@ from nanopore.analyses.consensus import Consensus
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 
 mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
-analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis ] #, FastQC, QualiMap, Consensus ]
+analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, FastQC, QualiMap, Consensus ]
 metaAnalyses = [ CoverageSummary ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
