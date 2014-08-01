@@ -7,16 +7,18 @@ import xml.etree.cElementTree as ET
 from jobTree.src.bioio import reverseComplement, prettyXml, system 
 
 class IndelCounter():
-    def __init__(self, readSeqName, refSeqName):
+    def __init__(self, refSeqName, refSeq, readSeqName, readSeq, alignedRead):
         self.readInsertionLengths = []
         self.readDeletionLengths = []
         self.blockLengths = []
         self.readSeqName = readSeqName
+        self.readSeq = readSeq
         self.refSeqName = refSeqName
+        self.refSeq = refSeq
 
-    def addReadAlignment(self, alignedRead, refSeq, readSeq):
+        #Now add the aligned read
         blockLength = 0
-        for aP in AlignedPair.iterator(alignedRead, refSeq, readSeq): 
+        for aP in AlignedPair.iterator(alignedRead, self.refSeq, self.readSeq): 
             if aP.getPrecedingReadInsertionLength() > 0:
                 self.readInsertionLengths.append(aP.getPrecedingReadInsertionLength())
             if aP.getPrecedingReadDeletionLength() > 0:
@@ -30,15 +32,54 @@ class IndelCounter():
 
     def getXML(self):
         return ET.Element("indels", { "refSeqName":self.refSeqName, 
+                                      "refSeqLength":str(len(self.refSeq)),
                                      "readSeqName":self.readSeqName,
-                                     "totalReadInsertions":str(len(self.readInsertionLengths)),
-                                     "totalReadDeletions":str(len(self.readDeletionLengths)),
+                                     "readSeqLength":str(len(self.readSeq)),
+                                     "numberReadInsertions":str(len(self.readInsertionLengths)),
+                                     "numberReadDeletions":str(len(self.readDeletionLengths)),
                                      "avgReadInsertionLength":str(numpy.average(self.readInsertionLengths)),
                                      "avgReadDeletionLength":str(numpy.average(self.readDeletionLengths)),
                                      "medianReadInsertionLength":str(numpy.median(self.readInsertionLengths)),
                                      "medianReadDeletionLength":str(numpy.median(self.readDeletionLengths)),
                                      "readInsertionLengths":" ".join([ str(i) for i in self.readInsertionLengths ]),
                                      "readDeletionLengths":" ".join([ str(i) for i in self.readDeletionLengths ]) })
+
+def getAggregateIndelStats(indelCounters):
+    """Calculates aggregate stats across a set of read alignments.
+    """
+    
+    readInsertionLengths = reduce(lambda x, y : x + y, map(lambda ic : ic.readInsertionLengths, indelCounters))
+    readDeletionLengths = reduce(lambda x, y : x + y, map(lambda ic : ic.readDeletionLengths, indelCounters))
+    
+    attribs = { "numberOfReadAlignments":str(len(indelCounters)), 
+                "readInsertionLengths":" ".join(map(str, readInsertionLengths)),
+                "readDeletionLengths":" ".join(map(str, readDeletionLengths)) }
+    
+    readSequenceLengths = map(lambda ic : len(ic.readSeq), indelCounters)
+    
+    numberReadInsertions = map(lambda ic : len(ic.readInsertionLengths), indelCounters)
+    numberReadDeletions = map(lambda ic : len(ic.readDeletionLengths), indelCounters)
+    
+    medianReadInsertionLengths = map(lambda ic : numpy.median(ic.readInsertionLengths), indelCounters)
+    medianReadDeletionLengths = map(lambda ic : numpy.median(ic.readDeletionLengths), indelCounters)
+    
+    def stats(distribution):
+        distribution = distribution[:]
+        distribution.sort()
+        return distribution[0], numpy.average(distribution), numpy.median(distribution), distribution[-1], " ".join(map(str, distribution))
+    
+    for name, distribution in [("ReadSequenceLengths", readSequenceLengths),
+                               ("NumberReadInsertions", numberReadInsertions),
+                               ("NumberReadDeletions", numberReadDeletions),
+                               ("MedianReadInsertionLengths", medianReadInsertionLengths),
+                               ("MedianReadDeletionLengths", medianReadDeletionLengths) ]:
+        for attribName, value in zip([ "min" + name, "avg" + name, "median" + name, "max" + name, "distribution" + name ], list(stats(distribution))):
+            attribs[name] = str(value)
+            
+    parentNode = ET.Element("indels", attribs)
+    for indelCounter in indelCounters:
+        parentNode.append(indelCounter.getXML())
+    return parentNode
 
 class Indels(AbstractAnalysis):
     """Calculates stats on indels.
@@ -48,14 +89,25 @@ class Indels(AbstractAnalysis):
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sam = pysam.Samfile(self.samFile, "r" )
-        overallIndelCounter = IndelCounter("overall", "overall")
-        for aR in samIterator(sam): #Iterate on the sam lines
-            refSeq = refSequences[sam.getrname(aR.rname)]
-            readSeq = readSequences[aR.qname]
-            overallIndelCounter.addReadAlignment(aR, refSeq, readSeq)
+        indelCounters = map(lambda aR : IndelCounter(sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, readSequences[aR.qname], aR), samIterator(sam)) #Iterate on the sam lines
         sam.close()
         #Write out the substitution info
-        open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(overallIndelCounter.getXML()))
+        indelXML = getAggregateIndelStats(indelCounters)
+        open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(indelXML))
+        
+        #Plots:
+        
+        ##Read insertion lengths plot: x-axis insertion legnth, y-axis: frequency (see map(int, indelXML.attrib["readInsertionLengths].split()))
+        
+        ##Read deletion lengths plot: x-axis deletion length, y-axis: frequency (see map(int,indelXML.attrib["readDeletionLengths].split()))
+        
+        ##Number of read insertions vs. read length (map(int, indelXML.attrib["distributionReadSequenceLengths"].split()) vs. map(int, indelXML.attrib["distributionNumberReadInsertions"].split())
+        
+        ##Number of read deletion vs. read length
+        
+        ##Distribution of median insertion lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
+        
+        """
         stats = dict(ET.parse(os.path.join(self.outputDir, "indels.xml")).findall(".")[0].items())
         outf = open(os.path.join(self.outputDir, "stats.tsv"), "w")
         for key in stats:
@@ -67,4 +119,6 @@ class Indels(AbstractAnalysis):
                 outf.write("{}\t{}\n".format(key, str(stats[key])))
         outf.close()
         system("Rscript nanopore/analyses/indel_plot.R {} {} {} {}".format(os.path.join(self.outputDir, "stats.tsv"), os.path.join(self.getLocalTempDir(), "r_insert.txt"), os.path.join(self.getLocalTempDir(), "r_delete.txt"), os.path.join(self.outputDir, "indel_hist.pdf")))
-        self.finish()
+        """
+        
+        self.finish() #Indicates the batch is done
