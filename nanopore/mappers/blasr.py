@@ -12,7 +12,7 @@ class Blasr(AbstractMapper):
         sam = pysam.Samfile(tempSamFile, "r" )
         outputSam = pysam.Samfile(self.outputSamFile, "w", template=sam)
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
-        for aR in samIterator(sam): #Iterate on the sam lines and put into buckets by read
+        for aR in sam: #Iterate on the sam lines and put into buckets by read
             if aR.qname not in readSequences:
                 newName = '/'.join(aR.qname.split('/')[:-1])
                 if newName not in readSequences:
