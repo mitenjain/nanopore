@@ -1,4 +1,4 @@
-Copyright (C) 2014 by Benedict Paten (benedictpaten@gmail.com), Miten Jain, Karen Miga
+Copyright (C) 2014 by Benedict Paten (benedictpaten@gmail.com), Miten Jain, Ian Fiddes, Karen Miga
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
