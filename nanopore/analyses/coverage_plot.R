@@ -10,7 +10,7 @@ data <- lapply(data, as.numeric)
 
 library(lattice)
 
-if ( length(data$MappedReadLengths) > 1 ) {
+if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1) {
     #open a pdf
     pdf(args[2])
     par(mfrow=c(2,2))
