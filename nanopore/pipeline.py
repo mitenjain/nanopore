@@ -109,13 +109,13 @@ def main():
     if not os.path.exists(processedFastqFiles):
         os.mkdir(processedFastqFiles)
     #This should be fixed to work with odd numbers of qual values, though this may be masking bug in input seqs.
-    readFastqFiles = [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", i), os.path.join(processedFastqFiles, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
+    readFastqFiles = [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", i), os.path.join(processedFastqFiles, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if (".fq" in i and i[-3:] == '.fq') or (".fastq" in i and i[-6:] == '.fastq') ]
         
     #Assign/process (uniquify the names of) the input reference fasta files
     processedFastaFiles = os.path.join(outputDir, "processedReferenceFastaFiles")
     if not os.path.exists(processedFastaFiles):
         os.mkdir(processedFastaFiles)
-    referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if ".fa" in i or ".fasta" in i ]
+    referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if (".fa" in i and i[-3:] == '.fa') or (".fasta" in i and i[-6:] == '.fasta') ]
     
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)

@@ -5,9 +5,9 @@ import os
 import pysam
 
 class Blasr(AbstractMapper):
-    def run(self):
+    def run(self, args=""):
         tempSamFile = os.path.join(self.getLocalTempDir(), "temp.sam")
-        system("blasr %s %s -sam > %s" % (self.readFastqFile, self.referenceFastaFile, tempSamFile))
+        system("blasr %s %s -sam -clipping hard %s > %s" % (self.readFastqFile, self.referenceFastaFile, args, tempSamFile))
         #Blasr seems to corrupt the names of read sequences, so lets correct them.
         sam = pysam.Samfile(tempSamFile, "r" )
         outputSam = pysam.Samfile(self.outputSamFile, "wh", template=sam)
