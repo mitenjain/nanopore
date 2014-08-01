@@ -128,29 +128,16 @@ class LocalCoverage(AbstractAnalysis):
             for readCoverages, outputName in [ (reduce(lambda x, y : x + y, readsToReadCoverages.values()), "coverage_all"), (map(lambda x : max(x, key=lambda y : y.readCoverage()), readsToReadCoverages.values()), "coverage_bestPerRead") ]:
                 parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences, readsToReadCoverages)
                 open(os.path.join(self.outputDir, outputName + ".xml"), 'w').write(prettyXml(parentNode))
-                
-                #Mapped/unmapped read length distributions
-                
-                ###Read coverage plot (x-axis: read coverage, y-axis: counts)
-                
-                ###Read coverage vs. read identity scatter density plot 
-                
-                ###Read coverage vs. read length scatter density plot 
-                
-                ###Read lengths vs. read identity scatter density plot 
-                
-                ###Read coverage vs. deletions+insertions per base scatter density plot 
-                
-                """
-                if len(readCoverages) > 0:
-                    outf = open(os.path.join(self.outputDir, outputName + ".tsv"), "w")
-                    outf.write("alignmentIdentity\talignmentCoverage\treadIdentity\treadCoverage\treferenceIdentity\treferenceCoverage\n")
-                    for readCoverage in readCoverages:
-                        outf.write("\t".join(map(str, [readCoverage.alignmentIdentity(), readCoverage.alignmentCoverage(), readCoverage.readIdentity(), readCoverage.readCoverage(), readCoverage.referenceIdentity(), readCoverage.referenceIdentity()])))
-                        outf.write("\n")
-                    outf.close()
-                    system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, outputName + ".tsv"), os.path.join(self.outputDir, outputName + ".pdf")))
-                """
+                #this is a ugly file format with each line being a different data type - column length is variable
+                outf = open(os.path.join(self.outputDir, outputName + ".txt"), "w")
+                outf.write("MappedReadLengths " + parentNode.get("mappedReadLengths") + "\n")
+                outf.write("UnmappedReadLengths " + parentNode.get("unmappedReadLengths") + "\n")
+                outf.write("ReadCoverage " + parentNode.get("distributionreadCoverage") + "\n")
+                outf.write("ReadIdentity " + parentNode.get("distributionidentity") + "\n")
+                outf.write("InsertionsPerBase " + parentNode.get("distributioninsertionsPerReadBase") + "\n")
+                outf.write("DeletionsPerBase " + parentNode.get("distributiondeletionsPerReadBase") + "\n")
+                outf.close()
+                system("Rscript nanopore/analyses/coverage_plot.R {} {}".format(os.path.join(self.outputDir, outputName + ".txt"), os.path.join(self.outputDir, outputName + ".pdf")))
         self.finish()
 
 class GlobalCoverage(LocalCoverage):
