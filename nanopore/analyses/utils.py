@@ -316,7 +316,8 @@ def chainSamFile(samFile, outputSamFile, readFastqFile, referenceFastaFile, chai
     readSequences = getFastqDictionary(readFastqFile) #Hash of names to sequences
     readsToAlignedReads = {}
     for aR in samIterator(sam): #Iterate on the sam lines and put into buckets by read
-        assert aR.qname in readSequences
+        if aR.qname not in readSequences:
+            raise RuntimeError("Aligned read name: %s not in read sequences names: %s" % (aR.qname, readSequences.keys()))
         key = (aR.qname,aR.rname)
         if key not in readsToAlignedReads:
             readsToAlignedReads[key] = []
