@@ -28,7 +28,7 @@ from nanopore.analyses.consensus import Consensus
 
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 
-mappers = [ Lastz, LastzChain, LastzRealign ] #, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ]  
+mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ]  
 analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, FastQC, QualiMap, Consensus ]
 metaAnalyses = [ CoverageSummary ]
 
