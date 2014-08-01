@@ -8,7 +8,7 @@ class QualiMap(AbstractAnalysis):
     def run(self):
         AbstractAnalysis.run(self) #Call base method to do some logging
         emptyQual = False
-        for entry in samIterator(self.samFile):
+        for entry in samIterator(pysam.Samfile(self.samFile, "r")):
             if entry.qual is None:
                 emptyQual = True
         if emptyQual is False:
