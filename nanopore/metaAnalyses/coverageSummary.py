@@ -11,8 +11,8 @@ class CoverageSummary(AbstractMetaAnalysis):
         
         fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
         
-        #tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
-        tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
+        tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
+        #tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
 
         for readFastqFile in self.readFastqFiles:
             for referenceFastaFile in self.referenceFastaFiles:
@@ -40,4 +40,5 @@ class CoverageSummary(AbstractMetaAnalysis):
                                globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")
         fH.close()
         tmp.close()
-        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(os.path.join(self.outputDir, "summary.csv"), os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "plots.pdf")))
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(os.path.join(self.outputDir, "summary.csv"), os.path.join(self.outputDir, "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
+	#self.finish()
