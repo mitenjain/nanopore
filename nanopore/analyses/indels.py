@@ -92,35 +92,36 @@ class Indels(AbstractAnalysis):
         indelCounters = map(lambda aR : IndelCounter(sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, readSequences[aR.qname], aR), samIterator(sam)) #Iterate on the sam lines
         sam.close()
         #Write out the substitution info
-        indelXML = getAggregateIndelStats(indelCounters)
-        open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(indelXML))
-        
-        #Plots:
-        
-        ##Read insertion lengths plot: x-axis insertion legnth, y-axis: frequency (see map(int, indelXML.attrib["readInsertionLengths].split()))
-        
-        ##Read deletion lengths plot: x-axis deletion length, y-axis: frequency (see map(int,indelXML.attrib["readDeletionLengths].split()))
-        
-        ##Number of read insertions vs. read length (map(int, indelXML.attrib["distributionReadSequenceLengths"].split()) vs. map(int, indelXML.attrib["distributionNumberReadInsertions"].split())
-        
-        ##Number of read deletion vs. read length
-        
-        ##Distribution of median insertion lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
-        
-        ##Distribution of deletion  lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
-        
-        """
-        stats = dict(ET.parse(os.path.join(self.outputDir, "indels.xml")).findall(".")[0].items())
-        outf = open(os.path.join(self.outputDir, "stats.tsv"), "w")
-        for key in stats:
-            if key == "readInsertionLengths":
-                open(os.path.join(self.getLocalTempDir(), "r_insert.txt"), "w").write(stats[key])
-            elif key == "readDeletionLengths":
-                open(os.path.join(self.getLocalTempDir(), "r_delete.txt"), "w").write(stats[key])
-            else:
-                outf.write("{}\t{}\n".format(key, str(stats[key])))
-        outf.close()
-        system("Rscript nanopore/analyses/indel_plot.R {} {} {} {}".format(os.path.join(self.outputDir, "stats.tsv"), os.path.join(self.getLocalTempDir(), "r_insert.txt"), os.path.join(self.getLocalTempDir(), "r_delete.txt"), os.path.join(self.outputDir, "indel_hist.pdf")))
-        """
+        if len(indelCounters) > 0:
+            indelXML = getAggregateIndelStats(indelCounters)
+            open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(indelXML))
+            
+            #Plots:
+            
+            ##Read insertion lengths plot: x-axis insertion legnth, y-axis: frequency (see map(int, indelXML.attrib["readInsertionLengths].split()))
+            
+            ##Read deletion lengths plot: x-axis deletion length, y-axis: frequency (see map(int,indelXML.attrib["readDeletionLengths].split()))
+            
+            ##Number of read insertions vs. read length (map(int, indelXML.attrib["distributionReadSequenceLengths"].split()) vs. map(int, indelXML.attrib["distributionNumberReadInsertions"].split())
+            
+            ##Number of read deletion vs. read length
+            
+            ##Distribution of median insertion lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
+            
+            ##Distribution of deletion  lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
+            
+            """
+            stats = dict(ET.parse(os.path.join(self.outputDir, "indels.xml")).findall(".")[0].items())
+            outf = open(os.path.join(self.outputDir, "stats.tsv"), "w")
+            for key in stats:
+                if key == "readInsertionLengths":
+                    open(os.path.join(self.getLocalTempDir(), "r_insert.txt"), "w").write(stats[key])
+                elif key == "readDeletionLengths":
+                    open(os.path.join(self.getLocalTempDir(), "r_delete.txt"), "w").write(stats[key])
+                else:
+                    outf.write("{}\t{}\n".format(key, str(stats[key])))
+            outf.close()
+            system("Rscript nanopore/analyses/indel_plot.R {} {} {} {}".format(os.path.join(self.outputDir, "stats.tsv"), os.path.join(self.getLocalTempDir(), "r_insert.txt"), os.path.join(self.getLocalTempDir(), "r_delete.txt"), os.path.join(self.outputDir, "indel_hist.pdf")))
+            """
         
         self.finish() #Indicates the batch is done
