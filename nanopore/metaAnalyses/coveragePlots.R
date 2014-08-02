@@ -2,7 +2,8 @@
 
 args <- commandArgs(trailingOnly = T)
 
-dist <- read.table(args[1], fill=T, sep=",", row.names=1)
+cols <- max(count.fields(args[1], sep=","))
+dist <- read.table(args[1], fill=T, sep=",", row.names=1, col.names=paste("V",seq_len(cols)))
 
 if (dim(dist)[2] > 2) {
 	
