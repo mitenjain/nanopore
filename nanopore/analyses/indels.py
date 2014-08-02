@@ -107,6 +107,8 @@ class Indels(AbstractAnalysis):
         
         ##Distribution of median insertion lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
         
+        ##Distribution of deletion  lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
+        
         """
         stats = dict(ET.parse(os.path.join(self.outputDir, "indels.xml")).findall(".")[0].items())
         outf = open(os.path.join(self.outputDir, "stats.tsv"), "w")

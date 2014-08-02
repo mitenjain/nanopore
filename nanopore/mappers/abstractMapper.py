@@ -20,9 +20,9 @@ class AbstractMapper(Target):
         system("cp %s %s" % (self.outputSamFile, tempSamFile))
         chainSamFile(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile)
     
-    def realignSamFile(self):
+    def realignSamFile(self, gapGamma=0.0):
         """Chains and then realigns the resulting global alignments.
         """
         tempSamFile = os.path.join(self.getGlobalTempDir(), "temp.sam")
         system("cp %s %s" % (self.outputSamFile, tempSamFile))
-        self.addChildTargetFn(realignSamFileTargetFn, args=(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile))
+        self.addChildTargetFn(realignSamFileTargetFn, args=(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile, gapGamma))

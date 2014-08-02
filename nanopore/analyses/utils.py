@@ -338,7 +338,7 @@ def chainSamFile(samFile, outputSamFile, readFastqFile, referenceFastaFile, chai
     sam.close()
     outputSam.close()
 
-def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, chainFn=chainFn):
+def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, gapGamma, chainFn=chainFn):
     """Chains and then realigns the resulting global alignments, using jobTree to do it in parallel on a cluster.
     """
     #Chain the sam file
@@ -359,13 +359,13 @@ def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, refere
         tempCigarFiles.append(os.path.join(target.getGlobalTempDir(), "rescoredCigar_%i.cig" % index))
         
         #Add a child target to do the alignment
-        target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1]))
+        target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], gapGamma))
     
     target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, tempCigarFiles))
     #Finish up
     sam.close()
     
-def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile):
+def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile, gapGamma):
     #Temporary files
     tempRefFile = os.path.join(target.getLocalTempDir(), "ref.fa")
     tempReadFile = os.path.join(target.getLocalTempDir(), "read.fa")
@@ -375,7 +375,7 @@ def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, re
     fastaWrite(tempReadFile, querySequenceName, querySequence)
     
     #Call to cactus_realign
-    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 --gapGamma=0.0 > %s" % (exonerateCigarString, tempRefFile, tempReadFile, outputCigarFile))
+    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, gapGamma, outputCigarFile))
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) == 1
 
 def realignSamFile2TargetFn(target, samFile, outputSamFile, tempCigarFiles):

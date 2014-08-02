@@ -37,19 +37,25 @@ class ReadAlignmentCoverageCounter:
                 self.totalReadInsertions += 1
                 totalReadInsertionLength += aP.getPrecedingReadInsertionLength(self.globalAlignment)
             if aP.getPrecedingReadDeletionLength(self.globalAlignment) > 0:
-                self.totalReadDeletions += aP.getPrecedingReadDeletionLength(self.globalAlignment)
+                self.totalReadDeletions += 1
                 totalReadDeletionLength += aP.getPrecedingReadDeletionLength(self.globalAlignment)
         if self.globalAlignment: #If global alignment account for any trailing indels
             assert len(self.refSeq) - aP.refPos - 1 >= 0
             if len(self.refSeq) - aP.refPos - 1 > 0:
                 self.totalReadDeletions += 1
                 self.totalReadDeletionLength += len(self.refSeq) - aP.refPos - 1
+
             if alignedRead.is_reverse:
-                self.totalReadInsertions += 1
-                totalReadInsertionLength += aP.readPos
+                aP.readPos >= 0
+                if aP.readPos > 0:
+                    self.totalReadInsertions += 1
+                    totalReadInsertionLength += aP.readPos
             else:
                 assert len(self.readSeq) - aP.readPos - 1 >= 0
-                totalReadInsertionLength += len(self.readSeq) - aP.readPos - 1
+                if len(self.readSeq) - aP.readPos - 1 > 0:
+                    self.totalReadInsertions += 1
+                    totalReadInsertionLength += len(self.readSeq) - aP.readPos - 1
+
         assert totalReadInsertionLength <= len(self.readSeq)
         assert totalReadDeletionLength <= len(self.refSeq)
         self.totalReadInsertionLength += totalReadInsertionLength
@@ -75,12 +81,12 @@ class ReadAlignmentCoverageCounter:
     
     def getXML(self):
         return ET.Element("readAlignmentCoverage", { "refSeqName":self.refSeqName, 
-                                       "readSeqName":self.readSeqName, "readLength":str(self.readLength()),
-                                       "readCoverage":str(self.readCoverage()), 
-                                       "referenceCoverage":str(self.referenceCoverage()), 
-                                "identity":str(self.identity()), 
-                                "insertionsPerReadBase":str(self.insertionsPerReadBase()),
-                                "deletionsPerReadBase":str(self.deletionsPerReadBase()) })
+                                                    "readSeqName":self.readSeqName, "readLength":str(self.readLength()),
+                                                    "readCoverage":str(self.readCoverage()), 
+                                                    "referenceCoverage":str(self.referenceCoverage()), 
+                                                    "identity":str(self.identity()), 
+                                                    "insertionsPerReadBase":str(self.insertionsPerReadBase()),
+                                                    "deletionsPerReadBase":str(self.deletionsPerReadBase()) })
 
 def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, readSequences, readsToReadAlignmentCoverages):
     """Calculates aggregate stats across a set of read alignments, plots distributions.
