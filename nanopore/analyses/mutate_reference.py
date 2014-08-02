@@ -33,7 +33,7 @@ class Fastaseq():
 def MutateReference(workingDir):
     for referenceFastaFile in glob.glob(os.path.join(workingDir + "referenceFastaFiles", "*")):
         if not "%" in referenceFastaFile and (".fa" in referenceFastaFile or ".fasta" in referenceFastaFile):
-			mutation_rates = [0.01, 0.05]
+			mutation_rates = [0.01, 0.05, 0.10, 0.20]
 			for mutation_rate in mutation_rates:
 				i = 100 - (mutation_rate * 100)
 				newreferenceFastaFile = referenceFastaFile.split(".fa")[0] + "_" +  str(i) + "%.fasta"

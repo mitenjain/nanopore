@@ -17,7 +17,7 @@ def getStanza (infile):
 def SampleReads(workingDir):
     for readFastqFile in glob.glob(os.path.join(workingDir + "readFastqFiles", "*")):
         if not "%" in readFastqFile and (".fq" in readFastqFile or ".fastq" in readFastqFile):
-            for i in range(75, 1, -25):
+            for i in range(90, 0, -10):
                 newReadFastqFile = readFastqFile.split(".fastq")[0] + "_" + str(i) + "%.fastq"
                 if not os.path.exists(newReadFastqFile):
                     index = 0
