@@ -3,7 +3,7 @@
 args <- commandArgs(trailingOnly = T)
 
 summary <- read.csv(args[1], header=T)
-dist <- read.table(args[2], fill=T, sep=",", row.names=1)
+dist <- read.table(args[2], fill=T, sep=",")
 
 if (dim(dist)[2] > 2) {
 	
