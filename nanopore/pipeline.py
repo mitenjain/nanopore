@@ -8,8 +8,9 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
-from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign
+from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign
+from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign
 from nanopore.mappers.last import Last, LastChain, LastRealign
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign
 from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign
@@ -24,11 +25,12 @@ from nanopore.analyses.alignmentUncertainty import AlignmentUncertainty
 from nanopore.analyses.mutate_reference import MutateReference
 from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
-
+from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 
-mappers = [ Lastz, LastzChain, LastzRealign, Bwa, BwaChain, BwaRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ] #LastChain, LastzChain, BwaChain ] #, #Lastz, Bwa, Last ] #Blasr ] #Blasr not yet working
-analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, FastQC, QualiMap, Consensus ]
+
+mappers = [ Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ] #, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ]  
+analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, FastQC, QualiMap, Consensus, ChannelMappability ]
 metaAnalyses = [ CoverageSummary ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
@@ -109,13 +111,13 @@ def main():
     if not os.path.exists(processedFastqFiles):
         os.mkdir(processedFastqFiles)
     #This should be fixed to work with odd numbers of qual values, though this may be masking bug in input seqs.
-    readFastqFiles = [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", i), os.path.join(processedFastqFiles, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if ".fq" in i or ".fastq" in i ]
+    readFastqFiles = [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", i), os.path.join(processedFastqFiles, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if (".fq" in i and i[-3:] == '.fq') or (".fastq" in i and i[-6:] == '.fastq') ]
         
     #Assign/process (uniquify the names of) the input reference fasta files
     processedFastaFiles = os.path.join(outputDir, "processedReferenceFastaFiles")
     if not os.path.exists(processedFastaFiles):
         os.mkdir(processedFastaFiles)
-    referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if ".fa" in i or ".fasta" in i ]
+    referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if (".fa" in i and i[-3:] == '.fa') or (".fasta" in i and i[-6:] == '.fasta') ]
     
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)

@@ -59,5 +59,3 @@ class CoverageSummary(AbstractMetaAnalysis):
             tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
         tmp.close()
         system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
-
-
