@@ -5,7 +5,7 @@ args <- commandArgs(trailingOnly = T)
 summary <- read.csv(args[1], header=T, row.names=1)
 name <- paste(args[3], args[4], sep="\n")
 
-if (dim(summary[1]) >= 1) {
+if (dim(summary)[1] >= 1) {
 
 	r <- rainbow(length(rownames(summary)))
 
