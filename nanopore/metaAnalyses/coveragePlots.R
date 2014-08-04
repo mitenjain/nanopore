@@ -8,9 +8,9 @@ dist <- read.table(args[1], fill=T, sep=",", row.names=1, col.names=paste("V",se
 if (dim(dist)[2] > 2) {
 	
 	pdf(args[2])
-	#this is all so hacky - first we make a color rainbow
+	#this is all so hacky - first we make a color topo.colors
 	n <- 1
-	r <- rainbow(length(rownames(dist)))
+	r <- topo.colors(length(rownames(dist)))
 	#then we find the biggest y value
 	m <- 0
 	for (i in 1:length(rownames(dist))) {
@@ -24,7 +24,7 @@ if (dim(dist)[2] > 2) {
 		lines(density(as.numeric(dist[i,]), na.rm=T), col = r[n])
 	}
 
-	legend(x="topleft", y="topleft", col=r, legend=rownames(dist), lty=1)
+	legend(x="topleft", y="topleft", col=r, legend=rownames(dist), lty=1, cex=0.8)
 
 	dev.off()
 
