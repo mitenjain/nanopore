@@ -33,14 +33,15 @@ def formatConsensusFastq(inputConsensusFastq, outputConsensusFastq):
             break
 
     for fasta_id in fasta_seq.keys():
-        outfile.write(fasta_id)
-        outfile.write("\n")
-        outfile.write("".join(fasta_seq[fasta_id]))
-        outfile.write("\n")
-        outfile.write(qual_id[fasta_id])
-        outfile.write("\n")
-        outfile.write("".join(qual_scr[fasta_id]))
-        outfile.write("\n")
+        if len(fasta_seq[fasta_id]) > 0:
+            outfile.write(fasta_id)
+            outfile.write("\n")
+            outfile.write("".join(fasta_seq[fasta_id]))
+            outfile.write("\n")
+            outfile.write(qual_id[fasta_id])
+            outfile.write("\n")
+            outfile.write("".join(qual_scr[fasta_id]))
+            outfile.write("\n")
     
     infile.close()
     outfile.close()
@@ -70,6 +71,7 @@ class Consensus(AbstractAnalysis):
         formatConsensusFastq(consensus_fastq, formatted_consensus_fastq)
         system("mv %s %s" % (formatted_consensus_fastq, consensus_fastq))
         cns_to_reads_folder = "./readFastqFiles/" + file_header + "_Consensus.fastq"
-        system("cp %s %s" % (consensus_fastq, cns_to_reads_folder))
+        if os.stat(consensus_fastq).st_size > 4:
+            system("cp %s %s" % (consensus_fastq, cns_to_reads_folder))
         
         self.finish()
