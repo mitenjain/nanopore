@@ -95,10 +95,8 @@ class Indels(AbstractAnalysis):
         if len(indelCounters) > 0:
             indelXML = getAggregateIndelStats(indelCounters)
             open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(indelXML))
-            indelXML = getAggregateIndelStats(indelCounters)
-            open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(indelXML))
-            tmp = open(os.path.join(self.outputDir, "tmp.tsv"), "w")
-            #tmp = open(os.path.join(self.getLocalTempDir(), "tmp.tsv"), "w")
+            #tmp = open(os.path.join(self.outputDir, "tmp.tsv"), "w")
+            tmp = open(os.path.join(self.getLocalTempDir(), "tmp.tsv"), "w")
             #build list of data as vectors
             data_list = []
             var = ["readInsertionLengths", "readDeletionLengths", "ReadSequenceLengths", "NumberReadInsertions", "NumberReadDeletions", "MedianReadInsertionLengths", "MedianReadDeletionLengths"]
@@ -109,8 +107,8 @@ class Indels(AbstractAnalysis):
             for line in data_list:
                 tmp.write("\t".join(map(str,line))); tmp.write("\n")
             tmp.close()
-            system("Rscript nanopore/analyses/indelPlots.R {} {}".format(os.path.join(self.outputDir, "tmp.tsv"), os.path.join(self.outputDir, "indel_plots.pdf")))
-            #system("Rscript nanopore/analyses/indelPlots.R {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.tsv"), os.path.join(self.outputDir, "indel_plots.pdf")))
+            #system("Rscript nanopore/analyses/indelPlots.R {} {}".format(os.path.join(self.outputDir, "tmp.tsv"), os.path.join(self.outputDir, "indel_plots.pdf")))
+            system("Rscript nanopore/analyses/indelPlots.R {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.tsv"), os.path.join(self.outputDir, "indel_plots.pdf")))
         
         self.finish() #Indicates the batch is done
 
