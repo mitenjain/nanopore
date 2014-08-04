@@ -16,20 +16,20 @@ def getStanza (infile):
 
 def SampleReads(workingDir):
     for readFastqFile in glob.glob(os.path.join(workingDir + "readFastqFiles", "*")):
-        if not "%" in readFastqFile and (".fq" in readFastqFile or ".fastq" in readFastqFile):
+        if (not "percent" in readFastqFile and not "Consensus" in readFastqFile) and (".fq" in readFastqFile or ".fastq" in readFastqFile):
             for i in range(90, 0, -10):
-                newReadFastqFile = readFastqFile.split(".fastq")[0] + "_" + str(i) + "%.fastq"
+                newReadFastqFile = readFastqFile.split(".fastq")[0] + "_" + str(i) + "_percent.fastq"
                 if not os.path.exists(newReadFastqFile):
                     index = 0
-                    readFastq = open(readFastqFile, "rb")
+                    readFastq = open(readFastqFile, "r")
                     output = len(readFastq.readlines())
                     readFastq.close()
                     # number of sequences
                     total_seqs = output / 4
                     num_seq = total_seqs * i / 100
                     indexes = sorted(random.sample(range(total_seqs), num_seq))
-                    readFastq = open(readFastqFile, "rb")
-                    newreadFastq = open(newReadFastqFile, "wb")
+                    readFastq = open(readFastqFile, "r")
+                    newreadFastq = open(newReadFastqFile, "w")
                     for stanza in getStanza(readFastq):
                         if index in indexes:
                             newreadFastq.write("\n".join(stanza))
@@ -37,4 +37,3 @@ def SampleReads(workingDir):
                         index += 1
                     readFastq.close()
                     newreadFastq.close()
-

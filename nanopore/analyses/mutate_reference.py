@@ -32,17 +32,17 @@ class Fastaseq():
 
 def MutateReference(workingDir):
     for referenceFastaFile in glob.glob(os.path.join(workingDir + "referenceFastaFiles", "*")):
-        if not "%" in referenceFastaFile and (".fa" in referenceFastaFile or ".fasta" in referenceFastaFile):
+        if not "percent" in referenceFastaFile and (".fa" in referenceFastaFile or ".fasta" in referenceFastaFile):
 			mutation_rates = [0.01, 0.05, 0.10, 0.20]
 			for mutation_rate in mutation_rates:
 				i = 100 - (mutation_rate * 100)
-				newreferenceFastaFile = referenceFastaFile.split(".fa")[0] + "_" +  str(i) + "%.fasta"
-				mutationIndexFile = referenceFastaFile.split(".fa")[0] + "_" + str(i) + "%_Mutation_Index.txt"
+				newreferenceFastaFile = referenceFastaFile.split(".fa")[0] + "_" +  str(i) + "_percent.fasta"
+				mutationIndexFile = referenceFastaFile.split(".fa")[0] + "_" + str(i) + "_percent_Mutation_Index.txt"
 				if not os.path.exists(newreferenceFastaFile):
-					referenceFasta = open(referenceFastaFile, "rb")
-					newreferenceFasta = open(newreferenceFastaFile, "wb")
+					referenceFasta = open(referenceFastaFile, "r")
+					newreferenceFasta = open(newreferenceFastaFile, "w")
 
-					mutationIndex = open(mutationIndexFile, "wb")
+					mutationIndex = open(mutationIndexFile, "w")
 					referenceFastaFile_ID = referenceFastaFile.split(".fa")[0].split("/")[-1]
 					mutationIndex.write("##ID\t" + referenceFastaFile_ID)
 					mutationIndex.write("\n")

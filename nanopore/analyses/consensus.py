@@ -5,8 +5,8 @@ import os
 import pysam
 
 def formatConsensusFastq(inputConsensusFastq, outputConsensusFastq):
-    infile = open(inputConsensusFastq, "rb")
-    outfile = open(outputConsensusFastq, "wb")
+    infile = open(inputConsensusFastq, "r")
+    outfile = open(outputConsensusFastq, "w")
     fasta_id = None
     fasta_seq = {}
     qual_id = {}
@@ -14,7 +14,7 @@ def formatConsensusFastq(inputConsensusFastq, outputConsensusFastq):
     flag = None
     for line in infile:
         if not line == "":
-            if line.startswith("@"):
+            if line.startswith("@") and not flag == "qual":
                 fasta_id = line.strip()
                 flag = "seq"
                 fasta_seq[fasta_id] = []
@@ -56,26 +56,20 @@ class Consensus(AbstractAnalysis):
         pysam.index(localSortedBamFile + ".bam")
         pysam.faidx(self.referenceFastaFile)
         
-        consensus_vcf = os.path.join(self.outputDir, "Consensus.vcf")
-        consensus_fastq = os.path.join(self.outputDir, "Consensus.fastq")
+        file_header = self.readFastqFile.split(".fastq")[0].split("/")[-1] +  "_" + self.referenceFastaFile.split(".fa")[0].split("/")[-1]
+        consensus_vcf = os.path.join(self.outputDir, file_header + "_Consensus.vcf")
+        consensus_fastq = os.path.join(self.outputDir, file_header + "_Consensus.fastq")
 
         system("samtools mpileup -Q 0 -uf %s %s | bcftools view -cg - > %s" \
                 % (self.referenceFastaFile, localSortedBamFile + ".bam", consensus_vcf))
         system("vcfutils.pl vcf2fq %s > %s" % (consensus_vcf, consensus_fastq))
         system("rm -rf %s" % (self.referenceFastaFile + ".fai"))
         
+        formatted_consensus_fastq = os.path.join(self.getLocalTempDir(), "Consensus.fastq")
+        
+        formatConsensusFastq(consensus_fastq, formatted_consensus_fastq)
+        system("mv %s %s" % (formatted_consensus_fastq, consensus_fastq))
+        cns_to_reads_folder = "./readFastqFiles/" + file_header + "_Consensus.fastq"
+        system("cp %s %s" % (consensus_fastq, cns_to_reads_folder))
+        
         self.finish()
-
-        #formatted_consensus_fastq = os.path.join(getLocalTempDir(), "Consensus.fastq")
-        
-        #formatConsensusFastq(consensus_fastq, formatted_consensus_fastq)
-        #system("mv %s %s" % (formatted_consensus_fastq, consensus_fastq))
-
-        #lastz_score = os.path.join(self.outputDir, "Lastz_Cns_100%_ref.txt")
-        
-        #if not "%" in self.referenceFastaFile:
-        #    referenceFastaFile = self.referenceFastaFile
-        #else:
-        #    referenceFastaFile = self.referenceFastaFile.split("_")[0] + ".fasta"
-        #system("lastz %s %s --format=text | grep \"score\" > %s" % \
-        #      (referenceFastaFile, consensus_fastq, lastz_score)
