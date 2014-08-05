@@ -27,5 +27,5 @@ class ChannelMappability(AbstractAnalysis):
                 outf.write("\t".join(map(str, [channel, per_channel_read_counts[channel], mapped_read_counts[channel]])))
                 outf.write("\n")
             outf.close()
-            system("Rscript nanopore/analyses/channel_plots.R {} {}".format(os.path.join(self.outputDir, "channel_mappability.tsv"), os.path.join(self.outputDir, "channel_mappability.pdf")))
+            system("Rscript nanopore/analyses/channel_plots.R {} {} {}".format(os.path.join(self.outputDir, "channel_mappability.tsv"), os.path.join(self.outputDir, "channel_mappability.pdf"), os.path.join(self.outputDir, "channel_mappability_sorted.png")))
         self.finish()

@@ -12,18 +12,18 @@ inf <- args[3]
 
 myPanel <- function(x, y, z, ...) {
     panel.levelplot(x, y, z, ...)
-    panel.text(x, y, 100 * round(exp(-z),4))
+    panel.text(x, y, paste(100 * round(exp(-z),4), "%", sep=""))
 }
 
 d <- read.table(f, header = T, row.names = 1)
 
-if ( sum(d) > 0 ) {
+if ( dim(d)[1] > 0 ) {
 
 	pdf(out)
 
-	levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
-	#use the version below if you want two colors
-	#levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel)
+	p <- levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
+
+    print(p)
 
 	dev.off()
 

@@ -95,8 +95,7 @@ class Indels(AbstractAnalysis):
         if len(indelCounters) > 0:
             indelXML = getAggregateIndelStats(indelCounters)
             open(os.path.join(self.outputDir, "indels.xml"), "w").write(prettyXml(indelXML))
-            #tmp = open(os.path.join(self.outputDir, "tmp.tsv"), "w")
-            tmp = open(os.path.join(self.getLocalTempDir(), "tmp.tsv"), "w")
+            tmp = open(os.path.join(self.outputDir, "indels.tsv"), "w")
             #build list of data as vectors
             data_list = []
             var = ["readInsertionLengths", "readDeletionLengths", "ReadSequenceLengths", "NumberReadInsertions", "NumberReadDeletions", "MedianReadInsertionLengths", "MedianReadDeletionLengths"]
@@ -107,17 +106,6 @@ class Indels(AbstractAnalysis):
             for line in data_list:
                 tmp.write("\t".join(map(str,line))); tmp.write("\n")
             tmp.close()
-            #system("Rscript nanopore/analyses/indelPlots.R {} {}".format(os.path.join(self.outputDir, "tmp.tsv"), os.path.join(self.outputDir, "indel_plots.pdf")))
-            system("Rscript nanopore/analyses/indelPlots.R {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.tsv"), os.path.join(self.outputDir, "indel_plots.pdf")))
-        
+            system("Rscript nanopore/analyses/indelPlots.R {} {}".format(os.path.join(self.outputDir, "indels.tsv"), os.path.join(self.outputDir, "indel_plots.pdf")))
+
         self.finish() #Indicates the batch is done
-
-
-            #Plots:
-            ##Read insertion lengths plot: x-axis insertion legnth, y-axis: frequency (see map(int, indelXML.attrib["readInsertionLengths].split()))
-            ##Read deletion lengths plot: x-axis deletion length, y-axis: frequency (see map(int,indelXML.attrib["readDeletionLengths].split()))
-            ##Number of read insertions vs. read length (map(int, indelXML.attrib["distributionReadSequenceLengths"].split()) vs. map(int, indelXML.attrib["distributionNumberReadInsertions"].split())
-            ##Number of read deletion vs. read length
-            ##Distribution of median insertion lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
-            ##Distribution of deletion  lengths (map(int, indelXML.attrib["distributionMedianReadInsertionLengths"].split()))
-

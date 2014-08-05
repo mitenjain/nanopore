@@ -6,11 +6,27 @@ data <- read.table(args[1], row.names=1, header=T)
 
 if (dim(data)[1] > 1) {
     
+    sorted <- data[order(data$ReadCount, decreasing=T),]
+    sorted <- t(sorted[sorted$ReadCount > 0,])
+
+    png(args[3], height=3000, width=3000)
+
+    q<- barplot(sorted, main=paste("Sorted Channel Mappability", paste("# Reporting = ", length(sorted[1,]), sep=""), sep="\n"), xlab="Channel", ylab="Read Counts", legend.text=T, xaxt="n", col=c("blue","red"), args.legend=c(cex=3), cex.names=3)
+    text(cex=0.35, x=q-.25, y=-1.25, colnames(sorted), xpd=T, srt=65)
+
+    dev.off()
+
     pdf(args[2])
 
-    sorted <- data[order(data$ReadCount, decreasing=T),]
-    q<- barplot(as.matrix(t(sorted)), main="Sorted Channel Mappability", xlab="Channel", ylab="Read Counts", legend.text=T, xaxt="n")
-    text(cex=0.2, x=q-.25,y=-1.25, rownames(sorted), xpd=T, srt=45)
+    sorted.percent <- sorted["MappableReadCount",]/sorted["ReadCount",]
+    sorted.percent <- sorted.percent[order(sorted.percent, decreasing=T)]
+    sorted.percent <- sorted.percent[sorted.percent > 0]
+    sorted.percent <- sorted.percent[!is.na(sorted.percent)]
+
+    q<- barplot(sorted.percent, main="Sorted Channel Percent Mappability", xlab="Channel", ylab="Read Counts", xaxt="n")
+    text(cex=0.3, x=q-.25,y=-0.001, names(sorted.percent), xpd=T, srt=45)
+
+    plot(sorted["MappableReadCount",]~sorted["ReadCount",], pch=20, col="blue", xlab="Total Read Count", ylab="Mappable Read Count", main="Mappable vs Total Reads\nReporting Channels Only")
 
     barplot(t(data)[2,]/(t(data)[1,]+t(data)[2,])*100, main="% Mappable Reads Per Channel", xlab="Channel", ylab="% Mappable")
 

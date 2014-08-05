@@ -17,7 +17,7 @@ class CoverageSummary(AbstractMetaAnalysis):
             for referenceFastaFile in self.referenceFastaFiles:
                 tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
                 #tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
-                tmp.write(",".join(["Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
+                tmp.write(",".join(["Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount", "NumberOfReads"]) + "\n")
                 tmp_data = {}    
                 for mapper in self.mappers:
                     analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
@@ -40,7 +40,8 @@ class CoverageSummary(AbstractMetaAnalysis):
                                globalCoverageXML.attrib["mediandeletionsPerReadBase"],
                                globalCoverageXML.attrib["medianinsertionsPerReadBase"],
                                alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
-                               globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")  
+                               globalCoverageXML.attrib["numberOfUnmappedReads"],
+                               globalCoverageXML.attrib["numberOfReads"]]) + "\n")  
                 tmp.close()
                 filename = "_".join([readFastqFile.split("/")[-1],referenceFastaFile.split("/")[-1]])
                 readname = readFastqFile.split("/")[-1]; refname = referenceFastaFile.split("/")[-1]
