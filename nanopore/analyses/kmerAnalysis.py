@@ -49,7 +49,7 @@ class KmerAnalysis(AbstractAnalysis):
         """
         AbstractAnalysis.run(self) #Call base method to do some logging
         self.ref = getFastaDictionary(self.referenceFastaFile)
-        outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
+        #outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
         outf = open(os.path.join(self.outputDir, "test"), "w")
         sam = pysam.Samfile(self.samFile, "r" )
         for record in samIterator(sam):
@@ -57,7 +57,8 @@ class KmerAnalysis(AbstractAnalysis):
             seq, ref = self.convert_sam_record(record, rseq)
             outf.write("{}\t{}\n".format(seq, ref))
         outf.close()
-        readf = os.path.join(self.getLocalTempDir(), "reads.fasta")
+        readf = os.path.join(self.outputDir, "reads.fasta")
+        #readf = os.path.join(self.getLocalTempDir(), "reads.fasta")
         readf_handle = open(readf, "w")
         try:
             for name, seq, quals in fastqRead(self.readFastqFile):
@@ -65,11 +66,12 @@ class KmerAnalysis(AbstractAnalysis):
                 readf_handle.write(">{}\n{}\n".format(name, seq))
         except:
                 readf_handle.close()
-                os.remove(os.path.join(self.getLocalTempDir(), "reads.fasta"))
+                os.remove(os.path.join(self.outputDir, "reads.fasta"))
         else:
             readf_handle.close()
-            system("nanopore/analyses/kmer.pl {} {} {}".format(readf, str(kmer_size), os.path.join(self.outputDir, "read_" + str(kmer_size) + "mer")))
-            system("nanopore/analyses/kmer.pl {} {} {}".format(self.referenceFastaFile, str(kmer_size), os.path.join(self.outputDir, "ref_" + str(kmer_size) + "mer")))
+            system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.outputDir, "reads.fasta"), os.path.join(self.outputDir, "read_" + str(kmer_size) + "mer"), str(kmer_size)))
+            system("nanopore/analyses/kmer.pl {} {} {}".format(self.referenceFastaFile, os.path.join(self.outputDir, "ref_" + str(kmer_size) + "mer"), str(kmer_size)))
             system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.outputDir, "ref_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, "read_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out")))
-            system("nanopore/analyses/kmer_indel.pl {} {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tab_delim_align"), self.referenceFastaFile, os.path.join(self.outputDir, str(kmer_size) + "mer_deletions.txt"), os.path.join(self.outputDir, str(kmer_size) + "mer_insertions.txt"), str(kmer_size)))
+            system("nanopore/analyses/kmer_indel.pl {} {} {} {} {}".format(os.path.join(self.outputDir, "test"), self.referenceFastaFile, os.path.join(self.outputDir, str(kmer_size) + "mer_deletions.txt"), os.path.join(self.outputDir, str(kmer_size) + "mer_insertions.txt"), str(kmer_size)))
+            #system("nanopore/analyses/kmer_indel.pl {} {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tab_delim_align"), self.referenceFastaFile, os.path.join(self.outputDir, str(kmer_size) + "mer_deletions.txt"), os.path.join(self.outputDir, str(kmer_size) + "mer_insertions.txt"), str(kmer_size)))
         self.finish()

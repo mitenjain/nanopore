@@ -5,10 +5,11 @@ my $seq;
 my $c;
 my $h;
 
-die "must provide input file\nusage: kmer.pl fastaFile k-merSize\n" unless ($ARGV[0]);
-die "must provide kmer size\nusage: kmer.pl fastaFile k-merSize\n" unless($ARGV[1]);
+die "must provide input file\nusage: kmer.pl fastaFile k-merSize outputFile\n" unless ($ARGV[0]);
+die "must provide kmer size\nusage: kmer.pl fastaFile k-merSize outputFile\n" unless($ARGV[1]);
+die "must provide output file\nusage: kmer.pl fastaFile k-merSize outputFile\n" unless($ARGV[2]);
 
-my $outFile=$ARGV[2];
+my $outFile=$ARGV[1];
 open(OUT,">$outFile");
 open(FA,"$ARGV[0]");
 while(<FA>){
@@ -36,7 +37,7 @@ sub kmer{
     my $len=length($s); 
     my $start = 0;
     my $slide = 1; 
-    my $windowSize=12;
+    my $windowSize=$ARGV[2];
     my $end = $start + $windowSize;
     my $o=0;    
     
