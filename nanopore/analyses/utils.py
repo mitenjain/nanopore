@@ -1,7 +1,8 @@
 import pysam
-from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, fastqWrite, cigarRead, logger
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, fastqWrite, cigarRead, logger, nameValue
 import os
 import sys
+from cactus.bar import cactus_expectationMaximisation
 
 class AlignedPair:
     """Represents an aligned pair of positions.
@@ -337,14 +338,47 @@ def chainSamFile(samFile, outputSamFile, readFastqFile, referenceFastaFile, chai
         outputSam.write(cAR)
     sam.close()
     outputSam.close()
+    
+def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFastaFile, outputModel):
+    """Does expectation maximisation on sam file to learn the hmm for the sam file.
+    """
+    #Convert the read file to fasta
+    reads = os.path.join(target.getGlobalTempDir(), "temp.fa")
+    fH = open(reads, 'w')
+    for name, seq, quals in fastqRead(readFastqFile):
+        fastaWrite(fH, name, seq)
+    fH.close()
+    
+    #Get cigars file
+    cigars = os.path.join(target.getGlobalTempDir(), "temp.cigar")
+    fH = open(cigars, 'w')
+    sam = pysam.Samfile(samFile, "r" )
+    for aR in sam: #Iterate on the sam lines realigning them in parallel
+        #Exonerate format Cigar string
+        fH.write(getExonerateCigarFormatString(aR, sam) + "\n")
+    fH.close()
+    
+    #Run cactus_expectationMaximisation
+    options = cactus_expectationMaximisation.Options()
+    options.optionsToRealign="--diagonalExpansion=5 --splitMatrixBiggerThanThis=100" 
+    target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
 
-def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, gapGamma, chainFn=chainFn):
+def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, 
+                           referenceFastaFile, gapGamma, hmmFileToTrain=None, chainFn=chainFn):
     """Chains and then realigns the resulting global alignments, using jobTree to do it in parallel on a cluster.
+    Optionally runs expectation maximisation.
     """
     #Chain the sam file
     tempSamFile = os.path.join(target.getGlobalTempDir(), "temp.sam")
     chainSamFile(samFile, tempSamFile, readFastqFile, referenceFastaFile, chainFn)
     
+    #If we do expectation maximisation we split here:
+    if hmmFileToTrain != None:
+        target.addChildTargetFn(learnModelFromSamFileTargetFn, args=(tempSamFile, readFastqFile, referenceFastaFile, hmmFileToTrain))
+    
+    target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFileToTrain, gapGamma))
+    
+def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma):
     #Load reference sequences
     refSequences = getFastaDictionary(referenceFastaFile) #Hash of names to sequences
     
@@ -359,13 +393,13 @@ def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, refere
         tempCigarFiles.append(os.path.join(target.getGlobalTempDir(), "rescoredCigar_%i.cig" % index))
         
         #Add a child target to do the alignment
-        target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], gapGamma))
+        target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], hmmFile, gapGamma))
     
-    target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, tempCigarFiles))
+    target.setFollowOnTargetFn(realignSamFile3TargetFn, args=(tempSamFile, outputSamFile, tempCigarFiles))
     #Finish up
     sam.close()
     
-def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile, gapGamma):
+def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile, hmmFile, gapGamma):
     #Temporary files
     tempRefFile = os.path.join(target.getLocalTempDir(), "ref.fa")
     tempReadFile = os.path.join(target.getLocalTempDir(), "read.fa")
@@ -375,10 +409,11 @@ def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, re
     fastaWrite(tempReadFile, querySequenceName, querySequence)
     
     #Call to cactus_realign
-    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, gapGamma, outputCigarFile))
+    loadHmm = nameValue("loadHmm", hmmFile)
+    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, outputCigarFile))
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) == 1
 
-def realignSamFile2TargetFn(target, samFile, outputSamFile, tempCigarFiles):
+def realignSamFile3TargetFn(target, samFile, outputSamFile, tempCigarFiles):
     #Setup input and output sam files
     sam = pysam.Samfile(samFile, "r" )
     

@@ -29,7 +29,7 @@ from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 
 
-mappers = [ Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ]  
+mappers = [  LastzRealign_GapGamma2 ] #[ Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ]  
 analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, FastQC, QualiMap, Consensus, ChannelMappability ]
 metaAnalyses = [ CoverageSummary ]
 
@@ -53,10 +53,11 @@ def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, 
     else:
         target.logToMaster("Experiment dir already exists: %s" % experimentDir)
     samFile = os.path.join(experimentDir, "mapping.sam")
+    hmmFileToTrain = os.path.join(experimentDir, "hmm.txt")
     remapped = False
     if not os.path.exists(samFile):
         target.logToMaster("Starting mapper %s for reference file %s and read file %s" % (mapper.__name__, referenceFastaFile, readFastaFile))
-        target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile))
+        target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile, hmmFileToTrain))
         remapped = True
     else:
         target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastaFile))
