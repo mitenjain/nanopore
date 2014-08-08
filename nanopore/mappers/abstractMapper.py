@@ -26,4 +26,4 @@ class AbstractMapper(Target):
         """
         tempSamFile = os.path.join(self.getGlobalTempDir(), "temp.sam")
         system("cp %s %s" % (self.outputSamFile, tempSamFile))
-        self.addChildTargetFn(realignSamFileTargetFn, args=(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile, self.hmmFileToTrain, gapGamma))
+        self.addChildTargetFn(realignSamFileTargetFn, args=(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile, gapGamma, self.hmmFileToTrain,))

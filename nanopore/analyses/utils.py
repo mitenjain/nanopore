@@ -361,6 +361,7 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     #Run cactus_expectationMaximisation
     options = cactus_expectationMaximisation.Options()
     options.optionsToRealign="--diagonalExpansion=5 --splitMatrixBiggerThanThis=100" 
+    options.randomStart = True
     target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
 
 def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, 
@@ -377,13 +378,13 @@ def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile,
         target.addChildTargetFn(learnModelFromSamFileTargetFn, args=(tempSamFile, readFastqFile, referenceFastaFile, hmmFileToTrain))
     
     target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFileToTrain, gapGamma))
-    
+
 def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma):
     #Load reference sequences
     refSequences = getFastaDictionary(referenceFastaFile) #Hash of names to sequences
     
     #Read through the SAM file
-    sam = pysam.Samfile(tempSamFile, "r" )
+    sam = pysam.Samfile(samFile, "r" )
     tempCigarFiles = []
     for aR, index in zip(samIterator(sam), xrange(sys.maxint)): #Iterate on the sam lines realigning them in parallel
         #Exonerate format Cigar string
@@ -395,7 +396,7 @@ def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, refer
         #Add a child target to do the alignment
         target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], hmmFile, gapGamma))
     
-    target.setFollowOnTargetFn(realignSamFile3TargetFn, args=(tempSamFile, outputSamFile, tempCigarFiles))
+    target.setFollowOnTargetFn(realignSamFile3TargetFn, args=(samFile, outputSamFile, tempCigarFiles))
     #Finish up
     sam.close()
     
