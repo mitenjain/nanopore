@@ -1,16 +1,13 @@
 #! /usr/bin/perl -w
 use strict;
-#070114:  modified script (v1.0, from original) to generate an enrichment value using the total number of kmers that span a gap, relative to the total number of kmers.  This differs from the previous version since the program no longer utilizes a random null. To do this one must now provide the reference sequence (fasta format).  Assumes a single sequence in the reference file.  Currently the length of k is fixed at 5bp.
-
-die "\nerror: must provide last2fasta file and reference fasta file\n###\nusage kmer_del.1.pl last2faFile reference.fa\n###\n" unless($ARGV[0]);
-die "\nerror: must provide last2fasta file and reference fasta file\n###\nusage kmer_del.1.pl last2faFile reference.fa\n###\n" unless($ARGV[1]);
+die "usage: kmer_indel.pl <last2fa> <ref.fa> <del_out.txt> <ins_out.txt> <kmer_size>\n" unless($ARGV[0] && $ARGV[1] && $ARGV[2] && $ARGV[3] && $ARGV[4]);
 
 open(FILE,"$ARGV[0]");
 open(REF,"$ARGV[1]");
 open(DEL,">$ARGV[2]");
 open(INS,">$ARGV[3]");
 
-my $kmerSize=$ARGV[4]; #fixed kmer size, this can be changed to be a parameter in the future if needed
+my $kmerSize=$ARGV[4];
 ##########
 # Read in all possible 5-mers (f/r orientation) found in a given reference and determine frequency
 ##########

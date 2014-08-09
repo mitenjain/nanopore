@@ -23,6 +23,11 @@ class LastzChain(Lastz):
         Lastz.run(self)
         self.chainSamFile()
         
+class LastzRealign(Lastz):
+    def run(self):
+        Lastz.run(self)
+        self.realignSamFile()
+
 class LastzRealign_GapGamma0(Lastz):
     def run(self):
         Lastz.run(self)

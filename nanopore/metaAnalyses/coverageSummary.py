@@ -1,9 +1,7 @@
 from nanopore.metaAnalyses.abstractMetaAnalysis import AbstractMetaAnalysis
-import os
+import os, sys
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import system
-
-import sys
 
 class CoverageSummary(AbstractMetaAnalysis):
     """Calculates meta-coverage across all the samples.
@@ -15,9 +13,9 @@ class CoverageSummary(AbstractMetaAnalysis):
         
         for readFastqFile in self.readFastqFiles:
             for referenceFastaFile in self.referenceFastaFiles:
-                #tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
-                tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
-                tmp.write(",".join(["Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
+                tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
+                #tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
+                tmp.write(",".join(["Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount", "NumberOfReads"]) + "\n")
                 tmp_data = {}    
                 for mapper in self.mappers:
                     analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
@@ -40,17 +38,18 @@ class CoverageSummary(AbstractMetaAnalysis):
                                globalCoverageXML.attrib["mediandeletionsPerReadBase"],
                                globalCoverageXML.attrib["medianinsertionsPerReadBase"],
                                alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
-                               globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")  
+                               globalCoverageXML.attrib["numberOfUnmappedReads"],
+                               globalCoverageXML.attrib["numberOfReads"]]) + "\n")  
                 tmp.close()
                 filename = "_".join([readFastqFile.split("/")[-1],referenceFastaFile.split("/")[-1]])
                 readname = readFastqFile.split("/")[-1]; refname = referenceFastaFile.split("/")[-1]
-                #system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {} {}".format(os.path.join(self.outputDir, "tmp.csv"), os.path.join(self.outputDir, filename), readname, refname))
-                system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, filename), readname, refname))
+                system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {} {}".format(os.path.join(self.outputDir, "tmp.csv"), os.path.join(self.outputDir, filename), readname, refname))
+                #system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, filename), readname, refname))
         fH.close()
-        #tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
-        tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
+        tmp = open(os.path.join(self.outputDir, "tmp2.csv"), "w")
+        #tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
         for mapper in tmp_data:
             tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
         tmp.close()
-        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
-        #system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
+        #system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, "tmp2.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
