@@ -12,7 +12,7 @@ if (dim(data)[1] > 1) {
     png(args[3], height=3000, width=3000)
 
     q<- barplot(sorted, main=paste("Sorted Channel Mappability", paste("# Reporting = ", length(sorted[1,]), sep=""), sep="\n"), xlab="Channel", ylab="Read Counts", legend.text=T, xaxt="n", col=c("blue","red"), args.legend=c(cex=3), cex.names=3)
-    text(cex=0.35, x=q-.25, y=-1.25, colnames(sorted), xpd=T, srt=65)
+    text(cex=0.5, x=q-.25, y=-1.25, colnames(sorted), xpd=T, srt=65)
 
     dev.off()
 
@@ -24,7 +24,7 @@ if (dim(data)[1] > 1) {
     sorted.percent <- sorted.percent[!is.na(sorted.percent)]
 
     q<- barplot(sorted.percent, main="Sorted Channel Percent Mappability", xlab="Channel", ylab="Read Counts", xaxt="n")
-    text(cex=0.3, x=q-.25,y=-0.001, names(sorted.percent), xpd=T, srt=45)
+    text(cex=0.27, x=q-.25,y=-0.005, names(sorted.percent), xpd=T, srt=45)
 
     plot(sorted["MappableReadCount",]~sorted["ReadCount",], pch=20, col="blue", xlab="Total Read Count", ylab="Mappable Read Count", main="Mappable vs Total Reads\nReporting Channels Only")
 
