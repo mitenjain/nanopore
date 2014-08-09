@@ -1,9 +1,7 @@
 from nanopore.metaAnalyses.abstractMetaAnalysis import AbstractMetaAnalysis
-import os
+import os, sys
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import system
-
-import sys
 
 class CoverageSummary(AbstractMetaAnalysis):
     """Calculates meta-coverage across all the samples.
