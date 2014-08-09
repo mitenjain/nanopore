@@ -28,17 +28,37 @@ class LastzRealign_GapGamma0(Lastz):
         Lastz.run(self)
         self.realignSamFile(gapGamma=0.0)
         
+class LastzRealign_GapGamma0_Em(Lastz):
+    def run(self):
+        Lastz.run(self)
+        self.realignSamFile(doEm=True, gapGamma=0.0)
+        
 class LastzRealign_GapGamma2(Lastz):
     def run(self):
         Lastz.run(self)
         self.realignSamFile(gapGamma=0.2)
+        
+class LastzRealign_GapGamma2_Em(Lastz):
+    def run(self):
+        Lastz.run(self)
+        self.realignSamFile(doEm=True, gapGamma=0.2)
         
 class LastzRealign_GapGamma5(Lastz):
     def run(self):
         Lastz.run(self)
         self.realignSamFile(gapGamma=0.5)
 
+class LastzRealign_GapGamma5_Em(Lastz):
+    def run(self):
+        Lastz.run(self)
+        self.realignSamFile(doEm=True, gapGamma=0.5)
+
 class LastzRealign_GapGamma9(Lastz):
     def run(self):
         Lastz.run(self)
         self.realignSamFile(gapGamma=0.9)
+
+class LastzRealign_GapGamma9_Em(Lastz):
+    def run(self):
+        Lastz.run(self)
+        self.realignSamFile(doEm=True, gapGamma=0.9)

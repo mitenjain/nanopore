@@ -8,7 +8,7 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
-from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9
+from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, LastzRealign_GapGamma0_Em, LastzRealign_GapGamma2_Em, LastzRealign_GapGamma5_Em, LastzRealign_GapGamma9_Em
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign
 from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign
 from nanopore.mappers.last import Last, LastChain, LastRealign
@@ -29,7 +29,7 @@ from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 
 
-mappers = [  LastzRealign_GapGamma2 ] #[ Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ]  
+mappers = [  LastzRealign_GapGamma2_Em, Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, LastzRealign_GapGamma0_Em, LastzRealign_GapGamma2_Em, LastzRealign_GapGamma5_Em, LastzRealign_GapGamma9_Em ]  
 analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, FastQC, QualiMap, Consensus, ChannelMappability ]
 metaAnalyses = [ CoverageSummary ]
 
