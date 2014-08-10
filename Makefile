@@ -1,5 +1,5 @@
 maxThreads = 4
-batchSystem = parasol
+batchSystem = singleMachine
 defaultJobMemory=8589934592
 
 all :

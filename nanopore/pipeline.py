@@ -8,7 +8,7 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
-from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9
+from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, LastzRealign_GapGamma0_Em, LastzRealign_GapGamma2_Em, LastzRealign_GapGamma5_Em, LastzRealign_GapGamma9_Em
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign
 from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign
 from nanopore.mappers.last import Last, LastChain, LastRealign
@@ -30,7 +30,8 @@ from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 
 
-mappers = [ Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign ]  
+
+mappers = [  Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, LastzRealign_GapGamma0_Em, LastzRealign_GapGamma2_Em, LastzRealign_GapGamma5_Em, LastzRealign_GapGamma9_Em ]  
 analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedKmer ]
 
@@ -54,10 +55,11 @@ def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, 
     else:
         target.logToMaster("Experiment dir already exists: %s" % experimentDir)
     samFile = os.path.join(experimentDir, "mapping.sam")
+    hmmFileToTrain = os.path.join(experimentDir, "hmm.txt")
     remapped = False
     if not os.path.exists(samFile):
         target.logToMaster("Starting mapper %s for reference file %s and read file %s" % (mapper.__name__, referenceFastaFile, readFastaFile))
-        target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile))
+        target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile, hmmFileToTrain))
         remapped = True
     else:
         target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastaFile))
