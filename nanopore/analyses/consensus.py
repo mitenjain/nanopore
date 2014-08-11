@@ -51,6 +51,7 @@ class Consensus(AbstractAnalysis):
         AbstractAnalysis.run(self) #Call base method to do some logging
         localBamFile = os.path.join(self.getLocalTempDir(), "mapping.bam")
         localSortedBamFile = os.path.join(self.getLocalTempDir(), "mapping.sorted")
+        #localSortedBamFile = os.path.join(self.outputDir, "mapping.sorted")
 
         samToBamFile(self.samFile, localBamFile)
         pysam.sort(localBamFile, localSortedBamFile)

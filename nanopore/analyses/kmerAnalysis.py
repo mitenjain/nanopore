@@ -49,7 +49,6 @@ class KmerAnalysis(AbstractAnalysis):
         """
         AbstractAnalysis.run(self) #Call base method to do some logging
         self.ref = getFastaDictionary(self.referenceFastaFile)
-        #outf = open(os.path.join(self.getLocalTempDir(), "tab_delim_align"), "w")
         outf = open(os.path.join(self.getLocalTempDir(), "tmp"), "w")
         sam = pysam.Samfile(self.samFile, "r" )
         for record in samIterator(sam):
@@ -58,7 +57,6 @@ class KmerAnalysis(AbstractAnalysis):
             outf.write("{}\t{}\n".format(seq, ref))
         outf.close()
         readf = os.path.join(self.getLocalTempDir(), "reads.fasta")
-        #readf = os.path.join(self.getLocalTempDir(), "reads.fasta")
         readf_handle = open(readf, "w")
         try:
             for name, seq, quals in fastqRead(self.readFastqFile):
@@ -73,4 +71,5 @@ class KmerAnalysis(AbstractAnalysis):
             system("nanopore/analyses/kmer.pl {} {} {}".format(self.referenceFastaFile, os.path.join(self.getLocalTempDir(), "ref_" + str(kmer_size) + "mer"), str(kmer_size)))
             system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "ref_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), "read_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out")))
             system("nanopore/analyses/kmer_indel.pl {} {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp"), self.referenceFastaFile, os.path.join(self.outputDir, str(kmer_size) + "mer_deletions.txt"), os.path.join(self.outputDir, str(kmer_size) + "mer_insertions.txt"), str(kmer_size)))
+            system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "top_kmers.tsv"), os.path.join(self.outputDir, "bot_kmers.tsv")))
         self.finish()
