@@ -26,6 +26,7 @@ class ReadAlignmentCoverageCounter:
         
         #Now process the read alignment
         totalReadInsertionLength, totalReadDeletionLength = 0, 0
+        aP = None
         for aP in AlignedPair.iterator(alignedRead, self.refSeq, self.readSeq): 
             if aP.isMatch():
                 self.matches += 1
@@ -39,7 +40,7 @@ class ReadAlignmentCoverageCounter:
             if aP.getPrecedingReadDeletionLength(self.globalAlignment) > 0:
                 self.totalReadDeletions += 1
                 totalReadDeletionLength += aP.getPrecedingReadDeletionLength(self.globalAlignment)
-        if self.globalAlignment: #If global alignment account for any trailing indels
+        if self.globalAlignment and aP != None: #If global alignment account for any trailing indels
             assert len(self.refSeq) - aP.refPos - 1 >= 0
             if len(self.refSeq) - aP.refPos - 1 > 0:
                 self.totalReadDeletions += 1
