@@ -30,5 +30,5 @@ class UnmappedKmer(AbstractMetaAnalysis):
             system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.fasta"), os.path.join(self.getLocalTempDir(), ref_base + "_read_" + str(kmer_size) + "mer"), str(kmer_size)))
             system("nanopore/analyses/kmer.pl {} {} {}".format(referenceFastaFile, os.path.join(self.getLocalTempDir(), ref_base + "_ref_" + str(kmer_size) + "mer"), str(kmer_size)))
             system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), ref_base + "_ref_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), ref_base + "_read_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, ref_base + "_" + str(kmer_size) + "kmer_Cmp.out")))
-            
+            system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(self.outputDir, ref_base + "_" + str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "top_kmers.tsv"), os.path.join(self.outputDir, "bot_kmers.tsv")))
 
