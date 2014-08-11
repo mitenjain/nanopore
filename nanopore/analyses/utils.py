@@ -361,7 +361,7 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     #Run cactus_expectationMaximisation
     options = cactus_expectationMaximisation.Options()
     options.modelType="threeStateAsymmetric"
-    options.optionsToRealign="--diagonalExpansion=6 --splitMatrixBiggerThanThis=100" 
+    options.optionsToRealign="--diagonalExpansion=30 --splitMatrixBiggerThanThis=3000" 
     options.randomStart = True
     options.iterations = 30
     target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
@@ -413,7 +413,7 @@ def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, re
     
     #Call to cactus_realign
     loadHmm = nameValue("loadHmm", hmmFile)
-    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, outputCigarFile))
+    system("echo %s | cactus_realign %s %s --diagonalExpansion=30 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, outputCigarFile))
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) == 1
 
 def realignSamFile3TargetFn(target, samFile, outputSamFile, tempCigarFiles):
