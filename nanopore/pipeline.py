@@ -70,6 +70,7 @@ metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalys
 if os.environ.get("BLASTDB") is not None:
     metaAnalyses.append(UnmappedBlastKmer)
 
+
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
     experiments = []
@@ -85,7 +86,7 @@ def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analy
                     experiment = (readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
                     target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
                     experiments.append(experiment)
-    target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
+        target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, readType, experiments))
 
 def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
@@ -117,12 +118,12 @@ def runAnalyses(target, readFastaFile, readType, referenceFastaFile, samFile, an
         else:
             target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastaFile))
 
-def runMetaAnalyses(target, metaAnalyses, outputDir, experiments):
+def runMetaAnalyses(target, metaAnalyses, outputDir, readType, experiments):
     for metaAnalysis in metaAnalyses:
-        metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + metaAnalysis.__name__)
+        metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + readType + "_" + metaAnalysis.__name__)
         if not os.path.exists(metaAnalysisDir):
             os.mkdir(metaAnalysisDir)
-        target.addChildTarget(metaAnalysis(metaAnalysisDir, experiments))
+        target.addChildTarget(metaAnalysis(metaAnalysisDir, readType, experiments))
 
 def main():
     #Parse the inputs args/options
