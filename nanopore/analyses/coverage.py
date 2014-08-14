@@ -96,8 +96,9 @@ def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, rea
     unmappedReadLengths = [ len(readSequences[i]) for i in readSequences.keys() if i not in readsToReadAlignmentCoverages ]
     def stats(fnStringName):
         l = map(lambda x : getattr(x, fnStringName)(), readAlignmentCoverages)
-        l.sort()
-        return l[0], numpy.average(l), numpy.median(l), l[-1], " ".join(map(str, l))
+        l2 = l
+        l2.sort()
+        return l2[0], numpy.average(l2), numpy.median(l2), l2[-1], " ".join(map(str, l))
     
     attribs = { "numberOfReadAlignments":str(len(readAlignmentCoverages)), 
                 "numberOfReads":str(len(readSequences)), "numberOfReferenceSequences":str(len(refSequences)), 
@@ -105,7 +106,8 @@ def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, rea
                 "numberOfUnmappedReads":str(len(unmappedReadLengths)), "unmappedReadLengths":" ".join(map(str, unmappedReadLengths)), }
     
     for fnStringName in "readCoverage", "referenceCoverage", "identity", "deletionsPerReadBase", "insertionsPerReadBase", "readLength":
-        for attribName, value in zip([ "min" + fnStringName, "avg" + fnStringName, "median" + fnStringName, "max" + fnStringName, "distribution" + fnStringName ], list(stats(fnStringName))):
+        for attribName, value in zip([ "min" + fnStringName, "avg" + fnStringName, "median" + fnStringName, "max" + fnStringName, 
+                                      "distribution" + fnStringName ], list(stats(fnStringName))):
             attribs[attribName] = str(value)
             
     parentNode = ET.Element(tagName, attribs)
