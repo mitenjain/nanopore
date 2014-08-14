@@ -49,4 +49,16 @@ To clean up an old run type:
     make clean
 
 To see and control which mappers and analyses are being run edit lines 8 and 9 of the src/pipeline.py script.
-    
+Additionally, if you would like to BLAST the unmapped reads against NT (NCBI nucleotide database) you need to have BLAST installed with the BLASTDB environmental variable set to wherever you have stored the NT database. In addition, you want the taxonomy database so that the hits make sense.
+
+You can download blastn from here:
+ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
+You will want to move blastn to somewhere that is in your path.
+Second, set the environmental variable BLASTDB:
+export BLASTDB=:/path/to/blast/db/ (you will want this in your bashrc)
+Finally, download and untar all of the databases to your BLASTDB path:
+ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.**.tar.gz
+ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
+
+For all of the (19) nt files, you have to untar separately. Thanks NCBI. Dirty solution:
+for i in `echo $BLASTDB | cut -d ":" -f 2`*.tar.gz; do tar zxvf $i; done    

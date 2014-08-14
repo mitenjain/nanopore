@@ -33,7 +33,6 @@ from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 from nanopore.analyses.hmm import Hmm
 from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
 
-
 mappers = [ Bwa,
            BwaChain,
            BwaParams,
@@ -66,6 +65,11 @@ mappers = [ Bwa,
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedBlastKmer ]
 
+#need to check for local blast installation to do unmappedBlastKmer:
+if os.environ.get("BLASTDB") is not None:
+    metaAnalyses = [ CoverageSummary, UnmappedBlastKmer ]
+else:
+    metaAnalyses [ CoverageSummary, UnmappedKmer ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
@@ -82,7 +86,7 @@ def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analy
                     experiment = (readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
                     target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
                     experiments.append(experiment)
-        target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, readType, experiments))
+    target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
 
 def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
@@ -114,12 +118,12 @@ def runAnalyses(target, readFastaFile, readType, referenceFastaFile, samFile, an
         else:
             target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastaFile))
 
-def runMetaAnalyses(target, metaAnalyses, outputDir, readType, experiments):
+def runMetaAnalyses(target, metaAnalyses, outputDir, experiments):
     for metaAnalysis in metaAnalyses:
-        metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + readType + "_" + metaAnalysis.__name__)
+        metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + metaAnalysis.__name__)
         if not os.path.exists(metaAnalysisDir):
             os.mkdir(metaAnalysisDir)
-        target.addChildTarget(metaAnalysis(metaAnalysisDir, readType, experiments))
+        target.addChildTarget(metaAnalysis(metaAnalysisDir, experiments))
 
 def main():
     #Parse the inputs args/options
