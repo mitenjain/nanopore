@@ -29,7 +29,6 @@ from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
-<<<<<<< HEAD
 from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
 from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
@@ -87,11 +86,7 @@ def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analy
                     experiment = (readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
                     target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
                     experiments.append(experiment)
-<<<<<<< HEAD
-    target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
-=======
         target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, readType, experiments))
->>>>>>> new version of pipeline that treats folders in the read folder as different read types to be analyzed separately
 
 def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
