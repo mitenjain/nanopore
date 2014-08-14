@@ -4,31 +4,48 @@ import xml.etree.cElementTree as ET
 from jobTree.src.bioio import system, fastqRead
 from nanopore.analyses.utils import samIterator
 import pysam
-from itertools import izip
 
 class UnmappedKmer(AbstractMetaAnalysis):
-    """Calculates kmer statistics for all reads (in all samples) not mapped by any mapper"""
+    """Calculates kmer statistics for all reads (in all samples) not mapped by any mapper
+    This class works almost identically to UnmappedBlastKmer but without the blasting part
+    And is supposed to be run on machines where blast is not installed (or if you don't want
+    the pipeline to takes days)"""
     def run(self, kmer_size=5):
-        unmapped_by_ref = dict()
-        for readFastqFile, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
-            #make sets of sequences from both mapped and all reads
-            mappedSequences = {x.seq for x in samIterator(pysam.Samfile(os.path.join(resultsDir, "mapping.sam")))}
-            readSequences = {x[1] for x in fastqRead(open(readFastqFile))}
-            #add readSequences - mappedSequences to unmapped
-            if referenceFastaFile not in unmapped_by_ref:
-                unmapped_by_ref[referenceFastaFile] = set()
-            unmapped_by_ref[referenceFastaFile] = unmapped_by_ref[referenceFastaFile].union(readSequences.difference(mappedSequences))
+        #build set of (read, fastq) of all mapped reads
+        mappedReads, unmappedReads = dict(), dict()
+        for readFastqFile, readType, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
+            if readType not in mappedReads:
+                mappedReads[readType] = set()
+            for record in samIterator(pysam.Samfile(os.path.join(resultsDir, "mapping.sam"))):
+                if not record.is_unmapped: #some aligners save unmapped reads in their samfiles (bwa)
+                    mappedReads[readType].add((record.qname, readFastqFile))
+        
+        #loop again and save only reads that did not map with any mapper
+        for readFastqFile, readType, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
+            if readType not in unmappedReads:
+                unmappedReads[readType] = set()
+            for name, seq, qual in fastqRead(readFastqFile):
+                if (name, readFastqFile) not in mappedReads:
+                    unmappedReads[readType].add((name, seq))
 
-        #first need to make reads into fasta format because I am not recoding Karen's perl
-        for referenceFastaFile, unmapped in unmapped_by_ref.iteritems():
-            outf = open(os.path.join(self.getLocalTempDir(), "tmp.fasta"), "w")
-            for seq, i in izip(unmapped, xrange(len(unmapped))):
-                outf.write(">{}\n{}\n".format(i, seq))
-            outf.close()
-            #now we run kmer analysis
-            ref_base = os.path.basename(referenceFastaFile).split(".")[0]
-            system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.fasta"), os.path.join(self.getLocalTempDir(), ref_base + "_read_" + str(kmer_size) + "mer"), str(kmer_size)))
-            system("nanopore/analyses/kmer.pl {} {} {}".format(referenceFastaFile, os.path.join(self.getLocalTempDir(), ref_base + "_ref_" + str(kmer_size) + "mer"), str(kmer_size)))
-            system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), ref_base + "_ref_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), ref_base + "_read_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, ref_base + "_" + str(kmer_size) + "kmer_Cmp.out")))
-            system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(self.outputDir, ref_base + "_" + str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "top_kmers.tsv"), os.path.join(self.outputDir, "bot_kmers.tsv")))
-
+        #build fastas of mapped and unmapped reads for kmer analysis
+        for readType in unmappedReads:
+            if len(unmappedReads[readType]) >= 1:
+                #first we build a fasta of unmapped reads
+                outf = open(os.path.join(self.getLocalTempDir(), "unmapped_reads.fasta"), "w")
+                for name, readFastqFile, seq in unmappedReads[readType]:
+                    outf.write(">{}\n{}\n".format(name, seq))
+                outf.close()
+                #then we build a fasta of mapped reads, iterating over the fastq files so we get the full read:
+                outf = open(os.path.join(self.getLocalTempDir(), "mapped_reads.fasta"), "w")
+                for readFastqFile, thisReadType, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
+                    if thisReadType == readType:
+                        for name, seq, qual in fastqRead(readFastqFile):
+                            if (name, readFastqFile) in mappedReads[readType]:
+                                outf.write(">{}\n{}\n".format(name, seq))
+                outf.close()
+                system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "unmapped_reads.fasta"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_unmapped_" + str(kmer_size) + "mer"), str(kmer_size)))
+                system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "mapped_reads.fasta"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_mapped_" + str(kmer_size) + "mer"), str(kmer_size)))
+                system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "readType_" + readType + "_mapped_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_unmapped_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, readType + "_" + str(kmer_size) + "kmer_Cmp.out")))
+                system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(os.path.join(self.outputDir, readType + "_" + str(kmer_size)) + "kmer_Cmp.out"), os.path.join(self.outputDir, readType + "_top_kmers.tsv"), os.path.join(self.outputDir, readType + "_bot_kmers.tsv")))
+          
