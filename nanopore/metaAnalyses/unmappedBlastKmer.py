@@ -1,4 +1,4 @@
-from nanopore.metaAnalyses.abstractMetaAnalysis import AbstractMetaAnalysis
+from nanopore.metaAnalyses.abstractUnmappedAnalysis import AbstractUnmappedMetaAnalysis
 import os, sys
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import system, fastqRead
@@ -7,7 +7,7 @@ import pysam
 from collections import Counter
 
 
-class UnmappedBlastKmer(AbstractMetaAnalysis):
+class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 	"""Finds reads that do not map to any reference with any mapper
 	blasts them, then does kmer analysis on those that do not have hits.
 	Also reports stats on hits"""

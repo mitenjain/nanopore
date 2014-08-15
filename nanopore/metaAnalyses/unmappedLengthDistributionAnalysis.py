@@ -18,13 +18,12 @@ class UnmappedLengthDistributionAnalysis(AbstractUnmappedMetaAnalysis):
             system("Rscript nanopore/metaAnalyses/unmapped_mapped_distributions.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_unmapped"), os.path.join(self.getLocalTempDir(), readType + "_mapped"), os.path.join(self.outputDir, readType + "_length_distribution.pdf"), readType))
 
         for reference in self.info.referenceFiles:
-            unmapped = open(os.path.join(self.getLocalTempDir(), reference + "_unmapped"), "w")
-            mapped = open(os.path.join(self.getLocalTempDir(), reference + "_mapped"), "w")
+            unmapped = open(os.path.join(self.getLocalTempDir(), os.path.basename(reference) + "_unmapped"), "w")
+            mapped = open(os.path.join(self.getLocalTempDir(), os.path.basename(reference) + "_mapped"), "w")
             for read in self.reads:
                 if read.is_mapped:
                     mapped.write("{}\n".format(len(read.seq)))
                 else:
                     unmapped.write("{}\n".format(len(read.seq)))
-            system("Rscript nanopore/metaAnalyses/unmapped_mapped_distributions.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), reference + "_unmapped"), os.path.join(self.getLocalTempDir(), reference + "_mapped"), os.path.join(self.outputDir, reference + "_length_distribution.pdf"), reference))
+            system("Rscript nanopore/metaAnalyses/unmapped_mapped_distributions.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), os.path.basename(reference) + "_unmapped"), os.path.join(self.getLocalTempDir(), os.path.basename(reference) + "_mapped"), os.path.join(self.outputDir, os.path.basename(reference) + "_length_distribution.pdf"), os.path.basename(reference)))
 
-        
