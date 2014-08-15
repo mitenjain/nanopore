@@ -29,8 +29,9 @@ from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
-from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 from nanopore.analyses.hmm import Hmm
+from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
+from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
 from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
 
 mappers = [ Bwa,
@@ -61,15 +62,13 @@ mappers = [ Bwa,
            LastzParamsRealign,
            LastzParamsRealignEm,
            LastzParamsRealignTrainedModel ]
-          
-analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedBlastKmer ]
 
-#need to check for local blast installation to do unmappedBlastKmer:
+analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
+metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalysis ]
+
+#need to check for local blast installation to do unmappedBlastKmer
 if os.environ.get("BLASTDB") is not None:
-    metaAnalyses = [ CoverageSummary, UnmappedBlastKmer ]
-else:
-    metaAnalyses [ CoverageSummary, UnmappedKmer ]
+    metaAnalyses.append(UnmappedBlastKmer)
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
