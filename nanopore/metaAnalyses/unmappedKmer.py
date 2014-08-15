@@ -1,7 +1,7 @@
 from nanopore.metaAnalyses.abstractMetaAnalysis import AbstractMetaAnalysis
 import os, sys
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import system, fastqRead
+from jobTree.src.bioio import system, fastqRead, fastaRead
 from nanopore.analyses.utils import samIterator
 import pysam
 
@@ -48,4 +48,14 @@ class UnmappedKmer(AbstractMetaAnalysis):
                 system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "mapped_reads.fasta"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_mapped_" + str(kmer_size) + "mer"), str(kmer_size)))
                 system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "readType_" + readType + "_mapped_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_unmapped_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, readType + "_" + str(kmer_size) + "kmer_Cmp.out")))
                 system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(os.path.join(self.outputDir, readType + "_" + str(kmer_size)) + "kmer_Cmp.out"), os.path.join(self.outputDir, readType + "_top_kmers.tsv"), os.path.join(self.outputDir, readType + "_bot_kmers.tsv")))
-          
+
+                #Miten wanted me to add this analysis, it maybe should go in another meta analysis, but this is faster 
+                outf = open(os.path.join(self.getLocalTempDir(), "mapped_lengths.txt"), "w")
+                for name, seq in fastaRead(open(os.path.join(self.getLocalTempDir(), "mapped_reads.fasta"))):
+                    outf.write("{}\n".format(len(seq)))
+                outf.close()
+                outf = open(os.path.join(self.getLocalTempDir(), "unmapped_lengths.txt"), "w")
+                for name, seq in fastaRead(open(os.path.join(self.getLocalTempDir(), "unmapped_reads.fasta"))):
+                    outf.write("{}\n".format(len(seq)))
+                outf.close()
+                system("Rscript nanopore/metaAnalyses/unmapped_mapped_distributions.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "mapped_reads.fasta"), os.path.join(self.getLocalTempDir(), "unmapped_reads.fasta"), os.path.join(self.outputDir, "mapped_distributions.pdf")))

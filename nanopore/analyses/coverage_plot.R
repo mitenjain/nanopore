@@ -16,8 +16,11 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     par(mfrow=c(2,2))
     #plot the mapped/unmapped read lengths
     #future - stack them; remove very long unmapped reads?
-    hist(data$MappedReadLengths, breaks = "FD", main="Mapped Read Length Distribution", xlab="Read Length")
-    hist(data$UnmappedReadLengths, breaks = "FD", main="Unmapped Read Length Distribution", xlab="Read Length")
+    lengths <- cbind(data$MappedReadLengths, data$UnmappedReadLengths)
+    lengths.sort <- lengths[order(lengths)]
+    xmax <- lengths.sort[round(0.95*length(lengths.sort))]
+    hist(data$MappedReadLengths, breaks = "FD", main=paste("Mapped Read Length Distribution n= ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax))
+    hist(data$UnmappedReadLengths, breaks = "FD", main=paste("Unmapped Read Length Distribution n= ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax))
     #plot read coverage distribution
     hist(data$ReadCoverage, breaks="FD", main="Read Coverage Distribution", xlab="Read Coverage")
 
