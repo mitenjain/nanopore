@@ -56,8 +56,17 @@ def fastqReadNoQual(fileHandle):
 
 
 def call_muscle(name1, seq1, name2, seq2):
-	p = Popen(["muscle", "-quiet"], stdout=PIPE, stdin=PIPE).communicate(">{}\n{}\n>{}\n{}\n".format(name1, seq1, name2, seq2))
-	return p[0]
+	p = Popen(["muscle", "-quiet"], stdout=PIPE, stdin=PIPE).communicate(">{}\n{}\n>{}\n{}\n".format(name1, seq1, name2, seq2))[0].split("\n")
+	return (p[1], p[3])
+
+def calculate_identity(align):
+	total, match = 0.0, 0.0
+	for ref_base, read_base in align:
+		if ref_base == read_base and ref_base != "-" and ref_base != "N":
+			total += 1; match += 1
+		else:
+			total += 1
+	return match/total
 
 
 def main(args):
@@ -80,12 +89,15 @@ def main(args):
 			ref_seq = reference[ref_name][ref_start:ref_stop]
 			template_seq = template_fastq_dict[twoD_record.qname]
 			complement_seq = template_fastq_dict[twoD_record.qname]
-			aligned_template = call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, template_seq).split("\n")[-1]
-			aligned_complement = call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, complement_seq).split("\n")[-1]
+			aligned_template = call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, template_seq)
+			aligned_complement = call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, complement_seq)
 			#args.output.write(call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, template_seq))
 			#args.output.write(call_muscle(ref_name, ref_seq, "complement_" + twoD_record.qname, complement_seq))
 			aligned[twoD_record.qname] = (aligned_template, aligned_complement)
-			
+	output.write("ReadName\tTemplateIdentity\tComplementIdentity\n")
+	for name, (aligned_template, aligned_complement) in aligned:
+		output.write("{}\t{}\t{}\n".format(name, calculate_identity(aligned_template), calculate_identiy(aligned_complement)))
+
 
 
 if __name__ == "__main__":

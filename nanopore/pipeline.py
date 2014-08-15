@@ -34,6 +34,7 @@ from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
 from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
 
+
 mappers = [ Bwa,
            BwaChain,
            BwaParams,
@@ -64,11 +65,14 @@ mappers = [ Bwa,
            LastzParamsRealignTrainedModel ]
 
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
+
 metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalysis ]
 
 #need to check for local blast installation to do unmappedBlastKmer
 if os.environ.get("BLASTDB") is not None:
     metaAnalyses.append(UnmappedBlastKmer)
+else:
+    metaAnalyses.append(UnmappedKmerAnalysis)
 
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
