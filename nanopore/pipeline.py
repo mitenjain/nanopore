@@ -31,9 +31,9 @@ from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 
 
 
-mappers = [  Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, LastzRealign_GapGamma0_Em, LastzRealign_GapGamma2_Em, LastzRealign_GapGamma5_Em, LastzRealign_GapGamma9_Em ]  
-analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedKmer ]
+mappers = [  Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, LastzRealign_GapGamma0_Em ]  
+analyses = [ LocalCoverage, GlobalCoverage, Substitutions ] #, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
+metaAnalyses = [ ] #CoverageSummary, UnmappedKmer ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):

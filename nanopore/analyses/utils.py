@@ -360,10 +360,11 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     
     #Run cactus_expectationMaximisation
     options = cactus_expectationMaximisation.Options()
-    options.modelType="threeStateAsymmetric"
-    options.optionsToRealign="--diagonalExpansion=10 --splitMatrixBiggerThanThis=300" 
+    options.modelType="fiveStateAsymmetric" #"threeStateAsymmetric"
+    options.optionsToRealign="--diagonalExpansion=10 --splitMatrixBiggerThanThis=3000" 
     options.randomStart = True
     options.iterations = 20
+    options.numberOfAlignmentsPerJob=1
     target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
 
 def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, 
