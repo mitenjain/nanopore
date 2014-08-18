@@ -38,6 +38,7 @@ class AlignmentUncertainty(AbstractAnalysis):
             system("echo %s | cactus_realign %s %s --rescoreByPosteriorProbIgnoringGaps --rescoreOriginalAlignment --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputPosteriorProbs=%s> %s" % (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, tempCigarFile))
             
             #Load the cigar and get the posterior prob
+            assert len([ pA for pA in cigarRead(open(tempCigarFile)) ]) > 0
             assert len([ pA for pA in cigarRead(open(tempCigarFile)) ]) == 1
             pA = [ i for i in cigarRead(open(tempCigarFile)) ][0]
             avgPosteriorMatchProbabilityInCigar.append(pA.score)

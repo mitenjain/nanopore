@@ -405,16 +405,17 @@ def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, refer
     
 def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile, hmmFile, gapGamma):
     #Temporary files
-    tempRefFile = os.path.join(target.getLocalTempDir(), "ref.fa")
-    tempReadFile = os.path.join(target.getLocalTempDir(), "read.fa")
+    tempRefFile = os.path.join(target.getGlobalTempDir(), "ref.fa")
+    tempReadFile = os.path.join(target.getGlobalTempDir(), "read.fa")
     
     #Write the temporary files.
     fastaWrite(tempRefFile, referenceSequenceName, referenceSequence) 
     fastaWrite(tempReadFile, querySequenceName, querySequence)
-    
+
     #Call to cactus_realign
     loadHmm = nameValue("loadHmm", hmmFile)
     system("echo %s | cactus_realign %s %s --diagonalExpansion=30 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, outputCigarFile))
+    assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) > 0
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) == 1
 
 def realignSamFile3TargetFn(target, samFile, outputSamFile, tempCigarFiles):

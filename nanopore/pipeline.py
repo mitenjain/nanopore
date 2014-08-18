@@ -32,10 +32,10 @@ from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 
 
 mappers = [  Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, 
-           LastzRealign_GapGamma0_Em, LastzRealign_GapGamma9, 
-           Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, 
-           Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, 
-           Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ]  
+           LastzRealign_GapGamma0_Em, ] #LastzRealign_GapGamma9, 
+           #Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, 
+           #Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, 
+           #Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ]  
 analyses = [ LocalCoverage, GlobalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, 
             ChannelMappability, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedKmer ]
