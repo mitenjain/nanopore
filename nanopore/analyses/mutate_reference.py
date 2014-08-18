@@ -56,7 +56,7 @@ def MutateReference(workingDir):
 							if error < mutation_rate:
 								# choose a random nucleotide that's different
 								temp_seq[index] = choice([x for x in "ACGT" if x != char])
-								mutationIndex.write(str(index) + "\t" + char + "\t" + temp_seq[index])
+								mutationIndex.write(str(index + 1) + "\t" + char + "\t" + temp_seq[index])
 								mutationIndex.write("\n")
 
 						newreferenceFasta.write(seq.id)
