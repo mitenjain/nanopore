@@ -12,6 +12,7 @@ def parse_args(args):
 	parser.add_argument("--template", type=argparse.FileType("r"), help="matching template fastq")
 	parser.add_argument("--complement", type=argparse.FileType("r"), help="matching complement fastq")
 	parser.add_argument("--output", type=argparse.FileType("w"), help="output file")
+	parser.add_argument("--muscle", type=argparse.FileType("w"), help="uncounted muscle output")
 	return parser.parse_args()
 
 def fastaRead(fileHandle):
@@ -91,12 +92,12 @@ def main(args):
 			complement_seq = template_fastq_dict[twoD_record.qname]
 			aligned_template = call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, template_seq)
 			aligned_complement = call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, complement_seq)
-			#args.output.write(call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, template_seq))
-			#args.output.write(call_muscle(ref_name, ref_seq, "complement_" + twoD_record.qname, complement_seq))
+			args.muscle.write("\t".join(call_muscle(ref_name, ref_seq, "template_ " + twoD_record.qname, template_seq))); args.muscle.write("\n")
+			args.muscle.write("\t".join(call_muscle(ref_name, ref_seq, "complement_" + twoD_record.qname, complement_seq))); args.muscle.write("\n")
 			aligned[twoD_record.qname] = (aligned_template, aligned_complement)
-	output.write("ReadName\tTemplateIdentity\tComplementIdentity\n")
-	for name, (aligned_template, aligned_complement) in aligned:
-		output.write("{}\t{}\t{}\n".format(name, calculate_identity(aligned_template), calculate_identiy(aligned_complement)))
+	args.output.write("ReadName\tTemplateIdentity\tComplementIdentity\n")
+	for name, (aligned_template, aligned_complement) in aligned.iteritems():
+		args.output.write("{}\t{}\t{}\n".format(name, calculate_identity(aligned_template), calculate_identiy(aligned_complement)))
 
 
 
