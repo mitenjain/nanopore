@@ -1,5 +1,5 @@
 from random import random, choice
-import os, sys, glob
+import os, sys, glob, itertools
 
 class Fastaseq():
     """
@@ -53,15 +53,23 @@ def MutateReference(workingDir):
 						temp_seq = list(seq.seq)
 						for index, char in enumerate(temp_seq):
 							error = random()
-							if error < mutation_rate:
-								# choose a random nucleotide that's different
-								temp_seq[index] = choice([x for x in "ACGT" if x != char])
-								mutationIndex.write(str(index + 1) + "\t" + char + "\t" + temp_seq[index])
+							if error < mutation_rate:																# choose SNP, In, or Del
+								type_mut = choice([m for m in "SID"])
+								if type_mut == "S":
+									# choose a random nucleotide that's different
+									temp_seq[index] = choice([x for x in "ACGT" if x != char])
+								elif type_mut == "I":
+									inserts = int(10 *(random()*random()))
+									temp_seq[index] = [choice([x for x in "ACGT"]) for j in range(inserts)]
+								elif type_mut == "D":
+									temp_seq[index] = ""
+
+								mutationIndex.write(str(index + 1) + "\t" + char + "\t" + "".join(temp_seq[index]))
 								mutationIndex.write("\n")
 
 						newreferenceFasta.write(seq.id)
 						newreferenceFasta.write("\n")
-						newreferenceFasta.write("".join(temp_seq))
+						newreferenceFasta.write("".join(list(itertools.chain(*temp_seq)))))
 						newreferenceFasta.write("\n")
 					referenceFasta.close()
 					newreferenceFasta.close()
