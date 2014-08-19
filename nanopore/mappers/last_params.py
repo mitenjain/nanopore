@@ -15,4 +15,4 @@ class LastParamsChain(LastParams):
 class LastParamsRealign(LastParams):
     def run(self):
         LastParams.run(self)
-        self.realignSamFile()
+        self.realignSamFile(doEm=True)
