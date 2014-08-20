@@ -30,7 +30,7 @@ from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 
 mappers = [  #Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, 
-           LastzRealign_GapGamma0_Em, BlasrParamsRealign, BwaParamsRealign, LastParamsRealign ] #, LastzRealign_GapGamma9, 
+           LastzRealign_GapGamma0_Em ] #, BlasrParamsRealign, BwaParamsRealign, LastParamsRealign ] #, LastzRealign_GapGamma9, 
            #Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, 
            #Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, 
            #Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ]  
