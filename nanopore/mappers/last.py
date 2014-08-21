@@ -34,3 +34,8 @@ class LastRealign(Last):
     def run(self):
         Last.run(self)
         self.realignSamFile()
+
+class LastRealignEm(Last):
+    def run(self):
+        Last.run(self)
+        self.realignSamFile(doEm=True)

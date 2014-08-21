@@ -69,6 +69,9 @@ class ReadAlignmentCoverageCounter:
         return AbstractAnalysis.formatRatio(self.matches + self.mismatches, self.matches + self.mismatches + self.totalReadDeletionLength)
     
     def identity(self):
+        return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches + self.totalReadInsertionLength)
+    
+    def matchIdentity(self):
         return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches)
     
     def deletionsPerReadBase(self):
@@ -86,6 +89,7 @@ class ReadAlignmentCoverageCounter:
                                                     "readCoverage":str(self.readCoverage()), 
                                                     "referenceCoverage":str(self.referenceCoverage()), 
                                                     "identity":str(self.identity()), 
+                                                    "matchIdentity":str(self.identity()), 
                                                     "insertionsPerReadBase":str(self.insertionsPerReadBase()),
                                                     "deletionsPerReadBase":str(self.deletionsPerReadBase()) })
 
@@ -105,7 +109,7 @@ def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, rea
                 "numberOfMappedReads":str(len(mappedReadLengths)), "mappedReadLengths":" ".join(map(str, mappedReadLengths)),
                 "numberOfUnmappedReads":str(len(unmappedReadLengths)), "unmappedReadLengths":" ".join(map(str, unmappedReadLengths)), }
     
-    for fnStringName in "readCoverage", "referenceCoverage", "identity", "deletionsPerReadBase", "insertionsPerReadBase", "readLength":
+    for fnStringName in "readCoverage", "referenceCoverage", "identity", "matchIdentity", "deletionsPerReadBase", "insertionsPerReadBase", "readLength":
         for attribName, value in zip([ "min" + fnStringName, "avg" + fnStringName, "median" + fnStringName, "max" + fnStringName, 
                                       "distribution" + fnStringName ], list(stats(fnStringName))):
             attribs[attribName] = str(value)
@@ -142,6 +146,7 @@ class LocalCoverage(AbstractAnalysis):
                 outf.write("MappedReadLengths " + parentNode.get("mappedReadLengths") + "\n")
                 outf.write("UnmappedReadLengths " + parentNode.get("unmappedReadLengths") + "\n")
                 outf.write("ReadCoverage " + parentNode.get("distributionreadCoverage") + "\n")
+                outf.write("MatchIdentity " + parentNode.get("distributionmatchIdentity") + "\n")
                 outf.write("ReadIdentity " + parentNode.get("distributionidentity") + "\n")
                 outf.write("InsertionsPerBase " + parentNode.get("distributioninsertionsPerReadBase") + "\n")
                 outf.write("DeletionsPerBase " + parentNode.get("distributiondeletionsPerReadBase") + "\n")

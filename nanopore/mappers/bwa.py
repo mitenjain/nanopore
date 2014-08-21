@@ -18,3 +18,8 @@ class BwaRealign(Bwa):
     def run(self):
         Bwa.run(self)
         self.realignSamFile()
+
+class BwaRealignEm(Bwa):
+    def run(self):
+        Bwa.run(self)
+        self.realignSamFile()

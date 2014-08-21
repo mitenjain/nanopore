@@ -31,3 +31,8 @@ class BlasrRealign(Blasr):
     def run(self):
         Blasr.run(self)
         self.realignSamFile()
+
+class BlasrRealignEm(Blasr):
+    def run(self):
+        Blasr.run(self)
+        self.realignSamFile(doEm=True)

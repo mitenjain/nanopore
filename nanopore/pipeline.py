@@ -8,13 +8,15 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
-from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, LastzRealign_GapGamma0_Em, LastzRealign_GapGamma2_Em, LastzRealign_GapGamma5_Em, LastzRealign_GapGamma9_Em
-from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign
-from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign
-from nanopore.mappers.last import Last, LastChain, LastRealign
-from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign
-from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign
-from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign
+from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign, LastzRealignEm
+from nanopore.mappers.lastzParams import LastzParams, LastzParamsChain, LastzParamsRealign, LastzParamsRealignEm
+from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm
+from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign, BwaParamsRealignEm
+from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm
+from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm
+from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm
+from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm
+
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
@@ -29,14 +31,31 @@ from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 
-mappers = [  #Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, 
-           LastzRealign_GapGamma0_Em ] #, BlasrParamsRealign, BwaParamsRealign, LastParamsRealign ] #, LastzRealign_GapGamma9, 
-           #Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, 
-           #Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, 
-           #Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign ]  
-analyses = [ GlobalCoverage ] #, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, 
+mappers = [ Bwa,
+           BwaChain,
+           BwaParams,
+           BwaParamsChain,
+           Blasr,
+           BlasrChain,
+           BlasrParams,
+           BlasrParamsChain,
+           Last,
+           LastChain,
+           LastParams,
+           LastParamsChain,
+           LastParamsRealignEm,
+           Lastz,
+           LastzChain,
+           LastzRealignEm,
+           LastzParams,
+           LastzParamsChain,
+           LastzParamsRealignEm ]
+
+mappers = [ LastParamsRealignEm, LastzParamsRealignEm, LastzRealignEm ]
+          
+analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis ] #, 
             #ChannelMappability, FastQC, QualiMap, Consensus]
-metaAnalyses = [ ] #CoverageSummary, UnmappedKmer ]
+metaAnalyses = [ CoverageSummary, UnmappedKmer ]
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):

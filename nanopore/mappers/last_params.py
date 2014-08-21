@@ -15,4 +15,9 @@ class LastParamsChain(LastParams):
 class LastParamsRealign(LastParams):
     def run(self):
         LastParams.run(self)
+        self.realignSamFile()
+
+class LastParamsRealignEm(LastParams):
+    def run(self):
+        LastParams.run(self)
         self.realignSamFile(doEm=True)

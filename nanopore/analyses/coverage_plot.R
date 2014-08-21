@@ -22,10 +22,10 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     hist(data$ReadCoverage, breaks="FD", main="Read Coverage Distribution", xlab="Read Coverage")
     #put new plots on next page
     par(mfrow=c(1,1))
-    p1 <- xyplot(data$ReadCoverage~data$ReadIdentity, main="Read Coverage vs. Read Identity", ylab="Read Coverage", xlab="Read Identity", grid=T, panel=panel.smoothScatter)
-    p2 <- xyplot(data$ReadCoverage~data$MappedReadLengths, main="Read Coverage vs. Read Length", ylab="Read Coverage", xlab="Read Length", grid=T, panel=panel.smoothScatter)
-    p3 <- xyplot(data$MappedReadLengths~data$ReadIdentity, main="Read Length vs. Read Identity", ylab="Read Length", xlab="Read Identity", grid=T, panel=panel.smoothScatter)
-    p4 <- xyplot(data$ReadCoverage~(data$InsertionsPerBase+data$DeletionsPerBase), main="Coverage vs. Indels Per Base", ylab="Read Coverage", xlab="Indels Per Base", grid=T, panel=panel.smoothScatter)
+    p1 <- xyplot(data$ReadCoverage~data$MatchIdentity, main="Read Coverage vs. Match Identity", ylab="Read Coverage", xlab="Read Identity", grid=T, panel=panel.smoothScatter)
+    p2 <- xyplot(data$ReadIdentity~data$MappedReadLengths, main="Read Identity vs. Read Length", ylab="Read Length", xlab="Read Identity", grid=T, panel=panel.smoothScatter)
+    p3 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$MappedReadLengths, main="Indels Per Base vs. Read Length", ylab="Read Length", xlab="Indels Per Base", grid=T, panel=panel.smoothScatter)
+    p4 <- xyplot(data$ReadIdentity~data~(data$InsertionsPerBase+data$DeletionsPerBase), main="Read Identity vs. Indels Per Base", xlab="Read Identity", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
 
     #print the graphs
     print(p1, position=c(0, 0.5, 0.5, 1), more=T)

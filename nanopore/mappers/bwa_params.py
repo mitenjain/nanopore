@@ -10,8 +10,13 @@ class BwaParamsChain(BwaParams):
     def run(self):
         BwaParams.run(self)
         self.chainSamFile()
-
+        
 class BwaParamsRealign(BwaParams):
+    def run(self):
+        BwaParams.run(self)
+        self.realignSamFile()
+
+class BwaParamsRealignEm(BwaParams):
     def run(self):
         BwaParams.run(self)
         self.realignSamFile(doEm=True)

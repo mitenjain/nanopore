@@ -15,4 +15,9 @@ class BlasrParamsChain(BlasrParams):
 class BlasrParamsRealign(BlasrParams):
     def run(self):
         BlasrParams.run(self)
+        self.realignSamFile()
+        
+class BlasrParamsRealignEm(BlasrParams):
+    def run(self):
+        BlasrParams.run(self)
         self.realignSamFile(doEm=True)

@@ -363,9 +363,9 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     options.modelType="fiveStateAsymmetric" #"threeStateAsymmetric"
     options.optionsToRealign="--diagonalExpansion=10 --splitMatrixBiggerThanThis=300" 
     options.randomStart = True
-    options.trials = 10
+    options.trials = 5
     options.iterations = 200
-    options.numberOfAlignmentsPerJob=1
+    options.numberOfAlignmentsPerJob=200
     #options.updateTheBand = True
     #options.useDefaultModelAsStart = True
     #options.setJukesCantorStartingEmissions=0.3
@@ -419,7 +419,7 @@ def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, re
 
     #Call to cactus_realign
     loadHmm = nameValue("loadHmm", hmmFile)
-    system("echo %s | cactus_realign %s %s --diagonalExpansion=30 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, outputCigarFile))
+    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, outputCigarFile))
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) > 0
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) == 1
 

@@ -5,10 +5,10 @@ import pysam
 import os
 
 class Lastz(AbstractMapper):
-    def run(self):
+    def run(self, args=""):
         tempFastqFile = os.path.join(self.getLocalTempDir(), "temp.fastq")
         normaliseQualValues(self.readFastqFile, tempFastqFile)
-        system("lastz %s %s --format=sam > %s" % (self.referenceFastaFile, tempFastqFile, self.outputSamFile))
+        system("lastz %s %s %s --format=sam > %s" % (self.referenceFastaFile, tempFastqFile, args, self.outputSamFile))
         try:
             pysam.Samfile(self.outputSamFile, "r" ).close()
         except ValueError:
@@ -27,43 +27,8 @@ class LastzRealign(Lastz):
     def run(self):
         Lastz.run(self)
         self.realignSamFile()
-
-class LastzRealign_GapGamma0(Lastz):
-    def run(self):
-        Lastz.run(self)
-        self.realignSamFile(gapGamma=0.0)
         
-class LastzRealign_GapGamma0_Em(Lastz):
+class LastzRealignEm(Lastz):
     def run(self):
         Lastz.run(self)
-        self.realignSamFile(doEm=True, gapGamma=0.0)
-        
-class LastzRealign_GapGamma2(Lastz):
-    def run(self):
-        Lastz.run(self)
-        self.realignSamFile(gapGamma=0.2)
-        
-class LastzRealign_GapGamma2_Em(Lastz):
-    def run(self):
-        Lastz.run(self)
-        self.realignSamFile(doEm=True, gapGamma=0.2)
-        
-class LastzRealign_GapGamma5(Lastz):
-    def run(self):
-        Lastz.run(self)
-        self.realignSamFile(gapGamma=0.5)
-
-class LastzRealign_GapGamma5_Em(Lastz):
-    def run(self):
-        Lastz.run(self)
-        self.realignSamFile(doEm=True, gapGamma=0.5)
-
-class LastzRealign_GapGamma9(Lastz):
-    def run(self):
-        Lastz.run(self)
-        self.realignSamFile(gapGamma=0.9)
-
-class LastzRealign_GapGamma9_Em(Lastz):
-    def run(self):
-        Lastz.run(self)
-        self.realignSamFile(doEm=True, gapGamma=0.9)
+        self.realignSamFile(doEm=True)
