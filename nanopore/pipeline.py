@@ -35,6 +35,7 @@ mappers = [ Bwa,
            BwaChain,
            BwaParams,
            BwaParamsChain,
+           BwaParamsRealignEm,
            Blasr,
            BlasrChain,
            BlasrParams,
@@ -51,7 +52,7 @@ mappers = [ Bwa,
            LastzParamsChain,
            LastzParamsRealignEm ]
 
-mappers = [ LastParamsRealignEm, LastzParamsRealignEm, LastzRealignEm ]
+#mappers = [ LastParamsRealignEm, LastzParamsRealignEm, LastzRealignEm ]
           
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis ] #, 
             #ChannelMappability, FastQC, QualiMap, Consensus]
