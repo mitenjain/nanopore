@@ -150,6 +150,7 @@ def makeFastqSequenceNamesUnique(inputFastqFile, outputFastqFile):
     names = set()
     fileHandle = open(outputFastqFile, 'w')
     for name, seq, quals in fastqRead(open(inputFastqFile, 'r')):
+        name = name.split()[0] #Get rid of any white space
         while name in names:
             logger.critical("Got a duplicate fastq sequence name: %s" % name)
             name += "i"
