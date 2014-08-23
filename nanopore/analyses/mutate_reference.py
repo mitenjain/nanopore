@@ -44,8 +44,8 @@ def MutateReference(workingDir):
 					if not os.path.exists(newreferenceFastaFile):
 						referenceFasta = open(referenceFastaFile, "r")
 						newreferenceFasta = open(newreferenceFastaFile, "w")
-
 						mutationIndex = open(mutationIndexFile, "w")
+						
 						referenceFastaFile_ID = referenceFastaFile.split(".fa")[0].split("/")[-1]
 						for seq in Fastaseq.readline(referenceFasta):
 							temp_seq = []
