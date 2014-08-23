@@ -37,10 +37,8 @@ def MutateReference(workingDir):
 			mutation_rates = [0.01, 0.05, 0.10, 0.20]
 			for indel_rate in indel_rates:
 				j = indel_rate * 100
-				print str(j)
 				for mutation_rate in mutation_rates:
 					i = mutation_rate * 100
-					print str(i)
 					newreferenceFastaFile = referenceFastaFile.split(".fa")[0] + "_" + str(i) + "_percent_SNPs_" + str(j) + "_percent_InDels.fasta"
 					mutationIndexFile = referenceFastaFile.split(".fa")[0] + "_" + str(i) + "_percent_SNPs_" + str(j) + "_percent_InDels_Index.txt"
 					if not os.path.exists(newreferenceFastaFile):
