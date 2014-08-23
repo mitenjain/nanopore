@@ -8,7 +8,7 @@ class Lastz(AbstractMapper):
     def run(self, args=""):
         tempFastqFile = os.path.join(self.getLocalTempDir(), "temp.fastq")
         normaliseQualValues(self.readFastqFile, tempFastqFile)
-        system("lastz %s %s %s --format=sam > %s" % (self.referenceFastaFile, tempFastqFile, args, self.outputSamFile))
+        system("lastz %s[multiple] %s %s --format=sam > %s" % (self.referenceFastaFile, tempFastqFile, args, self.outputSamFile))
         try:
             pysam.Samfile(self.outputSamFile, "r" ).close()
         except ValueError:
