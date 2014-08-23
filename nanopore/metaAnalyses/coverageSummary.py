@@ -23,7 +23,7 @@ class CoverageSummary(AbstractMetaAnalysis):
                     alignmentUncertaintyXML = ET.parse(os.path.join(resultsDir, "analysis_AlignmentUncertainty", "alignmentUncertainty.xml")).getroot()
                     if mapper.__name__ not in tmp_data:
                         tmp_data[mapper.__name__] = []
-                    tmp_data[mapper.__name__].append(",".join(globalCoverageXML.attrib["distributionreadCoverage"].split()))
+                    tmp_data[mapper.__name__].append(",".join(globalCoverageXML.attrib["distributionidentity"].split()))
                     fH.write(",".join([readFastqFile, referenceFastaFile, mapper.__name__,
                                globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
                                globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
