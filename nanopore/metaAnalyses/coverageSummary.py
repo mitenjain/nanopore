@@ -9,13 +9,13 @@ class CoverageSummary(AbstractMetaAnalysis):
     def run(self):
         fH = open(os.path.join(self.outputDir, "summary.csv"), 'w')
         
-        fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
+        fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AvgPosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
         
         for readFastqFile in self.readFastqFiles:
             for referenceFastaFile in self.referenceFastaFiles:
                 #tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
                 tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
-                tmp.write(",".join(["Mapper", "MedianReadCoverage","MedianReferenceCoverage","MedianIdentity","MedianDeletionsPerReadBase", "MedianInsertionsPerReadBase","AveragePosteriorMatchProbability", "UnmappedReadCount", "NumberOfReads"]) + "\n")
+                tmp.write(",".join(["Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity", "AvgMatchIdentity","AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "UnmappedReadCount", "NumberOfReads"]) + "\n")
                 tmp_data = {}    
                 for mapper in self.mappers:
                     analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
@@ -25,18 +25,18 @@ class CoverageSummary(AbstractMetaAnalysis):
                         tmp_data[mapper.__name__] = []
                     tmp_data[mapper.__name__].append(",".join(globalCoverageXML.attrib["distributionreadCoverage"].split()))
                     fH.write(",".join([readFastqFile, referenceFastaFile, mapper.__name__,
-                               globalCoverageXML.attrib["medianreadCoverage"], globalCoverageXML.attrib["medianreferenceCoverage"],
-                               globalCoverageXML.attrib["medianidentity"], 
-                               globalCoverageXML.attrib["mediandeletionsPerReadBase"],
-                               globalCoverageXML.attrib["medianinsertionsPerReadBase"],
+                               globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
+                               globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
+                               globalCoverageXML.attrib["avgdeletionsPerReadBase"],
+                               globalCoverageXML.attrib["avginsertionsPerReadBase"],
                                alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
                                globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")
                     #I realize this is ugly, sorry - better than trying to split it up in R however
                     tmp.write(",".join([mapper.__name__,
-                               globalCoverageXML.attrib["medianreadCoverage"], globalCoverageXML.attrib["medianreferenceCoverage"],
-                               globalCoverageXML.attrib["medianidentity"], 
-                               globalCoverageXML.attrib["mediandeletionsPerReadBase"],
-                               globalCoverageXML.attrib["medianinsertionsPerReadBase"],
+                               globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
+                               globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
+                               globalCoverageXML.attrib["avgdeletionsPerReadBase"],
+                               globalCoverageXML.attrib["avginsertionsPerReadBase"],
                                alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
                                globalCoverageXML.attrib["numberOfUnmappedReads"],
                                globalCoverageXML.attrib["numberOfReads"]]) + "\n")  
