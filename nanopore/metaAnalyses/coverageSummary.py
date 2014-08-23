@@ -51,10 +51,10 @@ class CoverageSummary(AbstractMetaAnalysis):
         for mapper in tmp_data:
             tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
             #Make version of the plot with just the mapper on it
-            #tmp2 = open(os.path.join(self.getGlobalTempDir(), "tmp2.csv"), "w")
-            #tmp2.write(",".join([mapper] + tmp_data[mapper])); tmp2.write("\n")
-            #system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp2.csv"), os.path.join(self.outputDir, "coverage_summary_plots_%s.pdf" % mapper)))
-            #tmp2.close()
+            tmp2 = open(os.path.join(self.getGlobalTempDir(), "tmp2.csv"), "w")
+            tmp2.write(",".join([mapper] + tmp_data[mapper])); tmp2.write("\n")
+            system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp2.csv"), os.path.join(self.outputDir, "coverage_summary_plots_%s.pdf" % mapper)))
+            tmp2.close()
         tmp.close()
         system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
         #system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, "tmp2.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))

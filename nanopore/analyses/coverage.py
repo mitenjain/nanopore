@@ -82,7 +82,7 @@ class ReadAlignmentCoverageCounter:
     
     def readLength(self):
         return len(self.readSeq)
-    
+
     def getXML(self):
         return ET.Element("readAlignmentCoverage", { "refSeqName":self.refSeqName, 
                                                     "readSeqName":self.readSeqName, "readLength":str(self.readLength()),
