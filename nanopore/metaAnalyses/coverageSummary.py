@@ -9,7 +9,7 @@ class CoverageSummary(AbstractMetaAnalysis):
     def run(self):
         fH = open(os.path.join(self.outputDir, "summary.csv"), 'w')
         
-        fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity","AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
+        fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "UnmappedReadCount"]) + "\n")
         
         for readFastqFile in self.readFastqFiles:
             for referenceFastaFile in self.referenceFastaFiles:
