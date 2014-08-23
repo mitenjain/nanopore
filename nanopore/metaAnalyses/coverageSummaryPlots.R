@@ -42,7 +42,7 @@ if (dim(summary)[1] >= 1) {
 
 	#scatterplot of Avg # of insertions per base vs Avg # of deletions per base
 	plot(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, ylab="Avg. Insertions Per Read Base", xlab="Avg. Deletions Per Read Base", main=name, col=r, pch=c(19,18,15,17), xlim=c(0,0.2), ylim=c(0,0.2), cex.main=0.9)
-    text(100 * summary$AvgIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, cex=0.75, pos=2, labels=rownames(summary))
+    text(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, cex=0.75, pos=2, labels=rownames(summary))
 	#legend(x="top", legend=rownames(summary), col=r, pch=c(19,18,15,17), cex=0.75)
 
 
