@@ -69,7 +69,7 @@ def MutateReference(workingDir):
 
 						newreferenceFasta.write(seq.id)
 						newreferenceFasta.write("\n")
-						newreferenceFasta.write("".join(list(itertools.chain(*temp_seq)))))
+						newreferenceFasta.write("".join(list(itertools.chain(*temp_seq))))
 						newreferenceFasta.write("\n")
 					referenceFasta.close()
 					newreferenceFasta.close()

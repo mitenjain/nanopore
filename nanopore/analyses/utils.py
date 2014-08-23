@@ -364,8 +364,10 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     options.optionsToRealign="--diagonalExpansion=10 --splitMatrixBiggerThanThis=300" 
     options.randomStart = True
     options.trials = 5
+    options.outputTrialHmms = True
     options.iterations = 200
     options.numberOfAlignmentsPerJob=200
+    options.outputXMLModelFile = outputModel + ".xml"
     #options.updateTheBand = True
     #options.useDefaultModelAsStart = True
     #options.setJukesCantorStartingEmissions=0.3

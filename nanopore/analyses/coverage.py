@@ -100,7 +100,7 @@ def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, rea
     unmappedReadLengths = [ len(readSequences[i]) for i in readSequences.keys() if i not in readsToReadAlignmentCoverages ]
     def stats(fnStringName):
         l = map(lambda x : getattr(x, fnStringName)(), readAlignmentCoverages)
-        l2 = l
+        l2 = l[:]
         l2.sort()
         return l2[0], numpy.average(l2), numpy.median(l2), l2[-1], " ".join(map(str, l))
     
