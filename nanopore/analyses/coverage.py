@@ -75,10 +75,10 @@ class ReadAlignmentCoverageCounter:
         return AbstractAnalysis.formatRatio(self.matches, self.matches + self.mismatches)
     
     def deletionsPerReadBase(self):
-        return AbstractAnalysis.formatRatio(self.totalReadDeletions, len(self.readSeq))
+        return AbstractAnalysis.formatRatio(self.totalReadDeletions, self.matches + self.mismatches)
     
     def insertionsPerReadBase(self):
-        return AbstractAnalysis.formatRatio(self.totalReadInsertions, len(self.readSeq))
+        return AbstractAnalysis.formatRatio(self.totalReadInsertions, self.matches + self.mismatches)
     
     def readLength(self):
         return len(self.readSeq)
