@@ -17,7 +17,7 @@ myPanel <- function(x, y, z, ...) {
 
 d <- read.table(f, header = T, row.names = 1)
 
-if ( dim(d)[1] > 0 ) {
+if ( dim(d)[1] > 0 && sum(d) > 0) {
 
 	pdf(out)
 
