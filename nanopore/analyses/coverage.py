@@ -5,6 +5,7 @@ import numpy
 import pysam
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, prettyXml, system
+from itertools import chain
 
 class ReadAlignmentCoverageCounter:
     """Counts coverage from a pairwise alignment.
@@ -93,10 +94,14 @@ class ReadAlignmentCoverageCounter:
                                                     "insertionsPerReadBase":str(self.insertionsPerReadBase()),
                                                     "deletionsPerReadBase":str(self.deletionsPerReadBase()) })
 
-def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, readSequences, readsToReadAlignmentCoverages):
+def getAggregateCoverageStats(readAlignmentCoverages, tagName, refSequences, readSequences, readsToReadAlignmentCoverages, typeof):
     """Calculates aggregate stats across a set of read alignments, plots distributions.
     """
-    mappedReadLengths = [ len(readSequences[i]) for i in readSequences.keys() if i in readsToReadAlignmentCoverages ]
+    if typeof == "coverage_all":
+        mappedReadLengths = [ [len(readSequences[i])] * len(readsToReadAlignmentCoverages[i]) for i in readSequences.keys() if i in readsToReadAlignmentCoverages ]
+        mappedReadLengths = list(chain(*mappedReadLengths))
+    else:
+        mappedReadLengths = [ len(readSequences[i]) for i in readSequences.keys() if i in readsToReadAlignmentCoverages ]
     unmappedReadLengths = [ len(readSequences[i]) for i in readSequences.keys() if i not in readsToReadAlignmentCoverages ]
     def stats(fnStringName):
         l = map(lambda x : getattr(x, fnStringName)(), readAlignmentCoverages)
@@ -139,7 +144,7 @@ class LocalCoverage(AbstractAnalysis):
         #Write out the coverage info for differing subsets of the read alignments
         if len(readsToReadCoverages.values()) > 0:
             for readCoverages, outputName in [ (reduce(lambda x, y : x + y, readsToReadCoverages.values()), "coverage_all"), (map(lambda x : max(x, key=lambda y : y.readCoverage()), readsToReadCoverages.values()), "coverage_bestPerRead") ]:
-                parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences, readsToReadCoverages)
+                parentNode = getAggregateCoverageStats(readCoverages, outputName, refSequences, readSequences, readsToReadCoverages, outputName)
                 open(os.path.join(self.outputDir, outputName + ".xml"), 'w').write(prettyXml(parentNode))
                 #this is a ugly file format with each line being a different data type - column length is variable
                 outf = open(os.path.join(self.outputDir, outputName + ".txt"), "w")
