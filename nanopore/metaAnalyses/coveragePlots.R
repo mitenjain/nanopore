@@ -21,7 +21,7 @@ if (file.info(args[1])$size != 0) {
 			m <- max(m, max(x$y))
 		}
 		#now we iterate over all of the mappers and plot based on the biggest y value and varying colors
-		plot(density(as.numeric(dist[1,]), na.rm=T, adjust=0.7), xlab="Identity", xlim=c(0,1), main="Identity by Mapper", ylim=c(0,20), col=r[n], lty=1)
+		plot(density(as.numeric(dist[1,]), na.rm=T, adjust=0.7), xlab="Identity", xlim=c(0,1), main="Identity by Mapper", ylim=c(0,m), col=r[n], lty=1)
 		for (i in 2:length(rownames(dist))) {
 			n <- n + 1
 			lines(density(as.numeric(dist[i,]), na.rm=T, adjust=0.7), col = r[n], lty=n%%2+1)
@@ -31,5 +31,5 @@ if (file.info(args[1])$size != 0) {
 
 		dev.off()
 
-}
+	}
 }
