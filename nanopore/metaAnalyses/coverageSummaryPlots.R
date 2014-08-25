@@ -15,12 +15,16 @@ if (dim(summary)[1] >= 1) {
 	#par(mfrow=c(2,2))
 
 	#barplot of unmapped read counts per mapper
-	q <- barplot(height=summary$UnmappedReadCount/(summary$UnmappedReadCount+summary$NumberOfReads), xaxt="n", col=r, main=paste(name,"Percent Unmapped Reads",sep="\n"), ylab="Counts", cex.main=0.9)
+	q <- barplot(height=summary$UnmappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), xaxt="n", col=r, main=paste(name,"Percent Unmapped Reads",sep="\n"), ylab="Counts", cex.main=0.9, ylim=c(0,1.0))
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
 
 	#scatterplot of Avg read coverage vs avg posterior probability
 	#plot(100 * summary$AvgReadCoverage, summary$AveragePosteriorMatchProbability, ylab="Avg. Match Probability", xlab="Avg. Read Coverage", main=name, col=r, pch=20, xlim=c(0,100), cex.main=0.9)
 	#text(100 * summary$AvgReadCoverage, summary$AveragePosteriorMatchProbability, cex=0.75, pos=2, labels=rownames(summary))
+    
+    #scatterplot of Avg. identity vs Proportion reads mapped.
+	plot(100 * summary$AvgIdentity, 100 * summary$UnmappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), ylab="Avg. Identity", xlab="Prop. Reads Mapped", main=name, col=r, pch=20, xlim=c(0,100), ylim=c(0,100), cex.main=0.9)
+	text(100 * summary$AvgIdentity, 100 * summary$UnmappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), cex=0.75, pos=2, labels=rownames(summary))
 
 	#scatterplot of Avg read coverage vs Avg match identity
 	plot(100 * summary$AvgReadCoverage, 100 * summary$AvgMatchIdentity, ylab="Avg. Match Identity", xlab="Avg. Read Coverage", main=name, col=r, pch=20, xlim=c(0,100), ylim=c(0,100), cex.main=0.9)
