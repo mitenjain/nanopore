@@ -22,7 +22,7 @@ if (dim(summary)[1] >= 1) {
     ####Looking at insertion/deletion/match rates
     ################################################
     
-	plot(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, ylab="Avg. Insertions Per Aligned Read Base", xlab="Avg. Deletions Per Aligned Read Base", main=name, col=r, pch=c(19,18,15,17), xlim=c(0,0.2), ylim=c(0,0.2), cex.main=0.9)
+	plot(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, ylab="Avg. Insertions Per Aligned Read Base", xlab="Avg. Deletions Per Aligned Read Base", main=name, col=r, pch=c(19,18,15,17), xlim=c(0,0.5), ylim=c(0,0.5), cex.main=0.9)
     text(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, cex=0.75, pos=2, labels=rownames(summary))
 	#legend(x="top", legend=rownames(summary), col=r, pch=c(19,18,15,17), cex=0.75)
     
@@ -30,20 +30,20 @@ if (dim(summary)[1] >= 1) {
 	plot(100 * summary$AvgMatchIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, ylab="Avg. Indels Per Aligned Read Base", xlab="Avg. Match Identity", main=name, col=r, pch=20, xlim=c(0,100), cex.main=0.9)
     text(100 * summary$AvgMatchIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, cex=0.75, pos=2, labels=rownames(summary))
 
-    q <- barplot(height=summary$AvgInsertionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Insertions Per Read Base",sep="\n"), ylab="Avg. Insertions Per Read Base", cex.main=0.9, ylim=c(0,1.0))
+    q <- barplot(height=summary$AvgInsertionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Insertions Per Read Base",sep="\n"), ylab="Avg. Insertions Per Read Base", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
-    q <- barplot(height=summary$AvgDeletionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Deletions Per Read Base",sep="\n"), ylab="Avg. Deletions Per Read Base", cex.main=0.9, ylim=c(0,1.0))
+    q <- barplot(height=summary$AvgDeletionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Deletions Per Read Base",sep="\n"), ylab="Avg. Deletions Per Read Base", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
-    q <- barplot(height=summary$AvgMatchIdentity, xaxt="n", col=r, main=paste(name,"Identity of Aligned Bases",sep="\n"), ylab="Proportion of matched aligned bases.", cex.main=0.9, ylim=c(0,1.0))
+    q <- barplot(height=summary$AvgMatchIdentity, xaxt="n", col=r, main=paste(name,"Identity of Aligned Bases",sep="\n"), ylab="Proportion of matched aligned bases.", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
     ################################################
     ####Looking at identity - demonstrating chaining and EM are useful improvements
     ################################################
     
-    q <- barplot(height=summary$AvgIdentity, xaxt="n", col=r, main=paste(name,"Identity (inc. gaps)",sep="\n"), ylab="Identity (inc. gaps)", cex.main=0.9, ylim=c(0,1.0))
+    q <- barplot(height=summary$AvgIdentity, xaxt="n", col=r, main=paste(name,"Identity (inc. gaps)",sep="\n"), ylab="Identity (inc. gaps)", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
     #scatterplot of Avg read coverage vs Avg match identity
@@ -55,7 +55,7 @@ if (dim(summary)[1] >= 1) {
     ################################################
 
     #barplot of unmapped read counts per mapper
-	q <- barplot(height=summary$MappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), xaxt="n", col=r, main=paste(name,"Prop. Mapped Reads",sep="\n"), ylab="Prop. Reads Mapped", cex.main=0.9, ylim=c(0,1.0))
+	q <- barplot(height=summary$MappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), xaxt="n", col=r, main=paste(name,"Prop. Mapped Reads",sep="\n"), ylab="Prop. Reads Mapped", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
 
     ################################################
@@ -66,7 +66,7 @@ if (dim(summary)[1] >= 1) {
 	plot(100 * summary$AvgIdentity, 100 * summary$MappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), xlab="Avg. Identity", ylab="Prop. Reads Mapped", main=name, col=r, pch=20, xlim=c(0,100), ylim=c(0,100), cex.main=0.9)
 	text(100 * summary$AvgIdentity, 100 * summary$MappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), cex=0.75, pos=2, labels=rownames(summary))
     
-    q <- barplot(height=((summary$MappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount))*summary$AvgIdentity), xaxt="n", col=r, main=paste(name,"Prop. Of Sequenced Bases Aligned with Identity",sep="\n"), ylab="Prop. Of Sequenced Bases Aligned with Identity", cex.main=0.9, ylim=c(0,1.0))
+    q <- barplot(height=((summary$MappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount))*summary$AvgIdentity), xaxt="n", col=r, main=paste(name,"Prop. Of Sequenced Bases Aligned with Identity",sep="\n"), ylab="Prop. Of Sequenced Bases Aligned with Identity", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
     #legend(x="top", legend=rownames(summary), col=r, pch=c(19,18,15,17), cex=0.75)
