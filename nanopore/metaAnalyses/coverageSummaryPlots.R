@@ -22,7 +22,7 @@ if (dim(summary)[1] >= 1) {
     ####Looking at insertion/deletion/match rates
     ################################################
     
-    plot(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, ylab="Avg. Insertions Per Aligned Read Base", xlab="Avg. Deletions Per Aligned Read Base", main=name, col=r, pch=c(19,18,15,17), xlim=c(0,0.2), ylim=c(0,0.2), cex.main=0.9)
+    plot(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, xlab="Avg. Insertions Per Aligned Read Base", ylab="Avg. Deletions Per Aligned Read Base", main=name, col=r, pch=c(19,18,15,17), xlim=c(0,0.2), ylim=c(0,0.2), cex.main=0.9)
     text(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, cex=0.75, pos=2, labels=rownames(summary))
     #legend(x="top", legend=rownames(summary), col=r, pch=c(19,18,15,17), cex=0.75)
     
