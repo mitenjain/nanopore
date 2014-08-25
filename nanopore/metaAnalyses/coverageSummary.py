@@ -18,8 +18,8 @@ class CoverageSummary(AbstractMetaAnalysis):
                 tmp.write(",".join(["Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity", "AvgMatchIdentity","AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "UnmappedReadCount", "NumberOfReads"]) + "\n")
                 tmp_data = {}    
                 for mapper in self.mappers:
+                    analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
                     if os.path.exists(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")):
-                        analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
                         globalCoverageXML = ET.parse(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")).getroot()
                         alignmentUncertaintyXML = ET.parse(os.path.join(resultsDir, "analysis_AlignmentUncertainty", "alignmentUncertainty.xml")).getroot()
                         if mapper.__name__ not in tmp_data:
