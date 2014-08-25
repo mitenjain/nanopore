@@ -20,8 +20,13 @@ if (dim(indels)[1] > 2) {
 	plot(x=as.numeric(indels$ReadSequenceLengths),y=as.numeric(indels$NumberReadDeletions), main="Deletions vs. Read Length", xlab="Read Length", ylab="Read Deletions", pch=19, col="blue")
 
 	if (! "NaN" %in% indels$MedianReadInsertionLengths && ! "NaN" %in% indels$MedianReadDeletionLengths) {
-		plot(density(as.numeric(indels$MedianReadInsertionLengths), na.rm=T), main="Distribution of Median Insertion Lengths", xlab="Median Insertion Lengths")
-		plot(density(as.numeric(indels$MedianReadDeletionLengths), na.rm=T), main="Distribution of Median Deletion Lengths", xlab="Median Deletion Lengths")
+		if (! length(indels$MedianReadDeletionLengths[!is.na(indels$MedianReadDeletionLengths)]) > 1 && ! length(indels$MedianReadInsertionLengths[!is.na(indels$MedianReadInsertionLengths)]) > 1 ) {
+			barplot( c(indels$MedianReadDeletionLengths[!is.na(indels$MedianReadDeletionLengths)], indels$MedianReadInsertionLengths[!is.na(indels$MedianReadInsertionLengths)]), main="Median Insertion Lengths", names.arg=c("Deletions", "Insertions"))
+		}
+		else {
+			plot(density(as.numeric(indels$MedianReadInsertionLengths), na.rm=T), main="Distribution of Median Insertion Lengths", xlab="Median Insertion Lengths")
+			plot(density(as.numeric(indels$MedianReadDeletionLengths), na.rm=T), main="Distribution of Median Deletion Lengths", xlab="Median Deletion Lengths")
+		}
 	}
 
 	dev.off()
