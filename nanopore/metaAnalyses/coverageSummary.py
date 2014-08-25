@@ -18,8 +18,8 @@ class CoverageSummary(AbstractMetaAnalysis):
                 tmp.write(",".join(["Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity", "AvgMatchIdentity","AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "UnmappedReadCount", "NumberOfReads"]) + "\n")
                 tmp_data = {}    
                 for mapper in self.mappers:
+                    analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
                     if os.path.exists(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")):
-                        analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
                         globalCoverageXML = ET.parse(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")).getroot()
                         alignmentUncertaintyXML = ET.parse(os.path.join(resultsDir, "analysis_AlignmentUncertainty", "alignmentUncertainty.xml")).getroot()
                         if mapper.__name__ not in tmp_data:
@@ -52,9 +52,9 @@ class CoverageSummary(AbstractMetaAnalysis):
         for mapper in tmp_data:
             tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
             #Make version of the plot with just the mapper on it
-            tmp2 = open(os.path.join(self.getGlobalTempDir(), "tmp2.csv"), "w")
+            tmp2 = open(os.path.join(self.getGlobalTempDir(), "tmp_{}.csv").format(mapper), "w")
             tmp2.write(",".join([mapper] + tmp_data[mapper])); tmp2.write("\n")
-            system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp2.csv"), os.path.join(self.outputDir, "coverage_summary_plots_%s.pdf" % mapper)))
+            system("Rscript nanopore/metaAnalyses/coveragePlotsByMapper.R {} {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp_{}.csv".format(mapper)), os.path.join(self.outputDir, "coverage_summary_plots_%s.pdf" % mapper), mapper))
             tmp2.close()
         tmp.close()
         system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
