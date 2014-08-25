@@ -18,28 +18,29 @@ class CoverageSummary(AbstractMetaAnalysis):
                 tmp.write(",".join(["Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity", "AvgMatchIdentity","AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "UnmappedReadCount", "NumberOfReads"]) + "\n")
                 tmp_data = {}    
                 for mapper in self.mappers:
-                    analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
-                    globalCoverageXML = ET.parse(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")).getroot()
-                    alignmentUncertaintyXML = ET.parse(os.path.join(resultsDir, "analysis_AlignmentUncertainty", "alignmentUncertainty.xml")).getroot()
-                    if mapper.__name__ not in tmp_data:
-                        tmp_data[mapper.__name__] = []
-                    tmp_data[mapper.__name__].append(",".join(globalCoverageXML.attrib["distributionidentity"].split()))
-                    fH.write(",".join([readFastqFile, referenceFastaFile, mapper.__name__,
-                               globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
-                               globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
-                               globalCoverageXML.attrib["avgdeletionsPerReadBase"],
-                               globalCoverageXML.attrib["avginsertionsPerReadBase"],
-                               alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
-                               globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")
-                    #I realize this is ugly, sorry - better than trying to split it up in R however
-                    tmp.write(",".join([mapper.__name__,
-                               globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
-                               globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
-                               globalCoverageXML.attrib["avgdeletionsPerReadBase"],
-                               globalCoverageXML.attrib["avginsertionsPerReadBase"],
-                               alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
-                               globalCoverageXML.attrib["numberOfUnmappedReads"],
-                               globalCoverageXML.attrib["numberOfReads"]]) + "\n")  
+                    if os.path.exists(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")):
+                        analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
+                        globalCoverageXML = ET.parse(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")).getroot()
+                        alignmentUncertaintyXML = ET.parse(os.path.join(resultsDir, "analysis_AlignmentUncertainty", "alignmentUncertainty.xml")).getroot()
+                        if mapper.__name__ not in tmp_data:
+                            tmp_data[mapper.__name__] = []
+                        tmp_data[mapper.__name__].append(",".join(globalCoverageXML.attrib["distributionidentity"].split()))
+                        fH.write(",".join([readFastqFile, referenceFastaFile, mapper.__name__,
+                                   globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
+                                   globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
+                                   globalCoverageXML.attrib["avgdeletionsPerReadBase"],
+                                   globalCoverageXML.attrib["avginsertionsPerReadBase"],
+                                   alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
+                                   globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")
+                        #I realize this is ugly, sorry - better than trying to split it up in R however
+                        tmp.write(",".join([mapper.__name__,
+                                   globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
+                                   globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
+                                   globalCoverageXML.attrib["avgdeletionsPerReadBase"],
+                                   globalCoverageXML.attrib["avginsertionsPerReadBase"],
+                                   alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
+                                   globalCoverageXML.attrib["numberOfUnmappedReads"],
+                                   globalCoverageXML.attrib["numberOfReads"]]) + "\n")  
                 tmp.close()
                 filename = "_".join([readFastqFile.split("/")[-1],referenceFastaFile.split("/")[-1]])
                 readname = readFastqFile.split("/")[-1]; refname = referenceFastaFile.split("/")[-1]
