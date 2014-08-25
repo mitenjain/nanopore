@@ -2,6 +2,7 @@ from nanopore.metaAnalyses.abstractMetaAnalysis import AbstractMetaAnalysis
 import os, sys
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import system
+import re
 
 class CoverageSummary(AbstractMetaAnalysis):
     """Calculates meta-coverage across all the samples.
@@ -51,13 +52,25 @@ class CoverageSummary(AbstractMetaAnalysis):
         fH.close()
         #tmp = open(os.path.join(self.outputDir, "tmp2.csv"), "w")
         tmp = open(os.path.join(self.getGlobalTempDir(), "tmp.csv"), "w")
+        #map by mapper and its parameters/etc; fast ugly hacks below
+        uppercase_regex = re.compile("[A-Z][a-z]*")
+        tmp_mapper = list()
+        for mapper in tmp_data:
+          tmp_mapper.append(re.findall(uppercase_regex, mapper))
+        tmp_mapper = sorted(tmp_mapper)
+        base_mappers = set([x[0] for x in tmp_mapper])
+        for base in base_mappers:
+          outf = open(os.path.join(self.outputDir, base + ".csv"), "w")
+          for mapper in tmp_data:
+            if base in mapper:
+              tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
+          tmp.close()
+          system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, base + ".csv"), os.path.join(self.outputDir, mapper + "_coverage_summary_plots.pdf")))
+        
+
+        #map everything together
         for mapper in tmp_data:
             tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
-            #Make version of the plot with just the mapper on it
-            tmp2 = open(os.path.join(self.getGlobalTempDir(), "tmp_{}.csv").format(mapper), "w")
-            tmp2.write(",".join([mapper] + tmp_data[mapper])); tmp2.write("\n")
-            system("Rscript nanopore/metaAnalyses/coveragePlotsByMapper.R {} {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp_{}.csv".format(mapper)), os.path.join(self.outputDir, "coverage_summary_plots_%s.pdf" % mapper), mapper))
-            tmp2.close()
         tmp.close()
-        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "overall_coverage_summary_plots.pdf")))
         #system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, "tmp2.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))

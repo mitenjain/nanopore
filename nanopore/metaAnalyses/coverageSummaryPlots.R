@@ -15,7 +15,7 @@ if (dim(summary)[1] >= 1) {
 	#par(mfrow=c(2,2))
 
 	#barplot of unmapped read counts per mapper
-	q <- barplot(height=summary$UnmappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), xaxt="n", col=r, main=paste(name,"Percent Unmapped Reads",sep="\n"), ylab="Counts", cex.main=0.9, ylim=c(0,1.0))
+	q <- barplot(height=summary$MappedReadCount/(summary$UnmappedReadCount+summary$MappedReadCount), xaxt="n", col=r, main=paste(name,"Percent Mapped Reads",sep="\n"), ylab="Counts", cex.main=0.9, ylim=c(0,1.0))
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
 
 	#scatterplot of Avg read coverage vs avg posterior probability
