@@ -90,7 +90,7 @@ def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analy
                     experiment = (readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
                     target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
                     experiments.append(experiment)
-    target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, readType, experiments))
+    target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
 
 def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
@@ -122,12 +122,12 @@ def runAnalyses(target, readFastaFile, readType, referenceFastaFile, samFile, an
         else:
             target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastaFile))
 
-def runMetaAnalyses(target, metaAnalyses, outputDir, readType, experiments):
+def runMetaAnalyses(target, metaAnalyses, outputDir, experiments):
     for metaAnalysis in metaAnalyses:
-        metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + readType + "_" + metaAnalysis.__name__)
+        metaAnalysisDir = os.path.join(outputDir, "metaAnalysis_" + metaAnalysis.__name__)
         if not os.path.exists(metaAnalysisDir):
             os.mkdir(metaAnalysisDir)
-        target.addChildTarget(metaAnalysis(metaAnalysisDir, readType, experiments))
+        target.addChildTarget(metaAnalysis(metaAnalysisDir, experiments))
 
 def main():
     #Parse the inputs args/options
@@ -171,6 +171,12 @@ def main():
         os.mkdir(processedFastaFiles)
     referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if (".fa" in i and i[-3:] == '.fa') or (".fasta" in i and i[-6:] == '.fasta') ]
     
+    if len(referenceFastaFiles) == 0:
+        raise RuntimeError("reference fasta folder is empty!")
+    for readType, readFastqFiles in readFastqFiles:
+        if len(readFastqFiles) == 0:
+            raise RuntimeError("Missing {} reads!".format(readType))
+
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)
     logger.info("Using the following output directory: %s" % outputDir)
