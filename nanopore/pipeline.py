@@ -88,7 +88,7 @@ def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analy
                     experiment = (readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
                     target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
                     experiments.append(experiment)
-        target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, readType, experiments))
+    target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, readType, experiments))
 
 def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
