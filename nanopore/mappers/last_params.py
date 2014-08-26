@@ -21,3 +21,8 @@ class LastParamsRealignEm(LastParams):
     def run(self):
         LastParams.run(self)
         self.realignSamFile(doEm=True)
+
+class LastParamsRealignTrainedModel(LastParams):
+    def run(self):
+        LastParams.run(self)
+        self.realignSamFile(useTrainedModel=True)

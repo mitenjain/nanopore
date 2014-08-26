@@ -32,3 +32,9 @@ class LastzRealignEm(Lastz):
     def run(self):
         Lastz.run(self)
         self.realignSamFile(doEm=True)
+
+class LastzRealignTrainedModel(Lastz):
+    def run(self):
+        Lastz.run(self)
+        self.realignSamFile(useTrainedModel=True)
+

@@ -21,3 +21,8 @@ class BlasrParamsRealignEm(BlasrParams):
     def run(self):
         BlasrParams.run(self)
         self.realignSamFile(doEm=True)
+
+class BlasrParamsRealignTrainedModel(BlasrParams):
+    def run(self):
+        BlasrParams.run(self)
+        self.realignSamFile(useTrainedModel=True)

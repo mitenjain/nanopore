@@ -20,4 +20,8 @@ class LastzParamsRealignEm(LastzParams):
     def run(self):
         LastzParams.run(self)
         self.realignSamFile(doEm=True)
-
+        
+class LastzParamsRealignTrainedModel(LastzParams):
+    def run(self):
+        LastzParams.run(self)
+        self.realignSamFile(useTrainedModel=True)

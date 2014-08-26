@@ -1,8 +1,13 @@
 import pysam
-from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, fastqWrite, cigarRead, logger, nameValue
+from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, fastqWrite, cigarRead, logger, nameValue, absSymPath
 import os
 import sys
 from cactus.bar import cactus_expectationMaximisation
+
+def pathToBaseNanoporeDir():
+    import nanopore
+    i = absSymPath(nanopore.__file__)
+    return os.path.split(os.path.split(i)[0])[0]
 
 class AlignedPair:
     """Represents an aligned pair of positions.
@@ -376,7 +381,7 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
 
 def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, 
-                           referenceFastaFile, gapGamma, hmmFileToTrain=None, chainFn=chainFn):
+                           referenceFastaFile, gapGamma, hmmFile=None, trainHmmFile=False, chainFn=chainFn):
     """Chains and then realigns the resulting global alignments, using jobTree to do it in parallel on a cluster.
     Optionally runs expectation maximisation.
     """
@@ -385,10 +390,12 @@ def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile,
     chainSamFile(samFile, tempSamFile, readFastqFile, referenceFastaFile, chainFn)
     
     #If we do expectation maximisation we split here:
-    if hmmFileToTrain != None:
-        target.addChildTargetFn(learnModelFromSamFileTargetFn, args=(tempSamFile, readFastqFile, referenceFastaFile, hmmFileToTrain))
+    if hmmFile != None and trainHmmFile:
+        target.addChildTargetFn(learnModelFromSamFileTargetFn, args=(tempSamFile, readFastqFile, referenceFastaFile, hmmFile))
+    else:
+        assert not trainHmmFile
     
-    target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFileToTrain, gapGamma))
+    target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma))
 
 def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma):
     #Load reference sequences

@@ -39,3 +39,8 @@ class LastRealignEm(Last):
     def run(self):
         Last.run(self)
         self.realignSamFile(doEm=True)
+        
+class LastRealignTrainedModel(Last):
+    def run(self):
+        Last.run(self)
+        self.realignSamFile(useTrainedModel=True)

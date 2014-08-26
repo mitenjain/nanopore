@@ -8,14 +8,14 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
-from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign, LastzRealignEm
-from nanopore.mappers.lastzParams import LastzParams, LastzParamsChain, LastzParamsRealign, LastzParamsRealignEm
-from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm
-from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign, BwaParamsRealignEm
-from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm
-from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm
-from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm
-from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm
+from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign, LastzRealignEm, LastzRealignTrainedModel
+from nanopore.mappers.lastzParams import LastzParams, LastzParamsChain, LastzParamsRealign, LastzParamsRealignEm, LastzParamsRealignTrainedModel
+from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm, BwaRealignTrainedModel
+from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign, BwaParamsRealignEm, BwaParamsRealignTrainedModel
+from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm, LastRealignTrainedModel
+from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm, BlasrRealignTrainedModel
+from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel
+from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel
 
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
@@ -35,24 +35,30 @@ mappers = [ Bwa,
            BwaChain,
            BwaParams,
            BwaParamsChain,
+           BwaParamsRealign,
            BwaParamsRealignEm,
+           BwaParamsRealignTrainedModel,
            Blasr,
            BlasrChain,
            BlasrParams,
            BlasrParamsChain,
+           BlasrParamsRealign,
            BlasrParamsRealignEm,
+           BlasrParamsRealignTrainedModel,
            Last,
            LastChain,
            LastParams,
            LastParamsChain,
            LastParamsRealignEm,
+           LastParamsRealignTrainedModel,
            Lastz,
            LastzChain,
            LastzParams,
            LastzParamsChain,
-           LastzParamsRealignEm ]
+           LastzParamsRealignEm,
+           LastzParamsRealignTrainedModel ]
 
-#mappers = [ LastParamsRealignEm, LastzParamsRealignEm, LastzRealignEm ]
+#mappers = [ LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel]
           
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedKmer ]

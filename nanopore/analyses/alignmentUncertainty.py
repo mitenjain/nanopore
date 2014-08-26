@@ -1,5 +1,5 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, getExonerateCigarFormatString, samIterator
+from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, getExonerateCigarFormatString, samIterator, pathToBaseNanoporeDir
 import os
 import pysam
 import numpy
@@ -14,7 +14,7 @@ class AlignmentUncertainty(AbstractAnalysis):
         refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         sam = pysam.Samfile(self.samFile, "r" )
-        
+
         #The data we collect
         avgPosteriorMatchProbabilityInCigar = []
         alignedPairsInCigar = []
@@ -34,8 +34,12 @@ class AlignmentUncertainty(AbstractAnalysis):
             fastaWrite(tempRefFile, sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)]) 
             fastaWrite(tempReadFile, aR.qname, aR.query)
             
+            #Trained hmm file to use.
+            hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
+            
             #Call to cactus_realign
-            system("echo %s | cactus_realign %s %s --rescoreByPosteriorProbIgnoringGaps --rescoreOriginalAlignment --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputPosteriorProbs=%s> %s" % (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, tempCigarFile))
+            system("echo %s | cactus_realign %s %s --rescoreByPosteriorProbIgnoringGaps --rescoreOriginalAlignment --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputPosteriorProbs=%s --loadHmm=%s > %s" % \
+                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile, tempCigarFile))
             
             #Load the cigar and get the posterior prob
             assert len([ pA for pA in cigarRead(open(tempCigarFile)) ]) > 0

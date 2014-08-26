@@ -69,6 +69,7 @@ class CoverageSummary(AbstractMetaAnalysis):
         
 
         #map everything together
+        tmp = open(os.path.join(self.getGlobalTempDir(), "tmp.csv"), "w")
         for mapper in tmp_data:
             tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
         tmp.close()
