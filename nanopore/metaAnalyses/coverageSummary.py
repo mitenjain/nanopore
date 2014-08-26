@@ -51,7 +51,6 @@ class CoverageSummary(AbstractMetaAnalysis):
                 system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, filename), readname, refname))
         fH.close()
         #tmp = open(os.path.join(self.outputDir, "tmp2.csv"), "w")
-        tmp = open(os.path.join(self.getGlobalTempDir(), "tmp.csv"), "w")
         #map by mapper and its parameters/etc; fast ugly hacks below
         uppercase_regex = re.compile("[A-Z][a-z]*")
         tmp_mapper = list()
@@ -60,6 +59,7 @@ class CoverageSummary(AbstractMetaAnalysis):
         tmp_mapper = sorted(tmp_mapper)
         base_mappers = set([x[0] for x in tmp_mapper])
         for base in base_mappers:
+            tmp = open(os.path.join(self.getGlobalTempDir(), "tmp.csv"), "w")
             outf = open(os.path.join(self.outputDir, base + ".csv"), "w")
             for mapper in tmp_data:
                 if base in mapper:
