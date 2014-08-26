@@ -362,7 +362,7 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     #Run cactus_expectationMaximisation
     options = cactus_expectationMaximisation.Options()
     options.modelType="fiveStateAsymmetric" #"threeStateAsymmetric"
-    options.optionsToRealign="--diagonalExpansion=10 --splitMatrixBiggerThanThis=300" 
+    options.optionsToRealign="--diagonalExpansion=20 --splitMatrixBiggerThanThis=300" 
     options.randomStart = True
     options.trials = 5
     options.outputTrialHmms = True

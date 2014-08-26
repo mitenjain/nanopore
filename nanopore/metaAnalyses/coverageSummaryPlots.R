@@ -30,10 +30,10 @@ if (dim(summary)[1] >= 1) {
     plot(100 * summary$AvgMatchIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, ylab="Avg. Indels Per Aligned Read Base", xlab="Avg. Match Identity", main=name, col=r, pch=20, xlim=c(0,100), cex.main=0.9)
     text(100 * summary$AvgMatchIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, cex=0.75, pos=2, labels=rownames(summary))
 
-    q <- barplot(height=summary$AvgInsertionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Insertions Per Read Base",sep="\n"), ylab="Avg. Insertions Per Read Base", cex.main=0.9)
+    q <- barplot(height=summary$AvgInsertionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Insertions Per Aligned Base",sep="\n"), ylab="Avg. Insertions Per Aligned Base", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
-    q <- barplot(height=summary$AvgDeletionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Deletions Per Read Base",sep="\n"), ylab="Avg. Deletions Per Read Base", cex.main=0.9)
+    q <- barplot(height=summary$AvgDeletionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Deletions Per Aligned Base",sep="\n"), ylab="Avg. Deletions Per Aligned Base", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
     q <- barplot(height=summary$AvgMatchIdentity, xaxt="n", col=r, main=paste(name,"Identity of Aligned Bases",sep="\n"), ylab="Proportion of matched aligned bases.", cex.main=0.9)

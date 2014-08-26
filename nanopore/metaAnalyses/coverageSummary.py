@@ -56,16 +56,16 @@ class CoverageSummary(AbstractMetaAnalysis):
         uppercase_regex = re.compile("[A-Z][a-z]*")
         tmp_mapper = list()
         for mapper in tmp_data:
-          tmp_mapper.append(re.findall(uppercase_regex, mapper))
+            tmp_mapper.append(re.findall(uppercase_regex, mapper))
         tmp_mapper = sorted(tmp_mapper)
         base_mappers = set([x[0] for x in tmp_mapper])
         for base in base_mappers:
-          outf = open(os.path.join(self.outputDir, base + ".csv"), "w")
-          for mapper in tmp_data:
-            if base in mapper:
-              tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
-          tmp.close()
-          system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, base + ".csv"), os.path.join(self.outputDir, mapper + "_coverage_summary_plots.pdf")))
+            outf = open(os.path.join(self.outputDir, base + ".csv"), "w")
+            for mapper in tmp_data:
+                if base in mapper:
+                    tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
+            tmp.close()
+            system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, base + ".csv"), os.path.join(self.outputDir, mapper + "_coverage_summary_plots.pdf")))
         
 
         #map everything together
