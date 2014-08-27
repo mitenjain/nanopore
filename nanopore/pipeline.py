@@ -64,6 +64,7 @@ mappers = [ Bwa,
 
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
 
+
 mappers = [  Lastz, LastzChain, LastzRealign_GapGamma0, LastzRealign_GapGamma2, LastzRealign_GapGamma5, LastzRealign_GapGamma9, Bwa, BwaChain, BwaRealign, BwaParams, BwaParamsChain, BwaParamsRealign, Last, LastChain, LastRealign, LastParams, LastParamsChain, LastParamsRealign, Blasr, BlasrChain, BlasrRealign, BlasrParams, BlasrParamsChain, BlasrParamsRealign, LastzRealign_GapGamma0_Em, LastzRealign_GapGamma2_Em, LastzRealign_GapGamma5_Em, LastzRealign_GapGamma9_Em ]  
 
 #need to check for local blast installation to do unmappedBlastKmer
