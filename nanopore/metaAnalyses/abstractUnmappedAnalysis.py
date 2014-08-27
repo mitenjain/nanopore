@@ -25,16 +25,6 @@ class Read():
         else:
             yield None
 
-class AnalysisInformation():
-    """
-    Allows for a much easier way to map between which type of data we are sorting by
-    """
-    def __init__(self):
-        self.readTypes = set()
-        self.mappers = set()
-        self.referenceFiles = set()
-        self.readFiles = set()
-
 class AbstractUnmappedMetaAnalysis(AbstractMetaAnalysis):
     """Builds a database of reads and the information gathered about them during analysis"""
     def __init__(self, outputDir, experiments):
@@ -52,7 +42,6 @@ class AbstractUnmappedMetaAnalysis(AbstractMetaAnalysis):
                     mappedReads[(record.qname, readFastqFile)].add((mapper.__name__, referenceFastaFile))
 
         self.reads = list()
-        self.info = AnalysisInformation()
 
         for name, readFastqFile, readType, seq in allReads:
             if (name, readFastqFile) in mappedReads:
@@ -61,11 +50,6 @@ class AbstractUnmappedMetaAnalysis(AbstractMetaAnalysis):
                 self.reads.append(Read(name, seq, readType, readFastqFile, (mappers, referenceFastaFiles)))
             else:
                 self.reads.append(Read(name, seq, readType, readFastqFile, None))
-
-            self.info.readTypes.add(readType)
-            self.info.readFiles.add(readFastqFile)
-            self.info.mappers.add(mapper)
-            self.info.referenceFiles.add(referenceFastaFile)
 
 
 
