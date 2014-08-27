@@ -67,6 +67,7 @@ analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUnce
 
 metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalysis ]
 
+
 #need to check for local blast installation to do unmappedBlastKmer
 if os.environ.get("BLASTDB") is not None:
     metaAnalyses.append(UnmappedBlastKmer)
