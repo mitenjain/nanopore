@@ -8,6 +8,7 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
+
 from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign, LastzRealignEm, LastzRealignTrainedModel
 from nanopore.mappers.lastzParams import LastzParams, LastzParamsChain, LastzParamsRealign, LastzParamsRealignEm, LastzParamsRealignTrainedModel
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm, BwaRealignTrainedModel
@@ -16,7 +17,6 @@ from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm, L
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm, BlasrRealignTrainedModel
 from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel
 from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel
-
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
@@ -33,7 +33,6 @@ from nanopore.analyses.hmm import Hmm
 from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
 from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
-
 
 mappers = [ Bwa,
            BwaChain,
@@ -71,19 +70,15 @@ metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalys
 #need to check for local blast installation to do unmappedBlastKmer
 if os.environ.get("BLASTDB") is not None:
     metaAnalyses.append(UnmappedBlastKmer)
-else:
-    metaAnalyses.append(UnmappedKmerAnalysis)
-
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
-def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
+def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
     experiments = []
-    print str(readFastqFiles) + "HERE"
-    for readType, readTypeFastqFiles in readFastqFiles:
+    for readType, readTypeFastaFiles in readFastaFiles:
         outputBase = os.path.join(outputDir, "analysis_" + readType)
         if not os.path.exists(outputBase):
             os.mkdir(outputBase)
-        for readFastaFile in readTypeFastqFiles:
+        for readFastaFile in readTypeFastaFiles:
             for referenceFastaFile in referenceFastaFiles:
                 for mapper in mappers:
                     experimentDir = os.path.join(outputBase, "experiment_%s_%s_%s" % \
@@ -171,19 +166,12 @@ def main():
     if not os.path.exists(processedFastaFiles):
         os.mkdir(processedFastaFiles)
     referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if (".fa" in i and i[-3:] == '.fa') or (".fasta" in i and i[-6:] == '.fasta') ]
-
-    if len(referenceFastaFiles) == 0:
-        raise RuntimeError("reference fasta folder is empty!")
-    for readType, readTypeFiles in readFastqFiles:
-        if len(readTypeFiles) == 0:
-            raise RuntimeError("Missing {} reads!".format(readType))
-
+    
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)
     logger.info("Using the following output directory: %s" % outputDir)
-    for readType, readTypeFiles in readFastqFiles:
-        for readFastqFile in readTypeFiles:
-            logger.info("Got the following %s fastq file: %s" % (readType, readFastqFile))
+    for readFastqFile in readFastqFiles:
+        logger.info("Got the following read fastq file: %s" % readFastqFile)
     for referenceFastaFile in referenceFastaFiles:
         logger.info("Got the following reference fasta files: %s" % referenceFastaFile)
     
