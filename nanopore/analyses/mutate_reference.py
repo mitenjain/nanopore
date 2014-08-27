@@ -39,7 +39,7 @@ class Fastaseq():
 def MutateReference(workingDir):
 	for referenceFastaFile in glob.glob(os.path.join(workingDir + "referenceFastaFiles", "*")):
 		if not "percent" in referenceFastaFile and (".fa" in referenceFastaFile or ".fasta" in referenceFastaFile):
-			mutation_rates = [0.2]#[0.01, 0.05, 0.10, 0.20]
+			mutation_rates = [0.01, 0.05, 0.10, 0.20]
 			for mutation_rate in mutation_rates:
 				indel_rate = 0.2 * mutation_rate # indel rate = 20% of Substitution rate
 				i = mutation_rate * 100
