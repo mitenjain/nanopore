@@ -26,7 +26,7 @@ class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 				result = None
 
 	def run(self, kmer_size=5):
-		for readType in self.info.readTypes:
+		for readType in self.readTypes:
 			unmapped = {(x.name, x.seq, x.readFastqFile) for x in self.reads if x.readType == readType and x.is_mapped is False}
 			if len(unmapped) > 1:
 				outf = open(os.path.join(self.getLocalTempDir(), "unmapped.fasta"), "w")
@@ -62,7 +62,7 @@ class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 					outf.write(">{} {}\n{}\n".format(name, readFastqFile, seq))
 				outf.close()
 
-				outf = open(os.path.join(outputDir, readType +  "_no_hits.fasta"), "w")
+				outf = open(os.path.join(self.outputDir, readType +  "_no_hits.fasta"), "w")
 				for name, seq, readFastqFile in no_mappings:
 					outf.write(">{} {}\n{}\n".format(name, readFastqFile, seq))
 				outf.close()

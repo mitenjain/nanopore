@@ -7,7 +7,7 @@ class UnmappedLengthDistributionAnalysis(AbstractUnmappedMetaAnalysis):
     """runs length distribution analysis on all mapped/unmapped per read Type
     as well as per reference"""
     def run(self):
-        for readType in self.info.readTypes:
+        for readType in self.readTypes:
             unmapped = open(os.path.join(self.getLocalTempDir(), readType + "_unmapped"), "w")
             mapped = open(os.path.join(self.getLocalTempDir(), readType + "_mapped"), "w")
             for read in self.reads:
@@ -22,7 +22,7 @@ class UnmappedLengthDistributionAnalysis(AbstractUnmappedMetaAnalysis):
                 os.remove(os.path.join(self.getLocalTempDir(), readType + "_unmapped"))
                 os.remove(os.path.join(self.getLocalTempDir(), readType + "_mapped"))
                 
-        for reference in self.info.referenceFiles:
+        for reference in self.referenceFastaFiles:
             unmapped = open(os.path.join(self.getLocalTempDir(), os.path.basename(reference) + "_unmapped"), "w")
             mapped = open(os.path.join(self.getLocalTempDir(), os.path.basename(reference) + "_mapped"), "w")
             for read in self.reads:

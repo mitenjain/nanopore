@@ -6,7 +6,7 @@ from itertools import product
 class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
     """runs kmer analysis on all mapped/unmapped per read Type"""
     def run(self, kmer_size=5):
-        for readType in self.info.readTypes:
+        for readType in self.readTypes:
             unmapped = open(os.path.join(self.getLocalTempDir(), readType + "_unmapped"), "w")
             mapped = open(os.path.join(self.getLocalTempDir(), readType + "_mapped"), "w")
             for read in self.reads:
