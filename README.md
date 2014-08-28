@@ -49,7 +49,9 @@ To clean up an old run type:
 
     make clean
 
-To see and control which mappers and analyses are being run edit lines 8 and 9 of the src/pipeline.py script.
+To see and control which mappers and analyses are being run edit lines 37 and 66 of the src/pipeline.py script.
+
+###Setting up BLAST
 Additionally, if you would like to BLAST the unmapped reads against NT (NCBI nucleotide database) you need to have BLAST installed with the BLASTDB environmental variable set to wherever you have stored the NT database. In addition, you want the taxonomy database so that the hits make sense.
 
 You can download blastn from here:
@@ -62,9 +64,10 @@ ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.**.tar.gz
 ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
 
 For all of the (19) nt files, you have to untar separately. Thanks NCBI. Dirty solution:
-for i in `echo $BLASTDB | cut -d ":" -f 2`*.tar.gz; do tar zxvf $i; done    
+`for i in `echo $BLASTDB | cut -d ":" -f 2`*.tar.gz; do tar zxvf $i; done`    
 
+###Scripts
 There is also a scripts directory where scripts can be dropped to analyze pipeline results outside of the pipeline. The jobTree can still be used, if you design your controlling shell script to change the paths as shown in the currently only external script, run_muscle.sh. These scripts will often depend on the directory structure of the pipeline to find sam files, xml files, etc.
 
-Current scripts:
+###Current scripts
 run_muscle.sh - has three inputs: --template_sam, --twoD_sam, --complement_sam. Takes these three sam files and looks for all read and reference files that these reads came from, and determines which reads were mappable as 2D but not mappable as template/complement. Then, the region of the reference where the 2D read aligned is extracted and MUSCLE is ran to try and get a global alignment between the template and complement and the corresponding 2D aligned region.
