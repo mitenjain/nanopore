@@ -35,7 +35,8 @@ To update a progressiveCactus installation, from the nanopore base directory typ
 
 ### Analysing your own data
 The inputs are:
-(1) One or more read files, in FASTA format. These should be placed in the directory *nanopore/readFastaFiles*.
+(1) One or more read files, in FASTQ format. These should be placed in the directory *nanopore/readFastaFiles/<X>/*.
+Where <X> is the readType being analyzed. Generally, this is in the format 2D/, complement/, and template/.
 (2) One or more reference genomes, in FASTA format. These should be placed in the directory *nanopore/referenceFastaFiles*.
 
 For each possible pair of read file, reference genome and mapping algorithm an experiment directory will be created in the *nanopore/output* directory.
@@ -62,3 +63,8 @@ ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
 
 For all of the (19) nt files, you have to untar separately. Thanks NCBI. Dirty solution:
 for i in `echo $BLASTDB | cut -d ":" -f 2`*.tar.gz; do tar zxvf $i; done    
+
+There is also a scripts directory where scripts can be dropped to analyze pipeline results outside of the pipeline. The jobTree can still be used, if you design your controlling shell script to change the paths as shown in the currently only external script, run_muscle.sh. These scripts will often depend on the directory structure of the pipeline to find sam files, xml files, etc.
+
+Current scripts:
+run_muscle.sh - has three inputs: --template_sam, --twoD_sam, --complement_sam. Takes these three sam files and looks for all read and reference files that these reads came from, and determines which reads were mappable as 2D but not mappable as template/complement. Then, the region of the reference where the 2D read aligned is extracted and MUSCLE is ran to try and get a global alignment between the template and complement and the corresponding 2D aligned region.
