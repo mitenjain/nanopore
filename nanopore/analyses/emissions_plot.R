@@ -7,21 +7,26 @@ library(lattice)
 f <- args[1]
 out <- args[2]
 
+
 myPanel <- function(x, y, z, ...) {
     panel.levelplot(x, y, z, ...)
-    panel.text(x, y, paste(100 * round(exp(-z),4), "%", sep=""))
+    panel.text(x, y, round(z,3))
 }
 
-d <- read.table(f, header = T, row.names = 1)
+d <- read.table(f, header = T)
 
 if ( dim(d)[1] > 0 && sum(d) > 0) {
 
-	pdf(out)
-    
-	p <- levelplot(as.matrix(-log(d)), main="Match Emission Probabilities", xlab="Read bases", ylab="Reference bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
+    pdf(out)
+
+    p <- levelplot(t(as.matrix(d[1,])), ylab="", main="Insertion Emission Probabilities", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
 
     print(p)
 
-	dev.off()
+    p2 <- levelplot(t(as.matrix(d[2,])), ylab="", main="Deletion Emission Probabilities", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
+
+    print(p2)
+
+    dev.off()
 
 }
