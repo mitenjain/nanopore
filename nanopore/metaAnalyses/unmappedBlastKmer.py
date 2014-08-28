@@ -29,15 +29,15 @@ class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 		for readType in self.readTypes:
 			unmapped = {(x.name, x.seq, x.readFastqFile) for x in self.reads if x.readType == readType and x.is_mapped is False}
 			if len(unmapped) > 1:
-				outf = open(os.path.join(self.getLocalTempDir(), "unmapped.fasta"), "w")
+				outf = open(os.path.join(self.outputDir, "unmapped.fasta"), "w")
 				for name, seq, readFastqFile in unmapped:
 					outf.write(">{} {}\n{}\n".format(name, readFastqFile, seq))
 				outf.close()
 
-				system('blastn -outfmt "7 qseqid sseqid sscinames stitle" -db nt -max_target_seqs 1 -query {} -out {}'.format(os.path.join(self.getLocalTempDir(), "unmapped.fasta"), os.path.join(self.getLocalTempDir(), "blast_out.txt")))
+				system('blastn -outfmt "7 qseqid sseqid sscinames stitle" -db nt -max_target_seqs 1 -query {} -out {}'.format(os.path.join(self.outputDir, "unmapped.fasta"), os.path.join(self.outputDir, "blast_out.txt")))
 				
 				blast_hits, no_hits = Counter(), set()
-				for query, result in self.parse_blast(open(os.path.join(self.getLocalTempDir(), "blast_out.txt"))):
+				for query, result in self.parse_blast(open(os.path.join(self.outputDir, "blast_out.txt"))):
 					if result is None:
 						no_hits.add(tuple(query.split(" "))) #need to save both read name and read fastq file 
 					else:
@@ -57,7 +57,7 @@ class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 				no_mappings = {(x.name, x.seq, x.readFastqFile) for x in self.reads if (x.name, x.readFastqFile) in no_hits and x.readType == readType}
 
 
-				outf = open(os.path.join(self.getLocalTempDir(), "mapped_reads.fasta"), "w")
+				outf = open(os.path.join(self.outputDir, "mapped_reads.fasta"), "w")
 				for name, seq, readFastqFile in all_mapped:
 					outf.write(">{} {}\n{}\n".format(name, readFastqFile, seq))
 				outf.close()
@@ -67,17 +67,17 @@ class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 					outf.write(">{} {}\n{}\n".format(name, readFastqFile, seq))
 				outf.close()
 
-				system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "no_hits.fasta"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_unmapped_" + str(kmer_size) + "mer"), str(kmer_size)))
-				system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "mapped_reads.fasta"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_mapped_" + str(kmer_size) + "mer"), str(kmer_size)))
-				system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_mapped_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), "readType_" + readType + "_unmapped_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, readType + "_" + str(kmer_size) + "kmer_Cmp.out")))
+				system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.outputDir, "no_hits.fasta"), os.path.join(self.outputDir, "readType_" + readType + "_unmapped_" + str(kmer_size) + "mer"), str(kmer_size)))
+				system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.outputDir, "mapped_reads.fasta"), os.path.join(self.outputDir, "readType_" + readType + "_mapped_" + str(kmer_size) + "mer"), str(kmer_size)))
+				system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.outputDir, readType + "_mapped_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, "readType_" + readType + "_unmapped_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, readType + "_" + str(kmer_size) + "kmer_Cmp.out")))
 				system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(os.path.join(self.outputDir, readType + "_" + str(kmer_size)) + "kmer_Cmp.out"), os.path.join(self.outputDir, readType + "_top_kmers.tsv"), os.path.join(self.outputDir, readType + "_bot_kmers.tsv")))
 
-				outf = open(os.path.join(self.getLocalTempDir(), "tmp"),"w")
+				outf = open(os.path.join(self.outputDir, "tmp"),"w")
 				blast_percent = (1.0 * sum(blast_hits.values())) / len(self.reads)
 				unmapped_percent = (1.0 * len(no_mappings)) / len(self.reads)
 				mapped_percent = 1 - unmapped_percent
-				outf.write("{} {} {}\n".format(blast_percent, unmapped_percent, mapped_percent))
+				outf.write("{} {} {}\n".format(blast_percent, mapped_percent, unmapped_percent))
 				outf.close()
-				system("Rscript nanopore/metaAnalyses/barplot_blast.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp"), os.path.join(self.outputDir, "blast_counts.pdf"), readType))
+				system("Rscript nanopore/metaAnalyses/barplot_blast.R {} {} {}".format(os.path.join(self.outputDir, "tmp"), os.path.join(self.outputDir, "blast_counts.pdf"), readType))
 
 

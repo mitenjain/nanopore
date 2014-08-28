@@ -40,6 +40,7 @@ class CoverageSummary(AbstractMetaAnalysis):
         for (base_mapper, readType), entries in entry_map.iteritems():
             name = "_".join([os.path.basename(base_mapper), readType])
             self.write_file_analyze(entries, name)
+        return entry_map
 
     #def by_reference(self):
     #    entry_map = {x: list() for x in self.referenceFastaFiles}
@@ -51,7 +52,10 @@ class CoverageSummary(AbstractMetaAnalysis):
         path = os.path.join(self.outputDir, name + ".tsv")
         outf = open(path, "w")
         outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
+        tmp = open(os.path.join(self.outputDir, "TMP"), "w")
+        tmp.write(str(entries)); tmp.write("\n")
         entries = self.resolve_duplicate_rownames(entries)
+        tmp.write(str(entries)); tmp.close()
         for entry in entries:
             outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
                                entry.XML.attrib["avgreadCoverage"], entry.XML.attrib["avgreferenceCoverage"],
@@ -84,5 +88,7 @@ class CoverageSummary(AbstractMetaAnalysis):
 
     def run(self):
         self.db = self.build_db()
+        outf = open(os.path.join(self.outputDir, "DB"), "w")
+        outf.write(self.db);outf.close()
         self.by_mapper_readtype()
 
