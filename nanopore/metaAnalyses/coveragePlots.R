@@ -10,10 +10,14 @@ if (file.info(args[1])$size != 0) {
 
 	if (dim(dist)[2] > 2) {
 		
+		tmp <- dist
+		dist <- vector()
 		#throw out rows with single-value columns
-		for (i in 1:length(rownames(dist))) {
-			if (length(dist[i,][!is.na(dist[i,])]) > 1) {
-				dist <- dist[-i,]
+		for (i in 1:length(rownames(tmp))) {
+			r <- tmp[i,]
+			if (length(r[!is.na(r)]) > 1) {
+				dist <- rbind(dist, r)
+			}
 		}
 
 		pdf(args[2])
