@@ -64,7 +64,7 @@ ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.**.tar.gz
 ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
 
 For all of the (19) nt files, you have to untar separately. Thanks NCBI. Dirty solution:
-`for i in `echo $BLASTDB | cut -d ":" -f 2`*.tar.gz; do tar zxvf $i; done`    
+```for i in `echo $BLASTDB | cut -d ":" -f 2`*.tar.gz; do tar zxvf $i; done``` 
 
 ###Scripts
 There is also a scripts directory where scripts can be dropped to analyze pipeline results outside of the pipeline. The jobTree can still be used, if you design your controlling shell script to change the paths as shown in the currently only external script, run_muscle.sh. These scripts will often depend on the directory structure of the pipeline to find sam files, xml files, etc.
