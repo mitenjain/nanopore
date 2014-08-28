@@ -53,9 +53,9 @@ mappers = [ Bwa,
            LastzChain,
            LastzParams,
            LastzParamsChain,
-           LastzParamsRealign, ]
+           LastzParamsRealign]
 
-analyses = [ GlobalCoverage, LocalCoverage]#, Substitutions, Indels, KmerAnalysis, ChannelMappability, QualiMap, Consensus]#, FastQC, AlignmentUncertainty]
+analyses = [ GlobalCoverage, LocalCoverage]#, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
 
 metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalysis ]
 
