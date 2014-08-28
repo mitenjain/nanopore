@@ -58,7 +58,7 @@ You can download blastn from here:
 ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 You will want to move blastn to somewhere that is in your path.
 Second, set the environmental variable BLASTDB:
-export BLASTDB=:/path/to/blast/db/ (you will want this in your bashrc)
+```export BLASTDB=:/path/to/blast/db/``` (you will want this in your bashrc)
 Finally, download and untar all of the databases to your BLASTDB path:
 ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt.**.tar.gz
 ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
@@ -70,4 +70,4 @@ For all of the (19) nt files, you have to untar separately. Thanks NCBI. Dirty s
 There is also a scripts directory where scripts can be dropped to analyze pipeline results outside of the pipeline. The jobTree can still be used, if you design your controlling shell script to change the paths as shown in the currently only external script, run_muscle.sh. These scripts will often depend on the directory structure of the pipeline to find sam files, xml files, etc.
 
 ###Current scripts
-run_muscle.sh - has three inputs: --template_sam, --twoD_sam, --complement_sam. Takes these three sam files and looks for all read and reference files that these reads came from, and determines which reads were mappable as 2D but not mappable as template/complement. Then, the region of the reference where the 2D read aligned is extracted and MUSCLE is ran to try and get a global alignment between the template and complement and the corresponding 2D aligned region.
+`run_muscle.sh` - has three inputs: `--template_sam`, `--twoD_sam`, `--complement_sam`. Takes these three sam files and looks for all read and reference files that these reads came from, and determines which reads were mappable as 2D but not mappable as template/complement. Then, the region of the reference where the 2D read aligned is extracted and MUSCLE is ran to try and get a global alignment between the template and complement and the corresponding 2D aligned region.
