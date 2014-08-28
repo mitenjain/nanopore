@@ -12,6 +12,7 @@ class AbstractAnalysis(Target):
         self.samFile = samFile
         self.outputDir = outputDir
         self.readType = readType
+        print(str(self.samFile))
         
     def run(self):
         """Base method that does some logging
