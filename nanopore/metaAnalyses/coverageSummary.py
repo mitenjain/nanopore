@@ -53,10 +53,7 @@ class CoverageSummary(AbstractMetaAnalysis):
         path = os.path.join(self.outputDir, name + ".tsv")
         outf = open(path, "w")
         outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
-        tmp = open(os.path.join(self.outputDir, "TMP"), "w")
-        tmp.write(str(entries)); tmp.write("\n")
         entries = self.resolve_duplicate_rownames(entries)
-        tmp.write(str(entries)); tmp.close()
         for entry in entries:
             outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
                                entry.XML.attrib["avgreadCoverage"], entry.XML.attrib["avgreferenceCoverage"],
