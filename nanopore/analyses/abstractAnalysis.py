@@ -5,12 +5,14 @@ import os
 class AbstractAnalysis(Target):
     """Base class to for analysis targets. Inherit this class to create an analysis.
     """
-    def __init__(self, readFastqFile, referenceFastaFile, samFile, outputDir):
+    def __init__(self, readFastqFile, readType, referenceFastaFile, samFile, outputDir):
         Target.__init__(self)
         self.readFastqFile = readFastqFile
         self.referenceFastaFile = referenceFastaFile
         self.samFile = samFile
         self.outputDir = outputDir
+        self.readType = readType
+        print(str(self.samFile))
         
     def run(self):
         """Base method that does some logging
