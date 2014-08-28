@@ -39,34 +39,29 @@ mappers = [ Bwa,
            BwaParams,
            BwaParamsChain,
            BwaParamsRealign,
-           BwaParamsRealignEm,
            BwaParamsRealignTrainedModel,
            Blasr,
            BlasrChain,
            BlasrParams,
            BlasrParamsChain,
            BlasrParamsRealign,
-           BlasrParamsRealignEm,
            BlasrParamsRealignTrainedModel,
            Last,
            LastChain,
            LastParams,
            LastParamsChain,
            LastParamsRealign,
-           LastParamsRealignEm,
            LastParamsRealignTrainedModel,
            Lastz,
            LastzChain,
            LastzParams,
            LastzParamsChain,
            LastzParamsRealign,
-           LastzParamsRealignEm,
            LastzParamsRealignTrainedModel ]
 
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
 
 metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalysis ]
-
 
 #need to check for local blast installation to do unmappedBlastKmer
 if os.environ.get("BLASTDB") is not None:
