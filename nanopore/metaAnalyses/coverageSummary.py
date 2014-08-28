@@ -30,6 +30,7 @@ class CoverageSummary(AbstractMetaAnalysis):
                     analyses, resultsDir = self.experimentHash[(readFastqFile, readType), referenceFastaFile, mapper]
                     if os.path.exists(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")):
                         globalCoverageXML = ET.parse(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")).getroot()
+                        db.append(Entry(readType, readFastqFile, referenceFastaFile, mapper, globalCoverageXML))
         return db      
 
     def by_mapper_readtype(self):
@@ -89,6 +90,6 @@ class CoverageSummary(AbstractMetaAnalysis):
     def run(self):
         self.db = self.build_db()
         outf = open(os.path.join(self.outputDir, "DB"), "w")
-        outf.write(self.db);outf.close()
+        outf.write(str(self.db));outf.close()
         self.by_mapper_readtype()
 
