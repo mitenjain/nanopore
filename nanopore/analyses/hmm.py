@@ -75,11 +75,14 @@ class Hmm(AbstractAnalysis):
             outf.write("\t".join(map(lambda x : str(deleteEmissions[x]), bases)) + "\n")
             outf.close()
             ###Here's where we do the plot..
-            ####IAN TODO
+            System("Rscript nanopore/metaAnalyses/emissions_plot.R {} {}".format(indelEmissionsFile, os.path.join(self.outputDir, "indelEmissions_plot.pdf")))
 
             #Plot convergence of likelihoods
+            outf = open(os.path.join(self.outputDir, "runninglikelihoods.tsv"), "w")
             for hmmNode in hmmsNode.findall("hmm"): #This is a loop over trials
                 runningLikelihoods = map(float, hmmNode.attrib["runningLikelihoods"].split()) #This is a list of floats ordered from the first iteration to last.
-                ##IAN TODO
+                outf.write("\t".join(map(str, runningLikelihoods))); outf.write("\n")
+            outf.close()
+            system("Rscript nanopore/metaAnalyses/running_likelihood.R {} {}".format(os.path.join(self.outputDir, "runninglikelihoods.tsv"), os.path.join(self.outputDir, "running_likelihood.pdf")))
             
         self.finish() #Indicates the batch is done
