@@ -64,9 +64,9 @@ mappers = [ Bwa,
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, Hmm, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedKmer ]
 
-analyses = [ Hmm ]
-mappers = [ LastParams, LastParamsRealignEm ]
-metaAnalyses = []
+#analyses = [ Hmm ]
+#mappers = [ LastParams, LastParamsRealignEm ]
+#metaAnalyses = []
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
