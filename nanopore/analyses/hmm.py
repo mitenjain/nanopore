@@ -29,10 +29,11 @@ class Hmm(AbstractAnalysis):
 
             #Make edges with labelled transition probs.
             for transition in hmmsNode.findall("transition"):
-                addEdgeToGraph("n%sn" % transition.attrib["from"], 
-                               "n%sn" % transition.attrib["to"], 
-                               fH, dir="arrow", style='""',
-                               label="%.3f,%.3f" % (float(transition.attrib["avg"]), float(transition.attrib["std"])))
+                if float(transition.attrib["avg"]) > 0.0:
+                    addEdgeToGraph("n%sn" % transition.attrib["from"], 
+                                   "n%sn" % transition.attrib["to"], 
+                                   fH, dir="arrow", style='""',
+                                   label="%.3f,%.3f" % (float(transition.attrib["avg"]), float(transition.attrib["std"])))
 
             #Finish up
             finishGraphFile(fH)
