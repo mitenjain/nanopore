@@ -43,7 +43,7 @@ class Hmm(AbstractAnalysis):
             emissions = dict([ ((emission.attrib["x"], emission.attrib["y"]), emission.attrib["avg"]) \
                   for emission in hmmsNode.findall("emission") if emission.attrib["state"] == '0' ])
             
-            matchEmissionsFile = os.path.join(self.outputDir, "subst.tsv")
+            matchEmissionsFile = os.path.join(self.outputDir, "matchEmissions.tsv")
             outf = open(matchEmissionsFile, "w")
             bases = "ACGT"
             outf.write("\t".join(bases) + "\n")
@@ -56,11 +56,30 @@ class Hmm(AbstractAnalysis):
             #Get the sequences to contrast the neutral model.
             refSequences = getFastaDictionary(self.referenceFastaFile) #Hash of names to sequences
             readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
+            
             #Need to do plot of insert and deletion gap emissions
+            
+            #Plot of insert and deletion gap emissions
+            insertEmissions = { "A":0.0, 'C':0.0, 'G':0.0, 'T':0.0 }
+            deleteEmissions = { "A":0.0, 'C':0.0, 'G':0.0, 'T':0.0 }
+            for emission in hmmsNode.findall("emission"):
+                if emission.attrib["state"] == '1':
+                    insertEmissions[emission.attrib["x"]] += float(emission.attrib["avg"])
+                elif emission.attrib["state"] == '2':
+                    deleteEmissions[emission.attrib["y"]] += float(emission.attrib["avg"])
+            #PLot insert and delete emissions
+            indelEmissionsFile = os.path.join(self.outputDir, "indelEmissions.tsv")
+            outf = open(indelEmissionsFile, "w")
+            outf.write("\t".join(bases) + "\n")
+            outf.write("\t".join(map(lambda x : str(insertEmissions[x]), bases)) + "\n")
+            outf.write("\t".join(map(lambda x : str(deleteEmissions[x]), bases)) + "\n")
+            outf.close()
+            ###Here's where we do the plot..
+            ####IAN TODO
 
-            #Plot convergence data
-            for hmmNode in hmmsNode.findall("hmm"):
-                runningLikelihoods = map(float, hmmNode.attrib["runningLikelihoods"].split())
-                #Need to do plot of iterations vs. running likelihoods.
+            #Plot convergence of likelihoods
+            for hmmNode in hmmsNode.findall("hmm"): #This is a loop over trials
+                runningLikelihoods = map(float, hmmNode.attrib["runningLikelihoods"].split()) #This is a list of floats ordered from the first iteration to last.
+                ##IAN TODO
             
         self.finish() #Indicates the batch is done
