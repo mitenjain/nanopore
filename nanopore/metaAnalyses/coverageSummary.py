@@ -90,6 +90,10 @@ class CoverageSummary(AbstractMetaAnalysis):
     def run(self):
         self.db = self.build_db()
         outf = open(os.path.join(self.outputDir, "DB"), "w")
+<<<<<<< HEAD
         outf.write(str(self.db));outf.close()
+=======
+        outf.write(self.db);outf.close()
+>>>>>>> ab883c9b63e790110aaa6e7fdcfeb331511b45c4
         self.by_mapper_readtype()
 
