@@ -39,27 +39,23 @@ mappers = [ Bwa,
            BwaParams,
            BwaParamsChain,
            BwaParamsRealign,
-           BwaParamsRealignTrainedModel,
            Blasr,
            BlasrChain,
            BlasrParams,
            BlasrParamsChain,
            BlasrParamsRealign,
-           BlasrParamsRealignTrainedModel,
            Last,
            LastChain,
            LastParams,
            LastParamsChain,
            LastParamsRealign,
-           LastParamsRealignTrainedModel,
            Lastz,
            LastzChain,
            LastzParams,
            LastzParamsChain,
-           LastzParamsRealign,
-           LastzParamsRealignTrainedModel ]
+           LastzParamsRealign, ]
 
-analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
+analyses = [ GlobalCoverage, LocalCoverage]#, Substitutions, Indels, KmerAnalysis, ChannelMappability, QualiMap, Consensus]#, FastQC, AlignmentUncertainty]
 
 metaAnalyses = [ CoverageSummary, UnmappedKmer, UnmappedLengthDistributionAnalysis ]
 
