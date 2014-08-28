@@ -10,6 +10,12 @@ if (file.info(args[1])$size != 0) {
 
 	if (dim(dist)[2] > 2) {
 		
+		#throw out rows with single-value columns
+		for (i in 1:length(rownames(dist))) {
+			if (length(dist[i,][!is.na(dist[i,])]) > 1) {
+				dist <- dist[-i,]
+		}
+
 		pdf(args[2])
 		#this is all so hacky - first we make a color topo.colors
 		n <- 1
