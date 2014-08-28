@@ -30,6 +30,7 @@ from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
+from nanopore.analyses.hmm import Hmm
 
 mappers = [ Bwa,
            BwaChain,
@@ -59,11 +60,13 @@ mappers = [ Bwa,
            LastzParamsRealign,
            LastzParamsRealignEm,
            LastzParamsRealignTrainedModel ]
-
-#mappers = [ LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel]
           
-analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, FastQC, QualiMap, Consensus]
+analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, Hmm, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedKmer ]
+
+#analyses = [ Hmm ]
+#mappers = [ LastParams, LastParamsRealignEm ]
+#metaAnalyses = []
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
