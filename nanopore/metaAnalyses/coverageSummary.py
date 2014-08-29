@@ -3,75 +3,88 @@ import os, sys
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import system
 import re
+from itertools import product
+from collections import Counter
+
+class Entry(object):
+    def __init__(self, readType, readFastqFile, referenceFastaFile, mapper, XML):
+        self.readType = readType
+        self.readFastqFile = os.path.basename(readFastqFile)
+        self.referenceFastaFile = os.path.basename(referenceFastaFile)
+        self.mapper = mapper.__name__
+        self.base_mapper = re.findall("[A-Z][a-z]*", mapper.__name__)[0]
+        self.XML = XML
 
 class CoverageSummary(AbstractMetaAnalysis):
     """Calculates meta-coverage across all the samples.
+    Includes analysis per mapper, per readType+mapper, per reference, and combined
     """
-    def run(self):
-        fH = open(os.path.join(self.outputDir, "summary.csv"), 'w')
-        
-        fH.write(",".join(["ReadFile", "ReferenceFile", "Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "MappedReadCount", "UnmappedReadCount"]) + "\n")
-        
-        for readFastqFile in self.readFastqFiles:
+    def build_db(self):
+        """
+        Builds db of coverage results
+        """
+        db = list()
+        for readFastqFile, readType in self.readFastqFiles:
             for referenceFastaFile in self.referenceFastaFiles:
-                #tmp = open(os.path.join(self.outputDir, "tmp.csv"), "w")
-                tmp = open(os.path.join(self.getLocalTempDir(), "tmp.csv"), "w")
-                tmp.write(",".join(["Mapper", "AvgReadCoverage","AvgReferenceCoverage","AvgIdentity", "AvgMatchIdentity","AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase","AvgPosteriorMatchProbability", "MappedReadCount", "UnmappedReadCount", "NumberOfReads"]) + "\n")
-                tmp_data = {}    
                 for mapper in self.mappers:
-                    analyses, resultsDir = self.experimentHash[(readFastqFile, referenceFastaFile, mapper)]
+                    analyses, resultsDir = self.experimentHash[(readFastqFile, readType), referenceFastaFile, mapper]
                     if os.path.exists(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")):
                         globalCoverageXML = ET.parse(os.path.join(resultsDir, "analysis_GlobalCoverage", "coverage_bestPerRead.xml")).getroot()
-                        alignmentUncertaintyXML = ET.parse(os.path.join(resultsDir, "analysis_AlignmentUncertainty", "alignmentUncertainty.xml")).getroot()
-                        if mapper.__name__ not in tmp_data:
-                            tmp_data[mapper.__name__] = []
-                        tmp_data[mapper.__name__].append(",".join(globalCoverageXML.attrib["distributionidentity"].split()))
-                        fH.write(",".join([readFastqFile, referenceFastaFile, mapper.__name__,
-                                   globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
-                                   globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
-                                   globalCoverageXML.attrib["avgdeletionsPerReadBase"],
-                                   globalCoverageXML.attrib["avginsertionsPerReadBase"],
-                                   alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
-                                   globalCoverageXML.attrib["numberOfMappedReads"],
-                                   globalCoverageXML.attrib["numberOfUnmappedReads"]]) + "\n")
-                        #I realize this is ugly, sorry - better than trying to split it up in R however
-                        tmp.write(",".join([mapper.__name__,
-                                   globalCoverageXML.attrib["avgreadCoverage"], globalCoverageXML.attrib["avgreferenceCoverage"],
-                                   globalCoverageXML.attrib["avgidentity"], globalCoverageXML.attrib["avgmatchIdentity"], 
-                                   globalCoverageXML.attrib["avgdeletionsPerReadBase"],
-                                   globalCoverageXML.attrib["avginsertionsPerReadBase"],
-                                   alignmentUncertaintyXML.attrib["averagePosteriorMatchProbability"],
-                                   globalCoverageXML.attrib["numberOfMappedReads"],
-                                   globalCoverageXML.attrib["numberOfUnmappedReads"],
-                                   globalCoverageXML.attrib["numberOfReads"]]) + "\n")
-                tmp.close()
-                filename = "_".join([readFastqFile.split("/")[-1],referenceFastaFile.split("/")[-1]])
-                readname = readFastqFile.split("/")[-1]; refname = referenceFastaFile.split("/")[-1]
-                #system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {} {}".format(os.path.join(self.outputDir, "tmp.csv"), os.path.join(self.outputDir, filename), readname, refname))
-                system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.csv"), os.path.join(self.outputDir, filename), readname, refname))
-        fH.close()
-        #tmp = open(os.path.join(self.outputDir, "tmp2.csv"), "w")
-        #map by mapper and its parameters/etc; fast ugly hacks below
-        uppercase_regex = re.compile("[A-Z][a-z]*")
-        tmp_mapper = list()
-        for mapper in tmp_data:
-            tmp_mapper.append(re.findall(uppercase_regex, mapper))
-        tmp_mapper = sorted(tmp_mapper)
-        base_mappers = set([x[0] for x in tmp_mapper])
-        for base in base_mappers:
-            tmp = open(os.path.join(self.getGlobalTempDir(), "tmp.csv"), "w")
-            outf = open(os.path.join(self.outputDir, base + ".csv"), "w")
-            for mapper in tmp_data:
-                if base in mapper:
-                    tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
-            tmp.close()
-            system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, base + ".csv"), os.path.join(self.outputDir, mapper + "_coverage_summary_plots.pdf")))
-        
+                        db.append(Entry(readType, readFastqFile, referenceFastaFile, mapper, globalCoverageXML))
+        return db      
 
-        #map everything together
-        tmp = open(os.path.join(self.getGlobalTempDir(), "tmp.csv"), "w")
-        for mapper in tmp_data:
-            tmp.write(",".join([mapper] + tmp_data[mapper])); tmp.write("\n")
-        tmp.close()
-        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.getGlobalTempDir(), "tmp.csv"), os.path.join(self.outputDir, "overall_coverage_summary_plots.pdf")))
-        #system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {}".format(os.path.join(self.outputDir, "tmp2.csv"), os.path.join(self.outputDir, "coverage_summary_plots.pdf")))
+    def by_mapper_readtype(self):
+        base_mappers = {re.findall("[A-Z][a-z]*", mapper.__name__)[0] for mapper in self.mappers}
+        entry_map = {x : list() for x in product(base_mappers, self.readTypes)}
+        for entry in self.db:
+            entry_map[(entry.base_mapper, entry.readType)].append(entry)
+        for (base_mapper, readType), entries in entry_map.iteritems():
+            name = "_".join([os.path.basename(base_mapper), readType])
+            self.write_file_analyze(entries, name)
+        return entry_map
+
+    #def by_reference(self):
+    #    entry_map = {x: list() for x in self.referenceFastaFiles}
+    #    for entry in self.db:
+    #        entry_map[entry.referenceFastaFile] = entry
+    #    return entry_map
+
+    def write_file_analyze(self, entries, name):
+        path = os.path.join(self.outputDir, name + ".tsv")
+        outf = open(path, "w")
+        outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
+        entries = self.resolve_duplicate_rownames(entries)
+        for entry in entries:
+            outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
+                               entry.XML.attrib["avgreadCoverage"], entry.XML.attrib["avgreferenceCoverage"],
+                               entry.XML.attrib["avgidentity"], entry.XML.attrib["avgmatchIdentity"], 
+                               entry.XML.attrib["avgdeletionsPerReadBase"],
+                               entry.XML.attrib["avginsertionsPerReadBase"],
+                               entry.XML.attrib["numberOfMappedReads"],
+                               entry.XML.attrib["numberOfUnmappedReads"],
+                               entry.XML.attrib["numberOfReads"]]) + "\n")
+        outf.close()
+        path2 = os.path.join(self.outputDir, name + "_distribution.tsv")
+        outf = open(path2, "w")
+        for entry in entries:
+            outf.write(",".join([entry.mapper] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
+        outf.close()
+        system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {}".format(path, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name)))
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name + "_distribution")))
+
+
+    def resolve_duplicate_rownames(self, entries):
+        mappers = Counter()
+        for entry in entries:
+            if entry.mapper not in mappers:
+                mappers[entry.mapper] += 1
+            else:
+                entry.mapper = entry.mapper + "." + str(mappers[entry.mapper])
+                mappers[entry.mapper] += 1
+        return entries
+
+
+    def run(self):
+        self.db = self.build_db()
+        self.by_mapper_readtype()
+

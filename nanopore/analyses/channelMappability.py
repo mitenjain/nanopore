@@ -17,8 +17,7 @@ class ChannelMappability(AbstractAnalysis):
         nr = re.compile(r"channel_[0-9]+_read_[0-9]+")
         per_channel_read_counts = Counter([int(x.split("_")[1]) for x in readSequences.iterkeys() if re.match(nr, x)])
         sam = pysam.Samfile(self.samFile, "r")
-        mapped_read_counts = Counter([int(aR.qname.split("_")[1]) for aR in samIterator(sam) if re.match(nr, aR.qname)])
-        assert len(per_channel_read_counts) >= len(mapped_read_counts)
+        mapped_read_counts = Counter([int(aR.qname.split("_")[1]) for aR in samIterator(sam) if re.match(nr, aR.qname) and aR.is_unmapped is False])
         if len(mapped_read_counts) > 0 and len(per_channel_read_counts) > 0:
             outf = open(os.path.join(self.outputDir, "channel_mappability.tsv"), "w")
             outf.write("Channel\tReadCount\tMappableReadCount\n")

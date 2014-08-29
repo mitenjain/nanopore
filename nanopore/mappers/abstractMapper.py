@@ -7,11 +7,12 @@ from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDic
 class AbstractMapper(Target):
     """Base class for mappers. Inherit this class to create a mapper
     """
-    def __init__(self, readFastqFile, referenceFastaFile, outputSamFile, emptyHmmFile=None):
+    def __init__(self, readFastqFile, readType, referenceFastaFile, outputSamFile, emptyHmmFile=None):
         Target.__init__(self)
         self.readFastqFile = readFastqFile
         self.referenceFastaFile = referenceFastaFile
         self.outputSamFile = outputSamFile
+        self.readType = readType
         self.emptyHmmFile=emptyHmmFile
         
     def chainSamFile(self):

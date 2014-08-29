@@ -8,6 +8,7 @@ from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
+
 from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign, LastzRealignEm, LastzRealignTrainedModel
 from nanopore.mappers.lastzParams import LastzParams, LastzParamsChain, LastzParamsRealign, LastzParamsRealignEm, LastzParamsRealignTrainedModel
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm, BwaRealignTrainedModel
@@ -16,7 +17,6 @@ from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm, L
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm, BlasrRealignTrainedModel
 from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel
 from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel
-
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
@@ -29,8 +29,10 @@ from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
-from nanopore.metaAnalyses.unmappedKmer import UnmappedKmer
 from nanopore.analyses.hmm import Hmm
+from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
+from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
+from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
 
 mappers = [ Bwa,
            BwaChain,
@@ -44,7 +46,7 @@ mappers = [ Bwa,
            BlasrParams,
            BlasrParamsChain,
            BlasrParamsRealign,
-           BlasrParamsRealignEm,
+           BlasrRealignEm,
            BlasrParamsRealignTrainedModel,
            Last,
            LastChain,
@@ -59,29 +61,39 @@ mappers = [ Bwa,
            LastzParamsChain,
            LastzParamsRealign,
            LastzParamsRealignEm,
-           LastzParamsRealignTrainedModel ]
-          
-analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, Hmm, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedKmer ]
+           LastzParamsRealignTrainedModel]
+
+analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
+metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis ]
 
 #analyses = [ GlobalCoverage ]
 #mappers = [ LastzParams ] #, LastParamsRealignEm ]
 #metaAnalyses = []
 
-#The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
-def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
+#need to check for local blast installation to do unmappedBlastKmer
+if os.environ.get("BLASTDB") is not None:
+    metaAnalyses.append(UnmappedBlastKmer)
+else:
+    metaAnalyses.append(UnmappedKmerAnalysis)
+
+#The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
+def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
     experiments = []
-    for readFastaFile in readFastaFiles:
-        for referenceFastaFile in referenceFastaFiles:
-            for mapper in mappers:
-                experimentDir = os.path.join(outputDir, "experiment_%s_%s_%s" % \
-                        (os.path.split(readFastaFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__))
-                experiment = (readFastaFile, referenceFastaFile, mapper, analyses, experimentDir)
-                target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
-                experiments.append(experiment)
+    for readType, readTypeFastaFiles in readFastqFiles:
+        outputBase = os.path.join(outputDir, "analysis_" + readType)
+        if not os.path.exists(outputBase):
+            os.mkdir(outputBase)
+        for readFastqFile in readTypeFastaFiles:
+            for referenceFastaFile in referenceFastaFiles:
+                for mapper in mappers:
+                    experimentDir = os.path.join(outputBase, "experiment_%s_%s_%s" % \
+                            (os.path.split(readFastqFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__))
+                    experiment = (readFastqFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
+                    target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
+                    experiments.append(experiment)
     target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
 
-def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, experimentDir):
+def mapThenAnalyse(target, readFastqFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
         os.mkdir(experimentDir)
         target.logToMaster("Creating experiment dir: %s" % experimentDir)
@@ -91,25 +103,25 @@ def mapThenAnalyse(target, readFastaFile, referenceFastaFile, mapper, analyses, 
     hmmFileToTrain = os.path.join(experimentDir, "hmm.txt")
     remapped = False
     if not os.path.exists(samFile):
-        target.logToMaster("Starting mapper %s for reference file %s and read file %s" % (mapper.__name__, referenceFastaFile, readFastaFile))
-        target.addChildTarget(mapper(readFastaFile, referenceFastaFile, samFile, hmmFileToTrain))
+        target.logToMaster("Starting mapper %s for reference file %s and read file %s" % (mapper.__name__, referenceFastaFile, readFastqFile))
+        target.addChildTarget(mapper(readFastqFile, readType, referenceFastaFile, samFile, hmmFileToTrain))
         remapped = True
     else:
-        target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastaFile))
-    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, referenceFastaFile, samFile, analyses, experimentDir, remapped))) 
+        target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastqFile))
+    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastqFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper))) 
 
-def runAnalyses(target, readFastaFile, referenceFastaFile, samFile, analyses, experimentDir, remapped):
+def runAnalyses(target, readFastqFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper):
     for analysis in analyses:
         analysisDir = os.path.join(experimentDir, "analysis_" + analysis.__name__)
-        #if not os.path.exists(analysisDir) or isNewer(readFastaFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
+        #if not os.path.exists(analysisDir) or isNewer(readFastqFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
         if not os.path.exists(analysisDir):
             os.mkdir(analysisDir)
         if remapped or not AbstractAnalysis.isFinished(analysisDir):
-            target.logToMaster("Starting analysis %s for reference file %s and read file %s" % (analysis.__name__, referenceFastaFile, readFastaFile))
+            target.logToMaster("Starting analysis %s for reference file %s and read file %s analyzed with mapper %s" % (analysis.__name__, referenceFastaFile, readFastqFile, mapper.__name__))
             AbstractAnalysis.reset(analysisDir)
-            target.addChildTarget(analysis(readFastaFile, referenceFastaFile, samFile, analysisDir))
+            target.addChildTarget(analysis(readFastqFile, readType, referenceFastaFile, samFile, analysisDir))
         else:
-            target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastaFile))
+            target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastqFile))
 
 def runMetaAnalyses(target, metaAnalyses, outputDir, experiments):
     for metaAnalysis in metaAnalyses:
@@ -146,9 +158,14 @@ def main():
     processedFastqFiles = os.path.join(outputDir, "processedReadFastqFiles")
     if not os.path.exists(processedFastqFiles):
         os.mkdir(processedFastqFiles)
-    #This should be fixed to work with odd numbers of qual values, though this may be masking bug in input seqs.
-    readFastqFiles = [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", i), os.path.join(processedFastqFiles, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles")) if (".fq" in i and i[-3:] == '.fq') or (".fastq" in i and i[-6:] == '.fastq') ]
-        
+    fastqParentDir = os.path.join(workingDir, "readFastqFiles")
+    readFastqFiles = list()
+    for fastqSubDir in filter(os.path.isdir, [os.path.join(fastqParentDir, x) for x in os.listdir(fastqParentDir)]):
+        readType = os.path.basename(fastqSubDir)
+        if not os.path.exists(os.path.join(processedFastqFiles, os.path.basename(fastqSubDir))):
+            os.mkdir(os.path.join(processedFastqFiles, readType))
+        readFastqFiles.append([readType, [ makeFastqSequenceNamesUnique(os.path.join(workingDir, "readFastqFiles", readType, i), os.path.join(processedFastqFiles, readType, i)) for i in os.listdir(os.path.join(workingDir, "readFastqFiles", readType)) if (".fq" in i and i[-3:] == '.fq') or (".fastq" in i and i[-6:] == '.fastq') ]])
+
     #Assign/process (uniquify the names of) the input reference fasta files
     processedFastaFiles = os.path.join(outputDir, "processedReferenceFastaFiles")
     if not os.path.exists(processedFastaFiles):
@@ -158,8 +175,10 @@ def main():
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)
     logger.info("Using the following output directory: %s" % outputDir)
-    for readFastqFile in readFastqFiles:
-        logger.info("Got the following read fastq file: %s" % readFastqFile)
+    for readType, readTypeFastqFiles in readFastqFiles:
+        logger.info("Got the follow read type: %s" % readType)
+        for readFastqFile in readTypeFastqFiles:
+            logger.info("Got the following read fastq file: %s" % readFastqFile)
     for referenceFastaFile in referenceFastaFiles:
         logger.info("Got the following reference fasta files: %s" % referenceFastaFile)
     
@@ -172,3 +191,4 @@ def main():
 if __name__ == '__main__':
     from nanopore.pipeline import *
     main()
+
