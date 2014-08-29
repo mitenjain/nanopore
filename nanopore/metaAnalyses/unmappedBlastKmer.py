@@ -78,6 +78,6 @@ class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 				mapped_percent = 1 - unmapped_percent
 				outf.write("{} {} {}\n".format(blast_percent, mapped_percent, unmapped_percent))
 				outf.close()
-				system("Rscript nanopore/metaAnalyses/barplot_blast.R {} {} {}".format(os.path.join(self.outputDir, readType + "_tmp"), os.path.join(self.outputDir, readType + "blast_counts.pdf"), readType))
+				system("Rscript nanopore/metaAnalyses/barplot_blast.R {} {} {}".format(os.path.join(self.outputDir, readType + "_tmp"), os.path.join(self.outputDir, readType + "_blast_counts.pdf"), readType))
 
 
