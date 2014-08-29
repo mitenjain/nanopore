@@ -19,8 +19,8 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     lengths <- cbind(data$MappedReadLengths, data$UnmappedReadLengths)
     lengths.sort <- lengths[order(lengths)]
     xmax <- lengths.sort[round(0.95*length(lengths.sort))]
-    hist(data$MappedReadLengths, breaks = "FD", main=paste("Mapped Read Length Distribution n= ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax))
-    hist(data$UnmappedReadLengths, breaks = "FD", main=paste("Unmapped Read Length Distribution n= ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax))
+    hist(data$MappedReadLengths, breaks = "FD", main=paste("Mapped Read Length Distribution n= ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
+    hist(data$UnmappedReadLengths, breaks = "FD", main=paste("Unmapped Read Length Distribution n= ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
     #plot read coverage distribution
     hist(data$ReadCoverage, breaks="FD", main="Read Coverage Distribution", xlab="Read Coverage")
 
