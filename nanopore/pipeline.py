@@ -105,16 +105,16 @@ def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, 
         remapped = True
     else:
         target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastaFile))
-    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped))) 
+    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper))) 
 
-def runAnalyses(target, readFastaFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped):
+def runAnalyses(target, readFastaFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper):
     for analysis in analyses:
         analysisDir = os.path.join(experimentDir, "analysis_" + analysis.__name__)
         #if not os.path.exists(analysisDir) or isNewer(readFastaFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
         if not os.path.exists(analysisDir):
             os.mkdir(analysisDir)
         if remapped or not AbstractAnalysis.isFinished(analysisDir):
-            target.logToMaster("Starting analysis %s for reference file %s and read file %s" % (analysis.__name__, referenceFastaFile, readFastaFile))
+            target.logToMaster("Starting analysis %s for reference file %s and read file %s analyzed with mapper %s" % (analysis.__name__, referenceFastaFile, readFastaFile, mapper.__name__))
             AbstractAnalysis.reset(analysisDir)
             target.addChildTarget(analysis(readFastaFile, readType, referenceFastaFile, samFile, analysisDir))
         else:
@@ -172,8 +172,10 @@ def main():
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)
     logger.info("Using the following output directory: %s" % outputDir)
-    for readFastqFile in readFastqFiles:
-        logger.info("Got the following read fastq file: %s" % readFastqFile)
+    for readType, readTypeFastqFiles in readFastqFiles:
+        logger.info("Got the follow read type: %s" % readType)
+        for readFastqFile in readTypeFastqFiles:
+            logger.info("Got the following read fastq file: %s" % readFastqFile)
     for referenceFastaFile in referenceFastaFiles:
         logger.info("Got the following reference fasta files: %s" % referenceFastaFile)
     
