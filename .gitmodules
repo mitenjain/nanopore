@@ -31,3 +31,12 @@
 [submodule "submodules/cactus"]
 	path = submodules/cactus
 	url = git@github.com:benedictpaten/cactus.git
+[submodule "submodules/samtools"]
+	path = submodules/samtools
+	url = https://github.com/samtools/samtools.git
+[submodule "submodules/htslib"]
+	path = submodules/htslib
+	url = https://github.com/samtools/htslib.git
+[submodule "submodules/bcftools"]
+	path = submodules/bcftools
+	url = https://github.com/samtools/bcftools.git
