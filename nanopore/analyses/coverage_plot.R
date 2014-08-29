@@ -18,11 +18,12 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     #future - stack them; remove very long unmapped reads?
     lengths <- cbind(data$MappedReadLengths, data$UnmappedReadLengths)
     lengths.sort <- lengths[order(lengths)]
+    #remove the 5% longest reads so they don't skew the graph
     xmax <- lengths.sort[round(0.95*length(lengths.sort))]
-    hist(data$MappedReadLengths, breaks = "FD", main=paste("Mapped Read Length Distribution n= ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
-    hist(data$UnmappedReadLengths, breaks = "FD", main=paste("Unmapped Read Length Distribution n= ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
+    hist(data$MappedReadLengths, breaks = "FD", main=paste("Mapped Read Length Distribution\nn = ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
+    hist(data$UnmappedReadLengths, breaks = "FD", main=paste("Unmapped Read Length Distribution\nn = ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
     #plot read coverage distribution
-    hist(data$ReadCoverage, breaks="FD", main="Read Coverage Distribution", xlab="Read Coverage")
+    hist(data$ReadCoverage, breaks="FD", main="Read Coverage Distribution", xlab="Read Coverage", cex.main=0.8)
 
     #plot relative density of mapped to unmapped reads
     #first, find max x value to expect
@@ -34,7 +35,7 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     mapDens <- density(data$MappedReadLengths, from=0, to=xmax, n=1000, adjust=0.5)
     #find porportionality difference in # of members in each group
     mapProp <- length(data$MappedReadLengths)/length(tot)
-    plot(mapDens$x, mapProp*mapDens$y/totDens$y, type="l", xlab="Read Length", ylab="Relative Density", main="Relative Density\nMapped To Unmapped Read Length", ylim=c(0,2))
+    plot(mapDens$x, mapProp*mapDens$y/totDens$y, type="l", xlab="Read Length", ylab="Relative Density", main="Relative Density\nMapped To Unmapped Read Length", ylim=c(0,2), cex.main=0.8)
 
     #put new plots on next page
     par(mfrow=c(1,1))
