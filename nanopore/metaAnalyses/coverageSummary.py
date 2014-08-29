@@ -70,7 +70,7 @@ class CoverageSummary(AbstractMetaAnalysis):
             outf.write(",".join([entry.mapper] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
         outf.close()
         system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {}".format(path, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name)))
-        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, os.path.join(self.outputDir, name)s, os.path.join(self.outputDir, name + "_distribution")))
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name + "_distribution")))
 
 
     def resolve_duplicate_rownames(self, entries):
