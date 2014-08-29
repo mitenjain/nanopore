@@ -1,0 +1,7 @@
+gap_open_penalty = 258
+gap_extend_penalty = 63
+                A       C       G       T
+        A       51      -38     -30     -151
+        C       -56     36      -83     -148
+        G       -38     -97     41      -124
+        T       -66     -44     -48     102

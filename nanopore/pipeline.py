@@ -64,8 +64,8 @@ mappers = [ Bwa,
 analyses = [ GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, Hmm, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedKmer ]
 
-#analyses = [ Hmm ]
-#mappers = [ LastParams, LastParamsRealignEm ]
+#analyses = [ GlobalCoverage ]
+#mappers = [ LastzParams ] #, LastParamsRealignEm ]
 #metaAnalyses = []
 
 #The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
