@@ -73,24 +73,24 @@ if os.environ.get("BLASTDB") is not None:
 else:
     metaAnalyses.append(UnmappedKmerAnalysis)
 
-#The following runs the mapping and analysis for every combination of readFastaFile, referenceFastaFile and mapper
-def setupExperiments(target, readFastaFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
+#The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
+def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
     experiments = []
-    for readType, readTypeFastaFiles in readFastaFiles:
+    for readType, readTypeFastaFiles in readFastqFiles:
         outputBase = os.path.join(outputDir, "analysis_" + readType)
         if not os.path.exists(outputBase):
             os.mkdir(outputBase)
-        for readFastaFile in readTypeFastaFiles:
+        for readFastqFile in readTypeFastaFiles:
             for referenceFastaFile in referenceFastaFiles:
                 for mapper in mappers:
                     experimentDir = os.path.join(outputBase, "experiment_%s_%s_%s" % \
-                            (os.path.split(readFastaFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__))
-                    experiment = (readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
+                            (os.path.split(readFastqFile)[-1], os.path.split(referenceFastaFile)[-1], mapper.__name__))
+                    experiment = (readFastqFile, readType, referenceFastaFile, mapper, analyses, experimentDir)
                     target.addChildTarget(Target.makeTargetFn(mapThenAnalyse, args=experiment))
                     experiments.append(experiment)
     target.setFollowOnTargetFn(runMetaAnalyses, args=(metaAnalyses, outputDir, experiments))
 
-def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
+def mapThenAnalyse(target, readFastqFile, readType, referenceFastaFile, mapper, analyses, experimentDir):
     if not os.path.exists(experimentDir):
         os.mkdir(experimentDir)
         target.logToMaster("Creating experiment dir: %s" % experimentDir)
@@ -100,25 +100,25 @@ def mapThenAnalyse(target, readFastaFile, readType, referenceFastaFile, mapper, 
     hmmFileToTrain = os.path.join(experimentDir, "hmm.txt")
     remapped = False
     if not os.path.exists(samFile):
-        target.logToMaster("Starting mapper %s for reference file %s and read file %s" % (mapper.__name__, referenceFastaFile, readFastaFile))
-        target.addChildTarget(mapper(readFastaFile, readType, referenceFastaFile, samFile, hmmFileToTrain))
+        target.logToMaster("Starting mapper %s for reference file %s and read file %s" % (mapper.__name__, referenceFastaFile, readFastqFile))
+        target.addChildTarget(mapper(readFastqFile, readType, referenceFastaFile, samFile, hmmFileToTrain))
         remapped = True
     else:
-        target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastaFile))
-    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastaFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper))) 
+        target.logToMaster("Mapper %s for reference file %s and read file %s is already complete" % (mapper.__name__, referenceFastaFile, readFastqFile))
+    target.setFollowOnTarget(Target.makeTargetFn(runAnalyses, args=(readFastqFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper))) 
 
-def runAnalyses(target, readFastaFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper):
+def runAnalyses(target, readFastqFile, readType, referenceFastaFile, samFile, analyses, experimentDir, remapped, mapper):
     for analysis in analyses:
         analysisDir = os.path.join(experimentDir, "analysis_" + analysis.__name__)
-        #if not os.path.exists(analysisDir) or isNewer(readFastaFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
+        #if not os.path.exists(analysisDir) or isNewer(readFastqFile, analysisDir) or isNewer(referenceFastaFile, analysisDir):
         if not os.path.exists(analysisDir):
             os.mkdir(analysisDir)
         if remapped or not AbstractAnalysis.isFinished(analysisDir):
-            target.logToMaster("Starting analysis %s for reference file %s and read file %s analyzed with mapper %s" % (analysis.__name__, referenceFastaFile, readFastaFile, mapper.__name__))
+            target.logToMaster("Starting analysis %s for reference file %s and read file %s analyzed with mapper %s" % (analysis.__name__, referenceFastaFile, readFastqFile, mapper.__name__))
             AbstractAnalysis.reset(analysisDir)
-            target.addChildTarget(analysis(readFastaFile, readType, referenceFastaFile, samFile, analysisDir))
+            target.addChildTarget(analysis(readFastqFile, readType, referenceFastaFile, samFile, analysisDir))
         else:
-            target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastaFile))
+            target.logToMaster("Analysis %s for reference file %s and read file %s is already complete" % (analysis.__name__, referenceFastaFile, readFastqFile))
 
 def runMetaAnalyses(target, metaAnalyses, outputDir, experiments):
     for metaAnalysis in metaAnalyses:
