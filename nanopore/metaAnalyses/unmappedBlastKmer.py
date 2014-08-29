@@ -34,7 +34,7 @@ class UnmappedBlastKmer(AbstractUnmappedMetaAnalysis):
 					outf.write(">{} {}\n{}\n".format(name, readFastqFile, seq))
 				outf.close()
 
-				system('blastn -outfmt "7 qseqid sseqid sscinames stitle" -db nt -max_target_seqs 1 -query {} -out {}'.format(os.path.join(self.outputDir, "unmapped.fasta"), os.path.join(self.outputDir, readType + "_blast_out.txt")))
+				system('blastn -outfmt "7 qseqid sseqid sscinames stitle" -db nt -max_target_seqs 1 -query {} -out {}'.format(os.path.join(self.outputDir, readType + "_unmapped.fasta"), os.path.join(self.outputDir, readType + "_blast_out.txt")))
 				
 				blast_hits, no_hits = Counter(), set()
 				for query, result in self.parse_blast(open(os.path.join(self.outputDir, readType + "_blast_out.txt"))):
