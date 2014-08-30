@@ -384,7 +384,7 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     options.randomStart = True
     options.trials = 5
     options.outputTrialHmms = True
-    options.iterations = 2
+    options.iterations = 200
     options.numberOfAlignmentsPerJob=200
     options.outputXMLModelFile = outputModel + ".xml"
     #options.updateTheBand = True
