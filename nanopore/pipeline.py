@@ -17,6 +17,8 @@ from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm, L
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm, BlasrRealignTrainedModel
 from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel
 from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel
+from nanopore.mappers.combinedMapper import CombinedMapper, CombinedMapperChain, CombinedMapperRealign, CombinedMapperRealignEm, CombinedMapperRealignTrainedModel
+
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
@@ -61,11 +63,19 @@ mappers = [ Bwa,
            LastzParamsChain,
            LastzParamsRealign,
            LastzParamsRealignEm,
-           LastzParamsRealignTrainedModel]
+           LastzParamsRealignTrainedModel,
+           CombinedMapper,
+           CombinedMapperChain, 
+           CombinedMapperRealign,
+           CombinedMapperRealignEm,
+           CombinedMapperRealignTrainedModel ]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
-
 metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis ]
+
+#analyses = [ GlobalCoverage ]
+#mappers = [ CombinedMapperRealign ] #, LastParamsRealignEm ]
+#metaAnalyses = []
 
 #need to check for local blast installation to do unmappedBlastKmer
 if os.environ.get("BLASTDB") is not None:

@@ -315,6 +315,19 @@ def chainFn(alignedReads, refSeq, readSeq, scoreFn=lambda alignedRead, refSeq, r
     
     return chain
 
+def combineSamFiles(baseSamFile, extraSamFiles, outputSamFile):
+    """Combines the lines from multiple sam files into one sam file
+    """
+    sam = pysam.Samfile(baseSamFile, "r" )
+    outputSam = pysam.Samfile(outputSamFile, "wh", template=sam)
+    sam.close()
+    for samFile in [ baseSamFile  ] + extraSamFiles:
+        sam = pysam.Samfile(samFile, "r" )
+        for line in sam:
+            outputSam.write(line)
+        sam.close()
+    outputSam.close()
+
 def chainSamFile(samFile, outputSamFile, readFastqFile, referenceFastaFile, chainFn=chainFn):
     """Chains together the reads in the SAM file so that each read is covered by a single maximal alignment
     """
