@@ -10,7 +10,7 @@ if (dim(summary)[1] >= 1) {
 
     r <- topo.colors(length(rownames(summary)))
 
-    pdf(paste(args[3], "pdf", sep="."))
+    pdf(args[3])
 
 
     ################################################
