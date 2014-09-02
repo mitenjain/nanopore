@@ -5,30 +5,21 @@ from jobTree.src.bioio import system, fastqRead
 from nanopore.analyses.utils import samIterator
 from itertools import product
 import re
-from collections import Counter
-
+from collections import OrderedDict as od
 
 class ComparePerReadMappabilityByMapper(AbstractUnmappedMetaAnalysis):
-    """Finds which mappers mapped which reads; reports proportion of reads mapped by only one mapper"""
+    """Finds which base mappers mapped which reads"""
     def run(self):
         for readType in self.readTypes:
-            mapper_ref_dict = {x: list() for x in self.baseMappers}
+            sortedBaseMappers = sorted(self.baseMappers)
+            outf = open(os.path.join(self.outputDir, readType + "_perReadMappability.tsv"), "w")
+            outf.write("Read\tReadFastqFile\t"); outf.write("\t".join(sortedBaseMappers)); outf.write("\n")
             for read in self.reads:
-                if read.readType == readType and read.is_mapped and len(read.mapRefPairs) == 1:
-                    for mapper, referenceFastaFile in read.get_map_ref_pair():
-                        base_mapper = re.findall("[A-Z][a-z]*", mapper)[0]
-                        mapper_ref_dict[base_mapper].add((read.mapRefPairs))
-
-            outf = open(os.path.join(self.outputDir, readType + "_full_unique_results"), "w")
-            outf2 = open(os.path.join(self.outputDir, readType + "_unique_read_counts"), "w")
-            for base_mapper, singletons in mapper_ref_dict.iteritems():
-                outf.write(base_mapper + " :"); outf.write("\t".join(singletons)); outf.write("\n")
-                outf2.write(base_mapper + "\t" + str(len(singletons)) + "\n")
-            outf.close(); outf2.close()
-
-            #you want a map of read file and read to base mappers I.E. read1, file1: last=0, lastz=1, etc
-            per_read_counts = list()
-            for read in self.reads:
-                if read.readType == readType and read.is_mapped:
-                    for mapper, referenceFastaFile in read.get_map_ref_pair():
-                        base_mapper_counter[(read.name, read.readFastqFile)] 
+                if read.readType == readType and read.is_mapped is True:
+                    tmp = od([[x, 0] for x in sortedBaseMappers])
+                    for mapper, reference in read.get_map_ref_pair():
+                        baseMapper = re.findall("[A-Z][a-z]*", mapper)[0]
+                        if tmp[baseMapper] == 0:
+                            tmp[baseMapper] = 1
+                    outf.write("\t".join([read.name, os.path.basename(read.readFastqFile)] + map(str, tmp.values()))); outf.write("\n")
+            outf.close()

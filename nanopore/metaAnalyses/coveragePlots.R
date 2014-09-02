@@ -7,7 +7,7 @@ if (file.info(args[1])$size != 0) {
 	dist <- read.table(args[1], fill=T, sep=",", row.names=1, col.names=paste("V",seq_len(cols)))
 	dist <- dist[order(rownames(dist)),]
 
-
+if (! is.null(dim(dist))) {
 	if (dim(dist)[2] > 2) {
 		
 		tmp <- dist
@@ -41,6 +41,6 @@ if (file.info(args[1])$size != 0) {
 		legend(x="top", col=r, legend=rownames(dist), cex=0.7, lty=1)
 
 		dev.off()
-
+		}
 	}
 }

@@ -39,46 +39,11 @@ from nanopore.metaAnalyses.comparePerReadMappabilityByMapper import ComparePerRe
 from nanopore.metaAnalyses.readTypeIntersectionsByMapper import ReadTypeIntersectionsByMapper
 
 
-mappers = [ Bwa,
-           BwaChain,
-           BwaParams,
-           BwaParamsChain,
-           BwaParamsRealign,
-           BwaParamsRealignEm,
-           BwaParamsRealignTrainedModel,
-           Blasr,
-           BlasrChain,
-           BlasrParams,
-           BlasrParamsChain,
-           BlasrParamsRealign,
-           BlasrRealignEm,
-           BlasrParamsRealignTrainedModel,
-           Last,
-           LastChain,
-           LastParams,
-           LastParamsChain,
-           LastParamsRealign,
-           LastParamsRealignEm,
-           LastParamsRealignTrainedModel,
-           Lastz,
-           LastzChain,
-           LastzParams,
-           LastzParamsChain,
-           LastzParamsRealign,
-           LastzParamsRealignEm,
-           LastzParamsRealignTrainedModel,
-           CombinedMapper,
-           CombinedMapperChain, 
-           CombinedMapperRealign,
-           CombinedMapperRealignEm,
-           CombinedMapperRealignTrainedModel ]
+mappers = [Lastz, Last]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
 metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper, ReadTypeIntersectionsByMapper ]
 
-#analyses = [ GlobalCoverage ]
-#mappers = [ CombinedMapperRealign ] #, LastParamsRealignEm ]
-#metaAnalyses = []
 
 #need to check for local blast installation to do unmappedBlastKmer
 if os.environ.get("BLASTDB") is not None:
