@@ -23,3 +23,4 @@ class ComparePerReadMappabilityByMapper(AbstractUnmappedMetaAnalysis):
                             tmp[baseMapper] = 1
                     outf.write("\t".join([read.name, os.path.basename(read.readFastqFile)] + map(str, tmp.values()))); outf.write("\n")
             outf.close()
+            system("Rscript nanopore/metaAnalyses/vennDiagram.R {} {}".format(os.path.join(self.outputDir, readType + "_perReadMappability.tsv"), os.path.join(self.outputDir, readType + "_perReadMappabilityVennDiagram.pdf")))

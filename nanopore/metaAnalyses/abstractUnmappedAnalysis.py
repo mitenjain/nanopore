@@ -14,8 +14,9 @@ class Read():
         self.readFastqFile = readFastqFile
         self.mapRefPairs = mapRefPairs
 
-        if mapRefPairs is not (None, None):
+        if mapRefPairs is not None:
             self.is_mapped = True
+            print mapRefPairs
             self.mappers, self.references = set(mapRefPairs[0]), set(mapRefPairs[1])
         else:
             self.is_mapped = False
@@ -25,8 +26,6 @@ class Read():
         if self.mapRefPairs is not None:
             for mapper, reference in zip(self.mapRefPairs[0], self.mapRefPairs[1]):
                 yield (mapper, reference)
-        else:
-            yield None, None
 
 class AbstractUnmappedMetaAnalysis(AbstractMetaAnalysis):
     """Builds a database of reads and the information gathered about them during analysis"""
@@ -51,4 +50,4 @@ class AbstractUnmappedMetaAnalysis(AbstractMetaAnalysis):
                 mappers, referenceFastaFiles = map(tuple, zip(*mappedReads[(name, readFastqFile)]))
                 self.reads.append(Read(name, seq, readType, readFastqFile, (mappers, referenceFastaFiles)))
             else:
-                self.reads.append(Read(name, seq, readType, readFastqFile, None, None))
+                self.reads.append(Read(name, seq, readType, readFastqFile, None))
