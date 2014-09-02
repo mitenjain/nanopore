@@ -35,6 +35,9 @@ from nanopore.analyses.hmm import Hmm
 from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
 from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
+from nanopore.metaAnalyses.comparePerReadMappabilityByMapper import ComparePerReadMappabilityByMapper
+from nanopore.metaAnalyses.readTypeIntersectionsByMapper import ReadTypeIntersectionsByMapper
+
 
 mappers = [ Bwa,
            BwaChain,
@@ -71,7 +74,7 @@ mappers = [ Bwa,
            CombinedMapperRealignTrainedModel ]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis ]
+metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper, ReadTypeIntersectionsByMapper ]
 
 #analyses = [ GlobalCoverage ]
 #mappers = [ CombinedMapperRealign ] #, LastParamsRealignEm ]
