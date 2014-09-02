@@ -53,6 +53,7 @@ class CoverageSummary(AbstractMetaAnalysis):
         path = os.path.join(self.outputDir, name + ".tsv")
         outf = open(path, "w")
         outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
+        entries = sorted(entries, key = lambda x: x.mapper)
         entries = self.resolve_duplicate_rownames(entries)
         for entry in entries:
             outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
@@ -77,14 +78,13 @@ class CoverageSummary(AbstractMetaAnalysis):
         mappers = Counter()
         for entry in entries:
             if entry.mapper not in mappers:
-                mappers[entry.mapper] += 1
+                mappers[entry.mapper] = 0
             else:
-                entry.mapper = entry.mapper + "." + str(mappers[entry.mapper])
                 mappers[entry.mapper] += 1
+                entry.mapper = entry.mapper + "." + str(mappers[entry.mapper])
         return entries
 
 
     def run(self):
         self.db = self.build_db()
         self.by_mapper_readtype()
-
