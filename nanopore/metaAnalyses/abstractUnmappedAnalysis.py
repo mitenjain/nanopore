@@ -50,6 +50,3 @@ class AbstractUnmappedMetaAnalysis(AbstractMetaAnalysis):
                 self.reads.append(Read(name, seq, readType, readFastqFile, (mappers, referenceFastaFiles)))
             else:
                 self.reads.append(Read(name, seq, readType, readFastqFile, None))
-
-
-
