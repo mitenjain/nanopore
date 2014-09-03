@@ -8,6 +8,10 @@ from jobTree.src.bioio import fastqRead, fastaRead, setLoggingFromOptions, logge
 from itertools import izip, product
 from collections import Counter
 
+"""Used to BLAST results from the combined analysis result in order to find the set of reads that truly unmappable.
+Reports the BLAST results as well as the raw hits, and also reports a fasta of the reads that did not map anywhere,
+and generates a summary barplot."""
+
 readTypes = ["2D", "template", "complement"]
 combinedAnalyses = ["CombinedMapper", "CombinedMapperChain", "CombinedMapperRealign", "CombinedMapperRealignEm", "CombinedMapperRealignTrainedModel"]
 
