@@ -30,26 +30,49 @@ from nanopore.analyses.mutate_reference import MutateReference
 from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
-from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.analyses.hmm import Hmm
+
 from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
-from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
 from nanopore.metaAnalyses.comparePerReadMappabilityByMapper import ComparePerReadMappabilityByMapper
-from nanopore.metaAnalyses.readTypeIntersectionsByMapper import ReadTypeIntersectionsByMapper
+from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 
-
-mappers = [Lastz, Last]
+mappers = [ Bwa,
+           BwaChain,
+           BwaParams,
+           BwaParamsChain,
+           BwaParamsRealign,
+           BwaParamsRealignEm,
+           BwaParamsRealignTrainedModel,
+           Blasr,
+           BlasrChain,
+           BlasrParams,
+           BlasrParamsChain,
+           BlasrParamsRealign,
+           BlasrRealignEm,
+           BlasrParamsRealignTrainedModel,
+           Last,
+           LastChain,
+           LastParams,
+           LastParamsChain,
+           LastParamsRealign,
+           LastParamsRealignEm,
+           LastParamsRealignTrainedModel,
+           Lastz,
+           LastzChain,
+           LastzParams,
+           LastzParamsChain,
+           LastzParamsRealign,
+           LastzParamsRealignEm,
+           LastzParamsRealignTrainedModel,
+           CombinedMapper,
+           CombinedMapperChain, 
+           CombinedMapperRealign,
+           CombinedMapperRealignEm,
+           CombinedMapperRealignTrainedModel ]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper, ReadTypeIntersectionsByMapper ]
-
-
-#need to check for local blast installation to do unmappedBlastKmer
-if os.environ.get("BLASTDB") is not None:
-    metaAnalyses.append(UnmappedBlastKmer)
-else:
-    metaAnalyses.append(UnmappedKmerAnalysis)
+metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
