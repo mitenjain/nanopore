@@ -4,6 +4,7 @@ args <- commandArgs(trailingOnly = T)
 
 data <- read.table(args[1], header=T, row.names=1)
 
+library(methods)
 
 ##############################################################################
 #### R script to
