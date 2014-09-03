@@ -34,14 +34,14 @@ def find_analyses(target, unmappedByReadType, outputDir):
     for readType in unmappedByReadType:
         outfiles[readType] = list()
         records = list()
-        for (sequence, (name, readFastqFile)), i in izip(unmappedByReadType[readType].iteritems(), xrange(len(unmappedByReadType[readType]))):
-                records.append(">{} {}\n{}\n".format(name, os.path.basename(readFastqFile), sequence))
-                if i % 30 == 0 or i == len(unmappedByReadType[readType]) - 1:
-                    tmpalign = os.path.join(target.getGlobalTempDir(), str(i) + ".fasta")
+        for (name, sequence), i in izip(unmappedByReadType[readType].iteritems(), xrange(len(unmappedByReadType[readType]))):
+                records.append(">{}\n{}\n".format(name, sequence))
+                if i % 500 == 0 or i == len(unmappedByReadType[readType]) - 1:
+                    tmpalign = os.path.join(target.getGlobalTempDir(), str(i) + ".txt")
                     outfiles[readType].append(tmpalign)
                     target.addChildTarget(Target.makeTargetFn(run_blast, args=(records, tmpalign)))
                     records = list()
-    target.setFollowOnTargetFn(merge, args=(records, tmpalign))
+    target.setFollowOnTargetFn(merge, args=(outfiles, outputDir))
 
 def run_blast(target, records, tmpalign):
     query = "".join(records)
@@ -51,11 +51,11 @@ def run_blast(target, records, tmpalign):
 
 def merge(target, outfiles, outputDir):
     for readType in outfiles:
-        outf = os.path.join(outputDir, readType + "_raw_blast.txt")
+        outf = os.path.join(outputDir, readType + "_blast_out.txt")
         with open(outf, "w") as outfile:
             for f in outfiles[readType]:
                 with open(f) as i:
-                    outf.write(i.read())
+                    outfile.write(i.read())
         outf.close()
 
 def main():
@@ -91,10 +91,10 @@ def main():
         for readFastqFile, referenceFastaFile, samFile in samFiles[readType]:
             mappedNames = {x.qname for x in pysam.Samfile(samFile) if not x.is_unmapped}
             for name, seq, qual in fastqRead(readFastqFile):
-                if name not in mappedNames:
-                    unmappedReads[seq] = (name, readFastqFile)
+                if name.split(" ")[0] not in mappedNames and name not in mappedReads and name not in unmappedReads:
+                    unmappedReads[name] = seq
                 else:
-                    mappedReads[seq] = (name, readFastqFile)
+                    mappedReads[name] = seq
         unmappedByReadType[readType] = unmappedReads
         mappedByReadType[readType] = mappedReads
 
