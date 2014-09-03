@@ -16,7 +16,6 @@ class Read():
 
         if mapRefPairs is not None:
             self.is_mapped = True
-            print mapRefPairs
             self.mappers, self.references = set(mapRefPairs[0]), set(mapRefPairs[1])
         else:
             self.is_mapped = False
