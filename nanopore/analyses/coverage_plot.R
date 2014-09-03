@@ -20,25 +20,24 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     lengths.sort <- lengths[order(lengths)]
     #remove the 5% longest reads so they don't skew the graph
     xmax <- lengths.sort[round(0.95*length(lengths.sort))]
-    hist(data$MappedReadLengths, breaks = "FD", main=paste("Mapped Read Length Distribution\nn = ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
-    hist(data$UnmappedReadLengths, breaks = "FD", main=paste("Unmapped Read Length Distribution\nn = ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
+    m <- hist(data$MappedReadLengths, breaks = "FD")   
+    u <- hist(data$UnmappedReadLengths, breaks = "FD")
+    plot(m, main=paste("Mapped Read Length Distribution\nn = ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
+    plot(u, main=paste("Unmapped Read Length Distribution\nn = ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
     #plot read coverage distribution
     hist(data$ReadCoverage, breaks="FD", main="Read Coverage Distribution", xlab="Read Coverage", cex.main=0.8)
-
-    #plot relative density of mapped to unmapped reads
-    #first, find max x value to expect
-    xmax <- max(data$UnmappedReadLengths,data$MappedReadLengths)
-    #generate a combined data set of all reads
-    tot <- rbind(c(data$UnmappedReadLengths,data$MappedReadLengths))
-    #find density of mapped and combined
-    totDens <- density(tot, from=0, to=xmax, n=1000, adjust=0.5)
-    mapDens <- density(data$MappedReadLengths, from=0, to=xmax, n=1000, adjust=0.5)
-    #find porportionality difference in # of members in each group
-    mapProp <- length(data$MappedReadLengths)/length(tot)
-    plot(mapDens$x, mapProp*mapDens$y/totDens$y, type="l", xlab="Read Length", ylab="Relative Density", main="Relative Density\nMapped To Unmapped Read Length", ylim=c(0,2), cex.main=0.8)
+    hist(data$ReadIdentity, breaks="FD", main="Read Identity Distribution", xlab="Read Identity", cex.main=0.8)
 
     #put new plots on next page
     par(mfrow=c(1,1))
+
+    #stacked histogram of mapped/unmapped length distribution
+    ymax <- max(u$counts, m$counts)
+    plot(m, col=rgb(1,0,0,0.5), xlim=c(0,xmax), ylim=c(0,ymax), main="Mapped and Unmapped Read Length Distributions", xlab="Read Length")
+    plot(u, col=rgb(0,0,1,0.5), add=T, xlim=c(0,xmax), ylim=c(0,ymax), main="", xlab="", ylab="")
+    legend("topleft", pch=15, legend=c("Mapped", "Unmapped"), col=c(rgb(1,0,0),rgb(0,0,1)))
+    
+
     p1 <- xyplot(data$ReadCoverage~data$MatchIdentity, main="Read Coverage vs. Match Identity", ylab="Read Coverage", xlab="Match Identity", grid=T, panel=panel.smoothScatter)
     p2 <- xyplot(data$ReadIdentity~data$MappedReadLengths, main="Read Identity vs. Read Length", xlab="Read Length", ylab="Read Identity", grid=T, panel=panel.smoothScatter)
     p3 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$MappedReadLengths, main="Indels Per Base vs. Read Length", xlab="Read Length", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
