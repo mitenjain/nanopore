@@ -8,8 +8,12 @@ if [ -e ./jobTree ]; then
     rm -rf ./jobTree
 fi
 
+if [ -z "$BLASTDB" ]; then
+    echo "Error: environmental variable BLASTDB is not set. Cannot BLAST."
+    exit 1
+fi
 
-export BLASTDB=:/hive/users/ifiddes/blastdb
+
 #Set the python path to just these local directories
 export PYTHONPATH=:../:../submodules:${PYTHONPATH}
 #Preferentially put the local binaries at the front of the path
