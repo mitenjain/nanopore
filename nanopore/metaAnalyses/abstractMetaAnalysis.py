@@ -1,5 +1,5 @@
 from jobTree.scriptTree.target import Target
-
+import re
 
 class AbstractMetaAnalysis(Target):
     """Base class to for meta-analysis targets. Inherit this class to create a meta-analysis.
@@ -19,6 +19,8 @@ class AbstractMetaAnalysis(Target):
         self.referenceFastaFiles = set()
         #readTypes
         self.readTypes = set()
+        #base mappers (lastz, last, bwa, blasr)
+        self.baseMappers = set()
         
         #Store all this stuff
         for readFastqFile, readType, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
@@ -27,3 +29,4 @@ class AbstractMetaAnalysis(Target):
             self.readFastqFiles.add((readFastqFile, readType))
             self.referenceFastaFiles.add(referenceFastaFile)
             self.readTypes.add(readType)
+            self.baseMappers.add(re.findall("[A-Z][a-z]*", mapper.__name__)[0])

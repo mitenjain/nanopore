@@ -26,7 +26,15 @@ if (dim(data)[1] > 1) {
     q<- barplot(sorted.percent, main="Sorted Channel Percent Mappability", xlab="Channel", ylab="Read Counts", xaxt="n")
     text(cex=0.27, x=q-.25,y=-0.005, names(sorted.percent), xpd=T, srt=45)
 
+
+    #do linear regression
+    reg <- lm(sorted["MappableReadCount",]~sorted["ReadCount",])
+    #plot scatterplot
     plot(sorted["MappableReadCount",]~sorted["ReadCount",], pch=20, col="blue", xlab="Total Read Count", ylab="Mappable Read Count", main="Mappable vs Total Reads\nReporting Channels Only")
+    #add regression line
+    abline(reg)
+    #add R2
+    legend("topleft",legend=c(paste("R^2 = ", round(summary.lm(reg)$adj.r.squared,4))))
 
     barplot(t(data)[2,]/(t(data)[1,]+t(data)[2,])*100, main="% Mappable Reads Per Channel", xlab="Channel", ylab="% Mappable")
 

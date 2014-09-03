@@ -30,11 +30,12 @@ from nanopore.analyses.mutate_reference import MutateReference
 from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
-from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.analyses.hmm import Hmm
+
 from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
-from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
+from nanopore.metaAnalyses.comparePerReadMappabilityByMapper import ComparePerReadMappabilityByMapper
+from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.customTrackAssemblyHub import CustomTrackAssemblyHub
 
 mappers = [ Bwa,
@@ -72,17 +73,10 @@ mappers = [ Bwa,
            CombinedMapperRealignTrainedModel ]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis, CustomTrackAssemblyHub ]
 
-#analyses = [ GlobalCoverage ]
-#mappers = [ CombinedMapperRealign ] #, LastParamsRealignEm ]
-#metaAnalyses = []
+metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
 
-#need to check for local blast installation to do unmappedBlastKmer
-if os.environ.get("BLASTDB") is not None:
-    metaAnalyses.append(UnmappedBlastKmer)
-else:
-    metaAnalyses.append(UnmappedKmerAnalysis)
+
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):

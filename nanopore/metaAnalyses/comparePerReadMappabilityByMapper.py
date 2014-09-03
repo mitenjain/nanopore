@@ -5,25 +5,24 @@ from jobTree.src.bioio import system, fastqRead
 from nanopore.analyses.utils import samIterator
 from itertools import product
 import re
-
+from collections import OrderedDict as od
 
 class ComparePerReadMappabilityByMapper(AbstractUnmappedMetaAnalysis):
-    """Finds which mappers mapped which reads; reports proportion of reads mapped by only one mapper"""
+    """Finds which base mappers mapped which reads"""
     def run(self):
         for readType in self.readTypes:
-            mapper_ref_dict = {x: list() for x in self.baseMappers}
+            sortedBaseMappers = [x for x in sorted(self.baseMappers) if x != "Combined"]
+            outf = open(os.path.join(self.outputDir, readType + "_perReadMappability.tsv"), "w")
+            outf.write("Read\tReadFastqFile\t"); outf.write("\t".join(sortedBaseMappers)); outf.write("\n")
             for read in self.reads:
-                if read.readType == readType and read.is_mapped and len(read.mapRefPairs) == 1:
-                    for mapper, referenceFastaFile in read.get_map_ref_pair():
-                        base_mapper = re.findall("[A-Z][a-z]*", mapper)[0]
-                        mapper_ref_dict[base_mapper].add((read.name, read.readFastqFile))
-
-        
-            outf = open(os.path.join(self.outputDir, readType + "_full_unique_results"), "w")
-            for base_mapper, singletons in mapper_ref_dict.iteritems():
-                outf.write(base_mapper + " :"); outf.write("\t".join(singletons)); outf.write("\n")
+                if read.readType == readType:
+                    tmp = od([[x, 0] for x in sortedBaseMappers])
+                    if read.is_mapped is True:
+                        for mapper, reference in read.get_map_ref_pair():
+                            baseMapper = re.findall("[A-Z][a-z]*", mapper)[0]
+                            #hacky way to avoid including 'combined' analysis
+                            if baseMapper != "Combined" and tmp[baseMapper] == 0:
+                                tmp[baseMapper] = 1
+                    outf.write("\t".join([read.name, os.path.basename(read.readFastqFile)] + map(str, tmp.values()))); outf.write("\n")
             outf.close()
-
-            outf = open(os.path.join(self.outputDir, readType + "_unique_read_counts"), "w")
-            outf.write("\t".join(map(lambda x,y: x, str(len(y)), mapper_ref_dict.iteritems())) + "\n")
-            outf.close()
+            system("Rscript nanopore/metaAnalyses/vennDiagram.R {} {}".format(os.path.join(self.outputDir, readType + "_perReadMappability.tsv"), os.path.join(self.outputDir, readType + "_perReadMappabilityVennDiagram.pdf")))

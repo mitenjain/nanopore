@@ -117,8 +117,8 @@ def main():
             ref_start, ref_stop = int(record.aend - record.alen), int(record.aend)
             recordsToAnalyze[name] = [ref_name, ref_start, ref_stop]
     if os.path.exists("../readFastqFiles/template/") and os.path.exists("../readFastqFiles/complement"):
-        templateFastqFiles = [os.path.join("../readFastqFiles/template/", x) for x in os.listdir("../readFastqFiles/template/")]
-        complementFastqFiles = [os.path.join("../readFastqFiles/complement/", x) for x in os.listdir("../readFastqFiles/complement/")]
+        templateFastqFiles = [os.path.join("../readFastqFiles/template/", x) for x in os.listdir("../readFastqFiles/template/") if x.endswith(".fastq") or x.endswith(".fq")]
+        complementFastqFiles = [os.path.join("../readFastqFiles/complement/", x) for x in os.listdir("../readFastqFiles/complement/") if x.endswith(".fastq") or x.endswith(".fq")]
     else:
         raise RuntimeError("Error: readFastqFiles does not contain template and/or complement folders")
 
@@ -128,6 +128,9 @@ def main():
         references = { y[0].split(" ")[0] : y[1] for x in referenceFastaFiles for y in fastaRead(x) }
     else:
         raise RuntimeError("Error: no reference fasta files")
+
+    if len(recordsToAnalyze) == 0:
+        raise RuntimeError("Error: none of the mappable twoD reads in this set did not map as template/complement.")
 
     logger.info("Starting to find analyses to run...")
     args = (recordsToAnalyze, templateFastqFiles, complementFastqFiles, references, outputDir)
