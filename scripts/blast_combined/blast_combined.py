@@ -15,7 +15,7 @@ and generates a summary barplot."""
 readTypes = ["2D", "template", "complement"]
 combinedAnalyses = ["CombinedMapper", "CombinedMapperChain", "CombinedMapperRealign", "CombinedMapperRealignEm", "CombinedMapperRealignTrainedModel"]
 
-def parse_blast(self, blast_handle):
+def parse_blast(blast_handle):
     """generator to yield blast results for each read, iterating over blast with outfmt="7 qseqid sseqid sscinames stitle"
     and max_target set to 1"""
     result = None
@@ -56,7 +56,7 @@ def merge(target, outfiles, outputDir):
             for f in outfiles[readType]:
                 with open(f) as i:
                     outfile.write(i.read())
-        outf.close()
+        outfile.close()
 
 def main():
     parser = OptionParser()
@@ -103,28 +103,27 @@ def main():
     if i != 0:
         raise RuntimeError("Got {} failed jobs".format(i))
 
-    blast_hits, no_hits = Counter(), set()
-    for query, result in parse_blast(open(os.path.join(outputDir, readType + "_blast_out.txt"))):
-        if result is None:
-            no_hits.add(tuple(query.split(" "))) #need to save both read name and read fastq file 
-        else:
-            blast_hits[tuple(result)] += 1 #count number of times each hit was seen
-
     for readType in readTypes:
+        #build a counter of blast hits and set of read names that did not map
+        blast_hits, no_hits = Counter(), set()
+        for query, result in parse_blast(open(os.path.join(outputDir, readType + "_blast_out.txt"))):
+            if result is None:
+                no_hits.add(query)
+            else:
+                blast_hits[tuple(result)] += 1 #count number of times each hit was seen
+        #write the unmapped hits to a fasta file
         outf = open(os.path.join(outputDir, readType + "_no_hits.fasta"), "w")
-        for seq, (name, readFastqFile) in unmappedReads.iteritems():
-            if (name, readFastqFile) in no_hits:
-                outf.write(">{} {}\n{}\n".format(name, readFastqFile, seq))
+        for name, seq in unmappedByReadType[readType].iteritems():
+            if name in no_hits:
+                outf.write(">{}\n{}\n".format(name, seq))
         outf.close()
-
-    for readType in readTypes:
+        #write the blast report
         blast_out = open(os.path.join(outputDir, readType + "_blast_report.txt"), "w")
         blast_out.write("gi|##|gb|##|\tSpecies\tseqID\tCount\n") #header to output
         for result, count in sorted(blast_hits.items(), key = lambda x: -int(x[-1])):
             blast_out.write("{}\t{}\n".format("\t".join(result), count))
         blast_out.close()
-
-    for readType in readTypes:
+        #calculate percents and make a barplot
         blast_percent = (1.0 * sum(blast_hits.values()) / len(mappedByReadType[readType]) + len(unmappedByReadType[readType]))
         unmapped_percent = (1.0 * len(unmappedByReadType[readType]) - sum(blast_hits.values())) / (len(mappedByReadType[readType]) + len(unmappedByReadType[readType]))
         system("Rscript blast_combined/barplot_blast.R {} {} {}".format(blast_percent, unmapped_percent, os.path.join(outputDir, "blast_barplot.pdf")))
