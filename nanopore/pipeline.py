@@ -35,6 +35,7 @@ from nanopore.analyses.hmm import Hmm
 from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
 from nanopore.metaAnalyses.unmappedBlastKmer import UnmappedBlastKmer
+from nanopore.metaAnalyses.customTrackAssemblyHub import CustomTrackAssemblyHub
 
 mappers = [ Bwa,
            BwaChain,
@@ -71,7 +72,7 @@ mappers = [ Bwa,
            CombinedMapperRealignTrainedModel ]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis ]
+metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis ] # CustomTrackAssemblyHub ]
 
 #analyses = [ GlobalCoverage ]
 #mappers = [ CombinedMapperRealign ] #, LastParamsRealignEm ]
