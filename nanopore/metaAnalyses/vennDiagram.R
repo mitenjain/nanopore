@@ -277,7 +277,7 @@ function (object, include = "both", names, mar = rep(1, 4), cex = 1.5,
 
 if (dim(data)[2] > 0) {
     pdf(args[2])
-    x <- vennCounts(test[,2:dim(data)[2]])
+    x <- vennCounts(data[,2:dim(data)[2]])
     vennDiagram(x)
     dev.off()
 }
