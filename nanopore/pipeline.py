@@ -72,7 +72,7 @@ mappers = [ Bwa,
            CombinedMapperRealignTrainedModel ]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
-metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis ] # CustomTrackAssemblyHub ]
+metaAnalyses = [ CoverageSummary, UnmappedLengthDistributionAnalysis, CustomTrackAssemblyHub ]
 
 #analyses = [ GlobalCoverage ]
 #mappers = [ CombinedMapperRealign ] #, LastParamsRealignEm ]
