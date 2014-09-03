@@ -34,7 +34,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 	"""moves mapping.sorted.bam and mapping.sorted.bam.bai files to a folder and creates trackDb.txt"""
 	def __init__(self, outputDir, experiments):
 		AbstractMetaAnalysis.__init__(self, outputDir, experiments)
-		parentFolder = "/hive/users/miten/for_public_html/myhub/"
+		parentFolder = "/cluster/home/miten/public_html/myhub/"
 
 		experiments = []
 		for readFastqFile, readType, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
