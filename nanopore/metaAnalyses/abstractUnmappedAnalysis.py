@@ -43,7 +43,6 @@ class AbstractUnmappedMetaAnalysis(AbstractMetaAnalysis):
                     mappedReads[(record.qname, readFastqFile)].add((mapper.__name__, referenceFastaFile))
 
         self.reads = list()
-
         for name, readFastqFile, readType, seq in allReads:
             if (name, readFastqFile) in mappedReads:
                 mappers, referenceFastaFiles = map(tuple, zip(*mappedReads[(name, readFastqFile)]))
