@@ -11,7 +11,7 @@ class ComparePerReadMappabilityByMapper(AbstractUnmappedMetaAnalysis):
     """Finds which base mappers mapped which reads"""
     def run(self):
         for readType in self.readTypes:
-            sortedBaseMappers = sorted(self.baseMappers)
+            sortedBaseMappers = [x for x in sorted(self.baseMappers) if x != "Combined"]
             outf = open(os.path.join(self.outputDir, readType + "_perReadMappability.tsv"), "w")
             outf.write("Read\tReadFastqFile\t"); outf.write("\t".join(sortedBaseMappers)); outf.write("\n")
             for read in self.reads:
@@ -19,7 +19,8 @@ class ComparePerReadMappabilityByMapper(AbstractUnmappedMetaAnalysis):
                     tmp = od([[x, 0] for x in sortedBaseMappers])
                     for mapper, reference in read.get_map_ref_pair():
                         baseMapper = re.findall("[A-Z][a-z]*", mapper)[0]
-                        if tmp[baseMapper] == 0:
+                        #hacky way to avoid including 'combined' analysis
+                        if baseMapper != "Combined" and tmp[baseMapper] == 0:
                             tmp[baseMapper] = 1
                     outf.write("\t".join([read.name, os.path.basename(read.readFastqFile)] + map(str, tmp.values()))); outf.write("\n")
             outf.close()
