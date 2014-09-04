@@ -103,6 +103,21 @@ if (dim(data)[1] > 1) {
 
     print(p)
 
+    #do it again except with total # of reads
+    reads <- data$ReadCount
+    reads[is.nan(reads)] <- 0
+    positions <- labels
+
+    for (i in 1:length(positions) ) {
+        positions[match(c(i), positions)] <- reads[i]
+    }
+    positions <- matrix(positions, nrow=16)
+
+    rotate <- function(x) t(apply(x, 2, rev))
+
+    p <- levelplot(rotate(positions), main ="MinION Channel Number of Reads", col.regions=colorRampPalette(c("white","red"))(256))
+
+
     dev.off()
 
 }
