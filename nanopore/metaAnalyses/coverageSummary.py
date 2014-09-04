@@ -34,12 +34,20 @@ class CoverageSummary(AbstractMetaAnalysis):
         return db      
 
     def by_mapper_readtype(self):
-        base_mappers = {re.findall("[A-Z][a-z]*", mapper.__name__)[0] for mapper in self.mappers}
-        entry_map = {x : list() for x in product(base_mappers, self.readTypes)}
+        entry_map = {x : list() for x in product(self.base_mappers, self.readTypes)}
         for entry in self.db:
             entry_map[(entry.base_mapper, entry.readType)].append(entry)
         for (base_mapper, readType), entries in entry_map.iteritems():
-            name = "_".join([os.path.basename(base_mapper), readType])
+            name = "_".join([base_mapper, readType])
+            self.write_file_analyze(entries, name)
+
+    def by_mapper_readfile(self):
+        for x in product(self.base_mappers, self.readFastqFiles):
+            entry_map[(x[0], os.path.basename(x[1]))]
+        for entry in self.db:
+            entry_map[(entry.base_mapper, entry.readFastqFile)].append(entry)
+        for (base_mapper, readFastqFile), entries in entry_map.iteritems():
+            name = "_".join([base_mapper, readFastqFile])
             self.write_file_analyze(entries, name)
 
     def by_reference(self):
@@ -70,8 +78,8 @@ class CoverageSummary(AbstractMetaAnalysis):
         for entry in entries:
             outf.write(",".join([entry.mapper] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
         outf.close()
-        system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {}".format(path, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name + "_summary_plots.pdf")))
-        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name + "_distribution.pdf")))
+        system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {}".format(path, name, os.path.join(self.outputDir, name + "_summary_plots.pdf")))
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, name, os.path.join(self.outputDir, name + "_distribution.pdf")))
 
 
     def resolve_duplicate_rownames(self, entries):
