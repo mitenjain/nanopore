@@ -44,8 +44,7 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     #print the graphs
     print(p1, position=c(0, 0.5, 0.5, 1), more=T)
     print(p2, position=c(0.5, 0.5, 1, 1), more=T)
-    print(p3, position=c(0, 0, 0.5, 0.5), more=T)
-    #print(p4, position=c(0.5, 0, 1, 0.5))
+    print(p3, position=c(0, 0, 0.5, 0.5))
     
     p1 <- xyplot(data$MismatchesPerAlignedBase~(data$InsertionsPerBase+data$DeletionsPerBase), main="Mismatches Per Aligned Base vs. Indels Per Aligned Base", xlab="Indels Per Aligned Base", ylab="Mismatches Per Aligned Base", grid=T, panel=panel.smoothScatter)
     p2 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$ReadIdentity, main="Indels Per Aligned Base vs. Read Identity", xlab="Read Identity", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
