@@ -22,7 +22,7 @@ if (dim(indels)[1] > 2) {
 
 		hist(deletionLengths, main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD", xlim=c(1,10))
 		phat <- 1 / mean(deletionLengths)
-		curve(length(insertionLengths)*g(phat, x), xlim=c(1,10), add=T)
+		curve(length(deletionLengths)*g(phat, x), xlim=c(1,10), add=T)
 
 	}
 
