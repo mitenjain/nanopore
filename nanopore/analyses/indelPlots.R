@@ -18,6 +18,8 @@ if (dim(indels)[1] > 2) {
 		hist(as.numeric(indels$readInsertionLengths), main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD", xlim=c(0,10))
 		hist(as.numeric(indels$readDeletionLengths), main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD", xlim=c(0,10))
 
+
+
 	}
 
 	plot(x=as.numeric(indels$ReadSequenceLengths),y=as.numeric(indels$NumberReadInsertions), main="Insertions vs. Read Length", xlab="Read Length", ylab="Read Insertions", pch=19, col="blue")
