@@ -41,13 +41,13 @@ class CoverageSummary(AbstractMetaAnalysis):
         for (base_mapper, readType), entries in entry_map.iteritems():
             name = "_".join([os.path.basename(base_mapper), readType])
             self.write_file_analyze(entries, name)
-        return entry_map
 
-    #def by_reference(self):
-    #    entry_map = {x: list() for x in self.referenceFastaFiles}
-    #    for entry in self.db:
-    #        entry_map[entry.referenceFastaFile] = entry
-    #    return entry_map
+    def by_reference(self):
+        entry_map = {x: list() for x in self.referenceFastaFiles}
+        for entry in self.db:
+            entry_map[entry.referenceFastaFile].append(entry)
+        for referenceFastaFile, entries in entry_map.iteritems():
+            self.write_file_analyze(entries, referenceFastaFile)
 
     def write_file_analyze(self, entries, name):
         path = os.path.join(self.outputDir, name + ".tsv")
@@ -88,3 +88,4 @@ class CoverageSummary(AbstractMetaAnalysis):
     def run(self):
         self.db = self.build_db()
         self.by_mapper_readtype()
+        self.by_reference()

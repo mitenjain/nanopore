@@ -126,7 +126,8 @@ def main():
         #calculate percents and make a barplot
         blast_percent = (1.0 * sum(blast_hits.values()) / len(mappedByReadType[readType]) + len(unmappedByReadType[readType]))
         unmapped_percent = (1.0 * len(unmappedByReadType[readType]) - sum(blast_hits.values())) / (len(mappedByReadType[readType]) + len(unmappedByReadType[readType]))
-        system("Rscript blast_combined/barplot_blast.R {} {} {}".format(blast_percent, unmapped_percent, os.path.join(outputDir, "blast_barplot.pdf")))
+        mapped_percent =  1 - blast_percent - unmapped_percent
+        system("Rscript blast_combined/barplot_blast.R {} {} {} {}".format(blast_percent, unmapped_percent, mapped_percent, os.path.join(outputDir, "blast_barplot.pdf")))
 
 if __name__ == "__main__":
     from scripts.blast_combined.blast_combined import *

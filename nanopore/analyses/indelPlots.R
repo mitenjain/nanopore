@@ -4,17 +4,31 @@ args <- commandArgs(trailingOnly = T)
 
 indels <- read.table(args[1], fill=T, sep="\t", header=T, na.strings="None", comment.char="")
 
+g <- function(p, x) {p*(1-p)^(x-1)} #geometric parameterized to start at 1
 
 if (dim(indels)[1] > 2) {
 
 	pdf(args[2])
 	par(mfrow=c(2,1))
 
-	hist(as.numeric(indels$readInsertionLengths), main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD")
-	hist(as.numeric(indels$readDeletionLengths), main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD")
+	if ( ! is.null(indels$readInsertionLengths) && ! is.null(indels$readDeletionLengths) && length(indels$readInsertionLengths[!is.na(indels$readInsertionLengths)]) > 1 && length(indels$readDeletionLengths[!is.na(indels$readDeletionLengths)]) ) {
 
-	hist(as.numeric(indels$readInsertionLengths), main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD", xlim=c(0,10))
-	hist(as.numeric(indels$readDeletionLengths), main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD", xlim=c(0,10))
+		insertionLengths <- indels$readInsertionLengths[!is.na(indels$readInsertionLengths)]
+		deletionLengths <- indels$readDeletionLengths[!is.na(indels$readDeletionLengths)]
+
+		hist(insertionLengths, main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD")
+		hist(deletionLengths, main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD")
+
+		hist(insertionLengths, main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD", xlim=c(0,10))
+		phat <- 1 / mean(insertionLengths)
+		lines(g(phat, seq(1:10)) * length(insertionLengths))
+
+		hist(deletionLengths, main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD", xlim=c(0,10))
+		phat <- 1 / mean(deletionLengths)
+		lines(g(phat, seq(1:10)) * length(insertionLengths))
+
+
+	}
 
 	plot(x=as.numeric(indels$ReadSequenceLengths),y=as.numeric(indels$NumberReadInsertions), main="Insertions vs. Read Length", xlab="Read Length", ylab="Read Insertions", pch=19, col="blue")
 	plot(x=as.numeric(indels$ReadSequenceLengths),y=as.numeric(indels$NumberReadDeletions), main="Deletions vs. Read Length", xlab="Read Length", ylab="Read Deletions", pch=19, col="blue")
