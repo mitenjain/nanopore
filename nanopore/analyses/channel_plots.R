@@ -117,6 +117,7 @@ if (dim(data)[1] > 1) {
 
     p <- levelplot(rotate(positions), main ="MinION Channel Number of Reads", col.regions=colorRampPalette(c("white","red"))(256))
 
+    print(p)
 
     dev.off()
 
