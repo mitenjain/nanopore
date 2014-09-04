@@ -16,17 +16,13 @@ if (dim(indels)[1] > 2) {
 		insertionLengths <- indels$readInsertionLengths[!is.na(indels$readInsertionLengths)]
 		deletionLengths <- indels$readDeletionLengths[!is.na(indels$readDeletionLengths)]
 
-		hist(insertionLengths, main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD")
-		hist(deletionLengths, main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD")
-
-		hist(insertionLengths, main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD", xlim=c(0,10))
+		hist(insertionLengths, main="Read Insertion\nLength Distribution",xlab="Insertion Length", breaks="FD", xlim=c(1,10))
 		phat <- 1 / mean(insertionLengths)
-		lines(g(phat, seq(1:10)) * length(insertionLengths))
+		curve(length(insertionLengths)*g(phat, x), xlim=c(1,10), add=T)
 
-		hist(deletionLengths, main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD", xlim=c(0,10))
+		hist(deletionLengths, main="Read Deletion\nLength Distribution",xlab="Deletion Length", breaks="FD", xlim=c(1,10))
 		phat <- 1 / mean(deletionLengths)
-		lines(g(phat, seq(1:10)) * length(insertionLengths))
-
+		curve(length(insertionLengths)*g(phat, x), xlim=c(1,10), add=T)
 
 	}
 
