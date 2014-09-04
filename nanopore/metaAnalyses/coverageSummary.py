@@ -52,12 +52,13 @@ class CoverageSummary(AbstractMetaAnalysis):
     def write_file_analyze(self, entries, name):
         path = os.path.join(self.outputDir, name + ".tsv")
         outf = open(path, "w")
-        outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
+        outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMismatchesPerReadBase", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
+        entries = sorted(entries, key = lambda x: x.mapper)
         entries = self.resolve_duplicate_rownames(entries)
         for entry in entries:
             outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
                                entry.XML.attrib["avgreadCoverage"], entry.XML.attrib["avgreferenceCoverage"],
-                               entry.XML.attrib["avgidentity"], entry.XML.attrib["avgmatchIdentity"], 
+                               entry.XML.attrib["avgidentity"], entry.XML.attrib["avgmismatchesPerReadBase"], 
                                entry.XML.attrib["avgdeletionsPerReadBase"],
                                entry.XML.attrib["avginsertionsPerReadBase"],
                                entry.XML.attrib["numberOfMappedReads"],
@@ -69,22 +70,21 @@ class CoverageSummary(AbstractMetaAnalysis):
         for entry in entries:
             outf.write(",".join([entry.mapper] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
         outf.close()
-        system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {}".format(path, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name)))
-        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name + "_distribution")))
+        system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {}".format(path, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name + "_summary_plots.pdf")))
+        system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, os.path.join(self.outputDir, name), os.path.join(self.outputDir, name + "_distribution.pdf")))
 
 
     def resolve_duplicate_rownames(self, entries):
         mappers = Counter()
         for entry in entries:
             if entry.mapper not in mappers:
-                mappers[entry.mapper] += 1
+                mappers[entry.mapper] = 0
             else:
-                entry.mapper = entry.mapper + "." + str(mappers[entry.mapper])
                 mappers[entry.mapper] += 1
+                entry.mapper = entry.mapper + "." + str(mappers[entry.mapper])
         return entries
 
 
     def run(self):
         self.db = self.build_db()
         self.by_mapper_readtype()
-

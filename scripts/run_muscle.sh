@@ -34,12 +34,11 @@ if [ ! -e $TWOD_SAM ]; then
     exit 1
 fi
 
-#if [ -e ./jobTree ]; then
-#    rm -r ./jobTree
-#fi
+if [ -e ./jobTree ]; then
+    rm -rf ./jobTree
+fi
 
 maxThreads=4
-#batchSystem=singleMachine
 batchSystem=parasol
 defaultJobMemory=8589934592
 
