@@ -23,7 +23,7 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     hist(data$MappedReadLengths, breaks = "FD", main=paste("Mapped Read Length Distribution\nn = ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
     hist(data$UnmappedReadLengths, breaks = "FD", main=paste("Unmapped Read Length Distribution\nn = ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
     #plot read coverage distribution
-    hist(data$ReadCoverage, breaks="FD", main="Read Coverage Distribution", xlab="Read Coverage", cex.main=0.8)
+    hist(data$ReadIdentity~data, breaks="FD", main="Read Identity Distribution", xlab="Read Identity", cex.main=0.8)
 
     #plot relative density of mapped to unmapped reads
     #first, find max x value to expect

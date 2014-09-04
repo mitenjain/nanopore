@@ -22,8 +22,8 @@ class Hmm(AbstractAnalysis):
             setupGraphFile(fH)
             #Make states
             addNodeToGraph("n0n", fH, "match")
-            addNodeToGraph("n1n", fH, "short insert")
-            addNodeToGraph("n2n", fH, "short delete")
+            addNodeToGraph("n1n", fH, "short delete")
+            addNodeToGraph("n2n", fH, "short insert")
             addNodeToGraph("n3n", fH, "long insert")
             addNodeToGraph("n4n", fH, "long delete")
 
@@ -50,7 +50,7 @@ class Hmm(AbstractAnalysis):
             for base in bases:
                 outf.write("\t".join([ base] + map(lambda x : emissions[(base, x)], bases)) + "\n")
             outf.close()
-            system("Rscript nanopore/analyses/emissions_plot.R %s %s" % (matchEmissionsFile, os.path.join(self.outputDir, "substitution_plot.pdf")))
+            system("Rscript nanopore/analyses/substitution_plot.R %s %s" % (matchEmissionsFile, os.path.join(self.outputDir, "substitution_plot.pdf")))
 
             #Plot indel info
             #Get the sequences to contrast the neutral model.
@@ -63,9 +63,9 @@ class Hmm(AbstractAnalysis):
             insertEmissions = { "A":0.0, 'C':0.0, 'G':0.0, 'T':0.0 }
             deleteEmissions = { "A":0.0, 'C':0.0, 'G':0.0, 'T':0.0 }
             for emission in hmmsNode.findall("emission"):
-                if emission.attrib["state"] == '1':
+                if emission.attrib["state"] == '2':
                     insertEmissions[emission.attrib["x"]] += float(emission.attrib["avg"])
-                elif emission.attrib["state"] == '2':
+                elif emission.attrib["state"] == '1':
                     deleteEmissions[emission.attrib["y"]] += float(emission.attrib["avg"])
             #PLot insert and delete emissions
             indelEmissionsFile = os.path.join(self.outputDir, "indelEmissions.tsv")
