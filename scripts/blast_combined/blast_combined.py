@@ -27,6 +27,7 @@ def parse_blast(blast_handle):
         elif result is None and not line.startswith("#"):
             result = line.strip().split("\t")[-3::]
             yield (query, result)
+        elif result is not None and line.startswith("#"):
             result = None
 
 def find_analyses(target, unmappedByReadType, outputDir):
@@ -36,7 +37,7 @@ def find_analyses(target, unmappedByReadType, outputDir):
         records = list()
         for (name, sequence), i in izip(unmappedByReadType[readType].iteritems(), xrange(len(unmappedByReadType[readType]))):
                 records.append(">{}\n{}\n".format(name, sequence))
-                if i % 500 == 0 or i == len(unmappedByReadType[readType]) - 1:
+                if i % 200 == 0 or i == len(unmappedByReadType[readType]) - 1:
                     tmpalign = os.path.join(target.getGlobalTempDir(), str(i) + ".txt")
                     outfiles[readType].append(tmpalign)
                     target.addChildTarget(Target.makeTargetFn(run_blast, args=(records, tmpalign)))
@@ -45,7 +46,7 @@ def find_analyses(target, unmappedByReadType, outputDir):
 
 def run_blast(target, records, tmpalign):
     query = "".join(records)
-    p = popenCatch('blastn -outfmt "7 qseqid sseqid sscinames stitle" -db nt -max_target_seqs 1', stdinString=query)
+    p = popenCatch('blastn -outfmt "7 qseqid sseqid sscinames stitle" -db nt', stdinString=query)
     outf = open(tmpalign, "w"); outf.write(p); outf.close()
 
 
