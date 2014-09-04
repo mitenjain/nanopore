@@ -39,16 +39,16 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     
     p1 <- xyplot(data$ReadIdentity~data$MappedReadLengths, main="Read Identity vs. Read Length", xlab="Read Length", ylab="Read Identity", grid=T, panel=panel.smoothScatter)
     p2 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$MappedReadLengths, main="Indels Per Aligned Base vs. Read Length", xlab="Read Length", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
-    p3 <- xyplot(data$MismatchesPerAlignedBase~data$MappedReadLengths, main="Mismatches Per Aligned Base vs. Read Length", ylab="Mismatches Per Aligned Base", xlab="Read Length", grid=T, panel=panel.smoothScatter)
+    p3 <- xyplot(data$MismatchesPerReadBase~data$MappedReadLengths, main="Mismatches Per Aligned Base vs. Read Length", ylab="Mismatches Per Aligned Base", xlab="Read Length", grid=T, panel=panel.smoothScatter)
     
     #print the graphs
     print(p1, position=c(0, 0.5, 0.5, 1), more=T)
     print(p2, position=c(0.5, 0.5, 1, 1), more=T)
     print(p3, position=c(0, 0, 0.5, 0.5))
     
-    p1 <- xyplot(data$MismatchesPerAlignedBase~(data$InsertionsPerBase+data$DeletionsPerBase), main="Mismatches Per Aligned Base vs. Indels Per Aligned Base", xlab="Indels Per Aligned Base", ylab="Mismatches Per Aligned Base", grid=T, panel=panel.smoothScatter)
+    p1 <- xyplot(data$MismatchesPerReadBase~(data$InsertionsPerBase+data$DeletionsPerBase), main="Mismatches Per Aligned Base vs. Indels Per Aligned Base", xlab="Indels Per Aligned Base", ylab="Mismatches Per Aligned Base", grid=T, panel=panel.smoothScatter)
     p2 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$ReadIdentity, main="Indels Per Aligned Base vs. Read Identity", xlab="Read Identity", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
-    p3 <- xyplot(data$MismatchesPerAlignedBase~data$ReadIdentity, main="Mismatches Per Aligned Base vs. Read Identity", ylab="Mismatches Per Aligned Base", xlab="Read Identity", grid=T, panel=panel.smoothScatter)
+    p3 <- xyplot(data$MismatchesPerReadBase~data$ReadIdentity, main="Mismatches Per Aligned Base vs. Read Identity", ylab="Mismatches Per Aligned Base", xlab="Read Identity", grid=T, panel=panel.smoothScatter)
     p4 <- xyplot(data$InsertionsPerBase~data$DeletionsPerBase, main="Insertions Per Aligned Base vs. Deletions Per Aligned Base", xlab="Deletions Per Aligned Base", ylab="Insertions Per Aligned Base", grid=T, panel=panel.smoothScatter)
     
     #print the graphs
