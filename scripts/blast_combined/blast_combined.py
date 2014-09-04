@@ -13,7 +13,7 @@ Reports the BLAST results as well as the raw hits, and also reports a fasta of t
 and generates a summary barplot."""
 
 readTypes = ["2D", "template", "complement"]
-combinedAnalyses = ["CombinedMapper", "CombinedMapperChain", "CombinedMapperRealign", "CombinedMapperRealignEm", "CombinedMapperRealignTrainedModel"]
+combinedAnalyses = ["CombinedMapper", "CombinedMapperChain", "CombinedMapperRealign", "CombinedMapperRealignTrainedModel", "CombinedMapperRealignEm"]
 
 def parse_blast(blast_handle):
     """generator to yield blast results for each read, iterating over blast with outfmt="7 qseqid sseqid sscinames stitle"
@@ -124,10 +124,10 @@ def main():
             blast_out.write("{}\t{}\n".format("\t".join(result), count))
         blast_out.close()
         #calculate percents and make a barplot
-        blast_percent = (1.0 * sum(blast_hits.values()) / len(mappedByReadType[readType]) + len(unmappedByReadType[readType]))
+        blast_percent = 1.0 * sum(blast_hits.values()) / (len(mappedByReadType[readType]) + len(unmappedByReadType[readType]))
         unmapped_percent = (1.0 * len(unmappedByReadType[readType]) - sum(blast_hits.values())) / (len(mappedByReadType[readType]) + len(unmappedByReadType[readType]))
-        mapped_percent =  1 - blast_percent - unmapped_percent
-        system("Rscript blast_combined/barplot_blast.R {} {} {} {}".format(blast_percent, unmapped_percent, mapped_percent, os.path.join(outputDir, "blast_barplot.pdf")))
+        mapped_percent = 1 - blast_percent - unmapped_percent
+        system("Rscript blast_combined/barplot_blast.R {} {} {} {} {}".format(blast_percent, unmapped_percent, mapped_percent, readType, os.path.join(outputDir, readType + "_blast_barplot.pdf")))
 
 if __name__ == "__main__":
     from scripts.blast_combined.blast_combined import *
