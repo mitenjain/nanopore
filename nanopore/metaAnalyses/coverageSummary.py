@@ -34,7 +34,7 @@ class CoverageSummary(AbstractMetaAnalysis):
         return db      
 
     def by_mapper_readtype(self):
-        entry_map = {x : list() for x in product(self.base_mappers, self.readTypes)}
+        entry_map = {x : list() for x in product(self.baseMappers, self.readTypes)}
         for entry in self.db:
             entry_map[(entry.base_mapper, entry.readType)].append(entry)
         for (base_mapper, readType), entries in entry_map.iteritems():
