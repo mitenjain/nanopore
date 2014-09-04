@@ -52,13 +52,13 @@ class CoverageSummary(AbstractMetaAnalysis):
     def write_file_analyze(self, entries, name):
         path = os.path.join(self.outputDir, name + ".tsv")
         outf = open(path, "w")
-        outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMatchIdentity", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
+        outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMismatchesPerReadBase", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
         entries = sorted(entries, key = lambda x: x.mapper)
         entries = self.resolve_duplicate_rownames(entries)
         for entry in entries:
             outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
                                entry.XML.attrib["avgreadCoverage"], entry.XML.attrib["avgreferenceCoverage"],
-                               entry.XML.attrib["avgidentity"], entry.XML.attrib["avgmatchIdentity"], 
+                               entry.XML.attrib["avgidentity"], entry.XML.attrib["avgmismatchesPerReadBase"], 
                                entry.XML.attrib["avgdeletionsPerReadBase"],
                                entry.XML.attrib["avginsertionsPerReadBase"],
                                entry.XML.attrib["numberOfMappedReads"],
