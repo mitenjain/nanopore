@@ -20,7 +20,7 @@ if (! is.null(dim(dist))) {
 			}
 		}
 
-		pdf(args[2])
+		pdf(args[3])
 		#this is all so hacky - first we make a color topo.colors
 		n <- 1
 		r <- topo.colors(length(rownames(dist)))
