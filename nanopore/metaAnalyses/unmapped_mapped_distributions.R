@@ -23,7 +23,7 @@ if (length(unmapped[,1]) >= 1) {
 
     m <- hist(mapped, breaks = "FD", plot=F)
     u <- hist(unmapped, breaks = "FD", plot=F)
-    combined <- cbind(mapped, unmapped)
+    combined <- c(mapped, unmapped)
     combined.sort <- combined[order(combined)]
     xmax <- combined.sort[round(0.95*length(combined.sort))]
     ymax <- max(m$counts, u$counts)
