@@ -51,7 +51,7 @@ class CoverageSummary(AbstractMetaAnalysis):
             self.write_file_analyze(entries, name)
 
     def by_reference(self):
-        entry_map = {x: list() for x in self.referenceFastaFiles}
+        entry_map = {os.path.basename(x): list() for x in self.referenceFastaFiles}
         for entry in self.db:
             entry_map[entry.referenceFastaFile].append(entry)
         for referenceFastaFile, entries in entry_map.iteritems():
