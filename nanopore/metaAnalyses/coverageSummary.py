@@ -33,12 +33,12 @@ class CoverageSummary(AbstractMetaAnalysis):
                         db.append(Entry(readType, readFastqFile, referenceFastaFile, mapper, globalCoverageXML))
         return db      
 
-    def by_mapper_readtype(self):
-        entry_map = {x : list() for x in product(self.baseMappers, self.readTypes)}
+    def by_mapper_readtype_reference(self):
+        entry_map = {x : list() for x in product(self.baseMappers, self.readTypes, [os.path.basename(x) for x in self.referenceFastaFiles])}
         for entry in self.db:
-            entry_map[(entry.base_mapper, entry.readType)].append(entry)
-        for (base_mapper, readType), entries in entry_map.iteritems():
-            name = "_".join([base_mapper, readType])
+            entry_map[(entry.base_mapper, entry.readType, entry.referenceFastaFile)].append(entry)
+        for (base_mapper, readType, referenceFastaFile), entries in entry_map.iteritems():
+            name = "_".join([base_mapper, readType, referenceFastaFile])
             self.write_file_analyze(entries, name)
 
     def by_mapper_readfile(self):
@@ -95,5 +95,6 @@ class CoverageSummary(AbstractMetaAnalysis):
 
     def run(self):
         self.db = self.build_db()
-        self.by_mapper_readtype()
+        self.by_mapper_readtype_reference()
+        self.by_mapper_readfile()
         self.by_reference()
