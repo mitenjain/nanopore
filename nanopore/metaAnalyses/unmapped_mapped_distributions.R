@@ -5,7 +5,7 @@ mapped <- read.table(args[1])
 unmapped <- read.table(args[2])
 analysis <- args[4]
 
-if (length(unmapped[,1]) >= 1) {
+if (length(unmapped[,1]) >= 1 && length(mapped[1,]) >= 1) {
     pdf(args[3])
     
     #remove outliers so graph is prettier
@@ -24,6 +24,7 @@ if (length(unmapped[,1]) >= 1) {
     m <- hist(mapped, breaks = "FD", plot=F)
     u <- hist(unmapped, breaks = "FD", plot=F)
     combined <- c(mapped, unmapped)
+    combined <- combined[!is.na(combined)]
     combined.sort <- combined[order(combined)]
     xmax <- combined.sort[round(0.95*length(combined.sort))]
     ymax <- max(m$counts, u$counts)

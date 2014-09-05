@@ -42,7 +42,7 @@ class CoverageSummary(AbstractMetaAnalysis):
             self.write_file_analyze(entries, name)
 
     def by_mapper_readfile(self):
-        for x in product(self.base_mappers, self.readFastqFiles):
+        for x in product(self.baseMappers, self.readFastqFiles):
             entry_map[(x[0], os.path.basename(x[1]))]
         for entry in self.db:
             entry_map[(entry.base_mapper, entry.readFastqFile)].append(entry)
