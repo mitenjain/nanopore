@@ -21,7 +21,7 @@ if (dim(summary)[1] >= 1) {
     legend("topright", cex=0.65, legend=rownames(summary), pch=c(19,18,15,17), col=r)
     
     #scatterplot of Avg identity coverage vs Avg # of indels per base
-    plot(100 * summary$AvgIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, ylab="Avg. Indels Per Aligned Read Base", xlab="Avg. Match Identity", main=name, col=r, pch=20, xlim=c(0,100), cex.main=0.9)
+    plot(100 * summary$AvgIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, ylab="Avg. Indels Per Aligned Read Base", xlab="Avg. Match Identity", main=name, col=r, pch=c(19,18,15,17), xlim=c(0,100), cex.main=0.9)
     legend("topright", cex=0.65, legend=rownames(summary), pch=c(19,18,15,17), col=r)
 
     q <- barplot(height=summary$AvgInsertionsPerReadBase, xaxt="n", col=r, main=paste(name,"Avg. Insertions Per Aligned Base",sep="\n"), ylab="Avg. Insertions Per Aligned Base", cex.main=0.9)
@@ -41,7 +41,7 @@ if (dim(summary)[1] >= 1) {
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
     
     #scatterplot of Avg read coverage vs Avg match identity
-    plot(100 * summary$AvgReadCoverage, 100 * summary$AvgIdentity, ylab="Avg. Match Identity", xlab="Avg. Read Coverage", main=name, col=r, pch=20, xlim=c(0,100), ylim=c(0,100), cex.main=0.9)
+    plot(100 * summary$AvgReadCoverage, 100 * summary$AvgIdentity, ylab="Avg. Match Identity", xlab="Avg. Read Coverage", main=name, col=r, pch=c(19,18,15,17), xlim=c(0,100), ylim=c(0,100), cex.main=0.9)
     legend("topright", cex=0.65, legend=rownames(summary), pch=c(19,18,15,17), col=r)
 
     ################################################
