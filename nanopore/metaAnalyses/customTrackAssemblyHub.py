@@ -50,6 +50,12 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 			if not os.path.exists(outFolderBamFiles):
 				os.mkdir(outFolderBamFiles)
 
+			bamFile = os.path.join(resultsDir, "mapping.bam")
+			sortedbamFile = os.path.join(resultsDir, "mapping.sorted")
+			samToBamFile(os.path.join(resultsDir, "mapping.sam"), bamFile)
+			pysam.sort(bamFile, sortedbamFile)
+			pysam.index(sortedbamFile + ".bam")
+
 			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam"), outFolderBamFiles + experiment + ".sorted.bam"))
 			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam.bai"), outFolderBamFiles + experiment + ".sorted.bam.bai"))
 
