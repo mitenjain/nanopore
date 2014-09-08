@@ -1,6 +1,8 @@
 from nanopore.metaAnalyses.abstractMetaAnalysis import AbstractMetaAnalysis
 from sonLib.bioio import system
 import os, sys, glob
+from nanopore.analyses.utils import samToBamFile
+import pysam
 
 class Fastaseq():
 	"""
