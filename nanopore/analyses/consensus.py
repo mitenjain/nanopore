@@ -51,7 +51,6 @@ class Consensus(AbstractAnalysis):
         AbstractAnalysis.run(self) #Call base method to do some logging
         localBamFile = os.path.join(self.getLocalTempDir(), "mapping.bam")
         localSortedBamFile = os.path.join(self.getLocalTempDir(), "mapping.sorted")
-        #localSortedBamFile = os.path.join(self.outputDir, "mapping.sorted")
 
         samToBamFile(self.samFile, localBamFile)
         pysam.sort(localBamFile, localSortedBamFile)
@@ -71,8 +70,5 @@ class Consensus(AbstractAnalysis):
         
         formatConsensusFastq(consensus_fastq, formatted_consensus_fastq)
         system("mv %s %s" % (formatted_consensus_fastq, consensus_fastq))
-        #cns_to_reads_folder = "./readFastqFiles/" + file_header + "_Consensus.fastq"
-        #if os.stat(consensus_fastq).st_size > 4:
-        #    system("cp %s %s" % (consensus_fastq, cns_to_reads_folder))
         
         self.finish()
