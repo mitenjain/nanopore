@@ -50,7 +50,7 @@ class Hmm(AbstractAnalysis):
             for base in bases:
                 outf.write("\t".join([ base] + map(lambda x : emissions[(base, x)], bases)) + "\n")
             outf.close()
-            system("Rscript nanopore/analyses/substitution_plot.R %s %s" % (matchEmissionsFile, os.path.join(self.outputDir, "substitution_plot.pdf")))
+            system("Rscript nanopore/analyses/substitution_plot.R %s %s %s" % (matchEmissionsFile, os.path.join(self.outputDir, "substitution_plot.pdf"), "Per-Base Substitutions after HMM"))
 
             #Plot indel info
             #Get the sequences to contrast the neutral model.
