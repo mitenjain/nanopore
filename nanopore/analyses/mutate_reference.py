@@ -102,14 +102,14 @@ def MutateReference(workingDir):
 									index = position + deletes
 									flag = True
 
-					mutationIndex.write(",".join(map(str, positions)))
-					mutationIndex.write("\n")
-					mutationIndex.write(seq.id)
-					mutationIndex.write("\n")
+					#mutationIndex.write(",".join(map(str, positions)))
+					#mutationIndex.write("\n")
+					#mutationIndex.write(seq.id)
+					#mutationIndex.write("\n")
 					mutationIndex.write("".join(list(itertools.chain(*ref_seq))))
 					mutationIndex.write("\n")
-					mutationIndex.write(new_seq_id)
-					mutationIndex.write("\n")
+					#mutationIndex.write(new_seq_id)
+					#mutationIndex.write("\n")
 					mutationIndex.write("".join(list(itertools.chain(*temp_seq))))
 					mutationIndex.write("\n")
 

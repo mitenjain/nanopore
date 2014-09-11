@@ -147,7 +147,7 @@ def main():
     workingDir = args[0]
     
     # call reference mutator script; introduces 1%, and 5% mutations (No nucleotide bias used for now)
-    #MutateReference(workingDir)
+    MutateReference(workingDir)
     # call read sampler script; samples 75, 50, and 25% reads
     #SampleReads(workingDir)
     
@@ -176,7 +176,13 @@ def main():
     if not os.path.exists(processedFastaFiles):
         os.mkdir(processedFastaFiles)
     referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if (".fa" in i and i[-3:] == '.fa') or (".fasta" in i and i[-6:] == '.fasta') ]
-    
+
+    # Copy Mutation Index files to processedFastaFiles
+    try:
+        os.system("cp %s %s" % (os.path.join(workingDir + "referenceFastaFiles/*.txt"), processedFastaFiles))
+    except:
+        pass
+
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)
     logger.info("Using the following output directory: %s" % outputDir)
