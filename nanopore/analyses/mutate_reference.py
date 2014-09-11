@@ -41,11 +41,11 @@ def MutateReference(workingDir):
 		if not "percent" in referenceFastaFile and (".fa" in referenceFastaFile or ".fasta" in referenceFastaFile):
 			mutation_rates = [0.01, 0.05, 0.10, 0.20]
 			for mutation_rate in mutation_rates:
-				indel_rate = 0.2 * mutation_rate # indel rate = 20% of Substitution rate
+				indel_rate = 0.0 * mutation_rate # indel rate = 20% of Substitution rate
 				i = mutation_rate * 100
 				j = indel_rate * 100
 				newreferenceFastaFile = referenceFastaFile.split(".fa")[0] + "_" + str(i) + "_percent_SNPs_" + str(j) + "_percent_InDels.fasta"
-				mutationIndexFile = referenceFastaFile.split(".fa")[0] + "_" + str(i) + "_percent_SNPs_" + str(j) + "_percent_InDels_Index.txt"
+				mutationIndexFile = referenceFastaFile.split(".fa")[0] + "_" + str(i) + "_percent_SNPs_" + str(j) + "_percent_InDels.fasta_Index.txt"
 				if not os.path.exists(newreferenceFastaFile):
 					referenceFasta = open(referenceFastaFile, "r")
 					newreferenceFasta = open(newreferenceFastaFile, "w")
