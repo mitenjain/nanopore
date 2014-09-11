@@ -31,6 +31,7 @@ from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
 from nanopore.analyses.hmm import Hmm
+from nanopore.analyses.marginAlignSnpCaller import MarginAlignSnpCaller
 
 from nanopore.metaAnalyses.unmappedKmerAnalysis import UnmappedKmerAnalysis
 from nanopore.metaAnalyses.unmappedLengthDistributionAnalysis import UnmappedLengthDistributionAnalysis
@@ -72,9 +73,13 @@ mappers = [ Bwa,
            CombinedMapperRealignEm,
            CombinedMapperRealignTrainedModel ]
 
-analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability]#, FastQC, QualiMap, Consensus]
+analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, ChannelMappability, MarginAlignSnpCaller ]#, FastQC, QualiMap, Consensus]
 
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
+
+#mappers = [ LastParamsRealignTrainedModel ]
+#analyses = [ MarginAlignSnpCaller]
+#metaAnalyses = []
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
