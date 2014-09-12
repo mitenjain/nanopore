@@ -4,6 +4,7 @@ from jobTree.scriptTree.target import Target
 from jobTree.scriptTree.stack import Stack
 from jobTree.src.bioio import getLogLevelString, isNewer, logger, setLoggingFromOptions
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
+from nanopore.analyses.mutate_reference import mutateReferenceSequences
 
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
@@ -26,7 +27,6 @@ from nanopore.analyses.indels import Indels
 from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
 from nanopore.analyses.alignmentUncertainty import AlignmentUncertainty
-from nanopore.analyses.mutate_reference import MutateReference
 from nanopore.analyses.read_sampler import SampleReads
 from nanopore.analyses.consensus import Consensus
 from nanopore.analyses.channelMappability import ChannelMappability
@@ -79,7 +79,7 @@ metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributi
 
 #mappers = [ LastParamsRealignTrainedModel ]
 #analyses = [ MarginAlignSnpCaller]
-#metaAnalyses = []
+#metaAnalyses = [] 
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
@@ -146,8 +146,6 @@ def main():
         raise RuntimeError("Expected one argument, got %s arguments: %s" % (len(args), " ".join(args)))
     workingDir = args[0]
     
-    # call reference mutator script; introduces 1%, and 5% mutations (No nucleotide bias used for now)
-    MutateReference(workingDir)
     # call read sampler script; samples 75, 50, and 25% reads
     #SampleReads(workingDir)
     
@@ -163,6 +161,8 @@ def main():
     processedFastqFiles = os.path.join(outputDir, "processedReadFastqFiles")
     if not os.path.exists(processedFastqFiles):
         os.mkdir(processedFastqFiles)
+    
+        
     fastqParentDir = os.path.join(workingDir, "readFastqFiles")
     readFastqFiles = list()
     for fastqSubDir in filter(os.path.isdir, [os.path.join(fastqParentDir, x) for x in os.listdir(fastqParentDir)]):
@@ -176,12 +176,9 @@ def main():
     if not os.path.exists(processedFastaFiles):
         os.mkdir(processedFastaFiles)
     referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if (".fa" in i and i[-3:] == '.fa') or (".fasta" in i and i[-6:] == '.fasta') ]
-
-    # Copy Mutation Index files to processedFastaFiles
-    try:
-        os.system("cp %s %s" % (os.path.join(workingDir + "referenceFastaFiles/*.txt"), processedFastaFiles))
-    except:
-        pass
+    
+    # call reference mutator script; introduces 1%, and 5% mutations (No nucleotide bias used for now)
+    #referenceFastaFiles = mutateReferenceSequences(referenceFastaFiles)
 
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)

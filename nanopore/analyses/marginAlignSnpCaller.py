@@ -21,18 +21,20 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         snpSet = {}
         referenceAlignmentFile = self.referenceFastaFile + "_Index.txt"
         if os.path.exists(referenceAlignmentFile):
-            #Get the true and mutated reference sequences
-            lines = [ i for i in open(referenceAlignmentFile, 'r') ]
-            assert len(lines) == 2
-            trueRefSeq = lines[0]
-            mutatedRefSeq = lines[1]
-            assert len(trueRefSeq) == len(mutatedRefSeq)
-            #Check there is only one reference sequence (This is just a check for now / we may change the way we do this later)
-            assert len(refSequences) == 1
-            assert refSequences.values()[0] == mutatedRefSeq #This is true while there are no indel variants
-            for i in xrange(len(trueRefSeq)):
-                if trueRefSeq[i] != mutatedRefSeq[i]:
-                   snpSet[(refSequences.keys()[0], i)] = trueRefSeq[i] 
+            seqsAndMutatedSeqs = getFastaDictionary(referenceAlignmentFile)
+            count = 0
+            for name in seqsAndMutatedSeqs:
+                if name in refSequences:
+                    count += 1
+                    trueSeq = seqsAndMutatedSeqs[name]
+                    mutatedSeq = seqsAndMutatedSeqs[name + "_mutated"]
+                    assert mutatedSeq == refSequences[name]
+                    for i in xrange(len(trueSeq)):
+                        if trueSeq[i] != mutatedSeq[i]:
+                            snpSet[(name, i)] = trueSeq[i] 
+                else:
+                    assert name.split("_")[-1] == "mutated"
+            assert count == len(refSequences.keys())
         
         #The data we collect
         posteriorProbsOfBasesAtEachPosition = {}
@@ -94,7 +96,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
             refSeq = refSequences[refSeqName]
             for refPosition in xrange(len(refSeq)):
                 mutatedRefBase = refSeq[refPosition].upper()
-                trueRefBase = (mutatedRefBase if not (refSeqName, refPosition) in snpSet else refSeq).upper()
+                trueRefBase = (mutatedRefBase if not (refSeqName, refPosition) in snpSet else snpSet[(refSeqName, refPosition)]).upper()
                 key = (refSeqName, refPosition)
                 
                 #Get posterior call
