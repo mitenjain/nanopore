@@ -135,7 +135,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     buckets[int(round(prob*100))] += 1
                 for i in xrange(len(buckets)-2, -1, -1): #Make cumulative
                     buckets[i] += buckets[i+1]
-                return map(lambda x : x/buckets[0], buckets) #Return normalised buckets
+                return map(lambda x : 0 if buckets[0] == 0 else x/buckets[0], buckets) #Return normalised buckets
             
             def getCumulativeFalsePositives(self):
                 return self.bucket(self.falsePositives)
