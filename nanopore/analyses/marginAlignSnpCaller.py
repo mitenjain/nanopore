@@ -22,7 +22,9 @@ def calcBasePosteriorProbs(baseObservations, refBase,
 
 def loadHmmErrorSubstitutionMatrix(hmmFile):
     hmm = Hmm.loadHmm(hmmFile)
-    return dict(zip(product(bases, bases), hmm.emissions))
+    m = hmm.emissions[:len(bases)**2]
+    m = map(lambda i : m[i] / sum(m[4*(i/4):4*(1 + i/4)]), range(len(m))) #Normalise m
+    return dict(zip(product(bases, bases), m)) 
 
 def getNullSubstitutionMatrix():
     return dict(zip(product(bases, bases), [1.0]*len(bases)**2))
