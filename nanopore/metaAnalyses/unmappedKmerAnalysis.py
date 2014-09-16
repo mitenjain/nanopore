@@ -4,18 +4,35 @@ from jobTree.src.bioio import system
 from itertools import product
 
 class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
-    """runs kmer analysis on all mapped/unmapped per read Type"""
+    """Calculates kmer statistics for all reads (in all samples) not mapped by any mapper
+    This class works almost identically to UnmappedBlastKmer but without the blasting part
+    And is supposed to be run on machines where blast is not installed (or if you don't want
+    the pipeline to takes days)"""
+
+    def countKmers(self, seq):
+        kmers = Counter()
+        for i in xrange(kmerSize, len(seq)):
+            if "N" not in seq[ i - kmerSize : i ]:
+                kmers[ seq[ i - kmerSize : i ] ] += 1
+        return kmers
+
     def run(self, kmer_size=5):
         for readType in self.readTypes:
-            unmapped = open(os.path.join(self.getLocalTempDir(), readType + "_unmapped"), "w")
-            mapped = open(os.path.join(self.getLocalTempDir(), readType + "_mapped"), "w")
+            mappedKmers, unmappedKmers = Counter(), Counter()
             for read in self.reads:
-                if read.is_mapped and read.readType == readType:
-                    mapped.write(">{}\n{}\n".format(read.name, read.seq))
-                elif read.readType == readType:
-                    unmapped.write(">{}\n{}\n".format(read.name, read.seq))
-            unmapped.close(); mapped.close()
-            system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_unmapped"), os.path.join(self.getLocalTempDir(), readType + "_unmapped_" + str(kmer_size) + "mer"), str(kmer_size)))
-            system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_mapped"), os.path.join(self.getLocalTempDir(), readType + "_mapped_" + str(kmer_size) + "mer"), str(kmer_size)))
-            system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_mapped_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), readType + "_unmapped_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, readType + "_" + str(kmer_size) + "kmer_Cmp.out")))
-            system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(os.path.join(self.outputDir, readType + "_" + str(kmer_size)) + "kmer_Cmp.out"), os.path.join(self.outputDir, readType + "_top_kmers.tsv"), os.path.join(self.outputDir, readType + "_bot_kmers.tsv")))
+                if read.readType == readType and read.is_mapped:
+                    mappedKmers += countKmers(read.seq)
+                elif read.readType == readType
+                    unmappedKmers += countKmers(read.seq)
+
+            mappedSize, unmappedSize = sum(mappedKmers.values()), sum(unmappedKmers.values())
+            outf = open(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), "w")
+            outf.write("kmer\trefCount\trefFraction\treadCount\treadFraction\tfoldChange\n")
+            for kmer in itertools.product("ATGC",repeat=5):
+                kmer = "".join(kmer)
+                refFraction, readFraction = 1.0 * refKmers[kmer] / refSize, 1.0 * readKmers[kmer] / readSize
+                foldChange = -log(readFraction / refFraction)
+                outf.write("\t".join(map(str,[kmer, refKmers[kmer], refFraction, readKmers[kmer], readFraction, foldChange]))+"\n")
+            outf.close()
+
+        system("Rscript nanopore/analyses/kmer_analysis.R {} {}".format(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), os.path.join(self.outputDir, readType + "kmer_counts.txt")))
