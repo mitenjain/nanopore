@@ -5,9 +5,7 @@ from itertools import product
 
 class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
     """Calculates kmer statistics for all reads (in all samples) not mapped by any mapper
-    This class works almost identically to UnmappedBlastKmer but without the blasting part
-    And is supposed to be run on machines where blast is not installed (or if you don't want
-    the pipeline to takes days)"""
+    """
 
     def countKmers(self, seq):
         kmers = Counter()
