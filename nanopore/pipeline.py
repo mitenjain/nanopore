@@ -16,8 +16,8 @@ from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm, BwaRea
 from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign, BwaParamsRealignEm, BwaParamsRealignTrainedModel
 from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm, LastRealignTrainedModel
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm, BlasrRealignTrainedModel
-from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel
-from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel
+from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel, BlasrParamsRealignTrainedModelAMAP, BlasrParamsRealignTrainedModelMatchGamma5
+from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel, LastParamsRealignTrainedModelAMAP, LastParamsRealignTrainedModelMatchGamma5
 from nanopore.mappers.combinedMapper import CombinedMapper, CombinedMapperChain, CombinedMapperRealign, CombinedMapperRealignEm, CombinedMapperRealignTrainedModel
 
 from nanopore.analyses.substitutions import Substitutions
@@ -54,6 +54,8 @@ mappers = [ Bwa,
            BlasrParamsRealign,
            BlasrRealignEm,
            BlasrParamsRealignTrainedModel,
+           BlasrParamsRealignTrainedModelAMAP, 
+           BlasrParamsRealignTrainedModelMatchGamma5,
            Last,
            LastChain,
            LastParams,
@@ -61,6 +63,8 @@ mappers = [ Bwa,
            LastParamsRealign,
            LastParamsRealignEm,
            LastParamsRealignTrainedModel,
+           LastParamsRealignTrainedModelAMAP, 
+           LastParamsRealignTrainedModelMatchGamma5,
            Lastz,
            LastzChain,
            LastzParams,
@@ -78,7 +82,8 @@ analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, Alignmen
 
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
 
-#mappers = [ LastParamsRealignTrainedModel, LastParamsChain , BwaParamsChain, BlasrParamsChain, LastzParamsChain ]
+#mappers = [ LastParamsChain , LastParamsRealignTrainedModel, LastParamsRealignTrainedModelAMAP, LastParamsRealignTrainedModelMatchGamma5, BlasrParamsChain , BlasrParamsRealignTrainedModel, BlasrParamsRealignTrainedModelAMAP, BlasrParamsRealignTrainedModelMatchGamma5,  ]
+#mappers = [ LastParamsRealignTrainedModelAMAP ]
 #analyses = [ MarginAlignSnpCaller ]
 #metaAnalyses = [ MarginAlignMetaAnalysis  ] 
 

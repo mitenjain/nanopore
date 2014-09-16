@@ -394,7 +394,7 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
 
 def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, 
-                           referenceFastaFile, gapGamma, hmmFile=None, trainHmmFile=False, chainFn=chainFn):
+                           referenceFastaFile, gapGamma, matchGamma, hmmFile=None, trainHmmFile=False, chainFn=chainFn):
     """Chains and then realigns the resulting global alignments, using jobTree to do it in parallel on a cluster.
     Optionally runs expectation maximisation.
     """
@@ -408,9 +408,9 @@ def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile,
     else:
         assert not trainHmmFile
     
-    target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma))
+    target.setFollowOnTargetFn(realignSamFile2TargetFn, args=(tempSamFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma, matchGamma))
 
-def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma):
+def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma, matchGamma):
     #Load reference sequences
     refSequences = getFastaDictionary(referenceFastaFile) #Hash of names to sequences
     
@@ -425,13 +425,13 @@ def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, refer
         tempCigarFiles.append(os.path.join(target.getGlobalTempDir(), "rescoredCigar_%i.cig" % index))
         
         #Add a child target to do the alignment
-        target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], hmmFile, gapGamma))
+        target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], hmmFile, gapGamma, matchGamma))
     
     target.setFollowOnTargetFn(realignSamFile3TargetFn, args=(samFile, outputSamFile, tempCigarFiles))
     #Finish up
     sam.close()
     
-def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile, hmmFile, gapGamma):
+def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, referenceSequence, querySequenceName, querySequence, outputCigarFile, hmmFile, gapGamma, matchGamma):
     #Temporary files
     tempRefFile = os.path.join(target.getGlobalTempDir(), "ref.fa")
     tempReadFile = os.path.join(target.getGlobalTempDir(), "read.fa")
@@ -442,7 +442,7 @@ def realignCigarTargetFn(target, exonerateCigarString, referenceSequenceName, re
 
     #Call to cactus_realign
     loadHmm = nameValue("loadHmm", hmmFile)
-    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, outputCigarFile))
+    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=3000 %s --gapGamma=%s --matchGamma=%s > %s" % (exonerateCigarString, tempRefFile, tempReadFile, loadHmm, gapGamma, matchGamma, outputCigarFile))
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) > 0
     assert len([ pA for pA in cigarRead(open(outputCigarFile)) ]) == 1
 

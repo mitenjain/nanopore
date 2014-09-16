@@ -26,3 +26,13 @@ class LastParamsRealignTrainedModel(LastParams):
     def run(self):
         LastParams.run(self)
         self.realignSamFile(useTrainedModel=True)
+        
+class LastParamsRealignTrainedModelAMAP(LastParams):
+    def run(self):
+        LastParams.run(self)
+        self.realignSamFile(useTrainedModel=True, gapGamma=0.5, matchGamma=0.0)
+
+class LastParamsRealignTrainedModelMatchGamma5(LastParams):
+    def run(self):
+        LastParams.run(self)
+        self.realignSamFile(useTrainedModel=True, gapGamma=0.0, matchGamma=0.5)
