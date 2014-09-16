@@ -1,75 +1,76 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from jobTree.src.bioio import fastqRead, system
-from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDictionary, fastaRead, samIterator
-import pysam, os
+from jobTree.src.bioio import fastqRead, fastaRead, system, reverseComplement
+from nanopore.analyses.utils import AlignedPair
+import pysam, os, itertools
+from collections import Counter
+from math import log
+
 
 class KmerAnalysis(AbstractAnalysis):
-    """Runs Karen's kmer analysis pipeline on a aligned sam and reference
-    """
-    def convert_sam_record(self, record, target):
-        """Takes a single record from a sam and a str representing a sequence
-        and converts this toper a aligned fasta (MAF) style format
-        """
-        read, ref = list(), list()
-        pos, ref_pos = 0, record.pos
-        for oper, num in record.cigar:
-            if oper == 0 or oper == 7:
-                #treating M and = equally
-                read.append(record.seq[pos : pos + num])
-                ref.append(record.seq[pos : pos + num])
-                pos += num; ref_pos += num
-            elif oper == 1:
-                #insertion
-                read.append(record.seq[pos : pos + num])
-                ref.append("-" * num)
-                pos += num
-            elif oper == 2 or oper == 3:
-                #treating D and N equally
-                read.append("-" * num)
-                ref.append(target[ref_pos : ref_pos + num])
-                ref_pos += num
-            elif oper == 8:
-                #mismatch
-                read.append(record.seq[pos : pos + num])
-                ref.append(target[ref_pos : ref_pos + num])
-                pos += num; ref_pos += num
-            elif oper == 4:
-                #soft clip means ignore that part of read
-                pos += num
-            elif oper == 5:
-                #hard-clipped sequences can be ignored here
-                continue
-            elif oper == 6:
-                #ignore padding as well
-                continue
-        return ("".join(read).upper(), "".join(ref).upper())
-    
-    def run(self, kmer_size=5):
-        """Run karen's pipeline.
-        """
-        AbstractAnalysis.run(self) #Call base method to do some logging
-        self.ref = getFastaDictionary(self.referenceFastaFile)
-        outf = open(os.path.join(self.getLocalTempDir(), "tmp"), "w")
-        sam = pysam.Samfile(self.samFile, "r" )
-        for record in samIterator(sam):
-            rseq = self.ref[sam.getrname(record.tid)]
-            seq, ref = self.convert_sam_record(record, rseq)
-            outf.write("{}\t{}\n".format(seq, ref))
+"""Runs kmer analysis"""
+    def countIndelKmers(self):
+        sam = pysam.Samfile(self.sam)
+        refKmers, readKmers = Counter(), Counter()
+        for aR in samIterator(sam):
+            #Ref name
+            refSeqName = sam.getrname(aR.rname)
+            #Sequences
+            refSeq = refSequences[sam.getrname(aR.rname)]
+            readSeq = aR.query
+            #temp lists of kmers
+            refKmer, readKmer = list(), list()
+            #flag that says if we are currently in an indel
+            indelFlag = False
+            #iterate over aligned pairs of positions
+            for aP in AlignedPair.iterator(aR, refSeq, readSeq):
+                #add the base at each position to the list
+                refKmer.append(aP.getRefBase()); readKmer.append(aP.getReadBase())
+                #if this position has a indel, we want to save this kmer as soon as it hits kmerSize
+                if aP.getPrecedingReadInsertionLength != 0 or aP.getPrecedingReadDeletionLength != 0:
+                    indelFlag = True
+                if indelFlag is True and len(refKmer) == self.kmerSize:
+                    if aP.isReversed:
+                        refKmers["".join(refKmer)] += 1; readKmers[reverseComplement("".join(readKmer))] += 1
+                    else:
+                        refKmers["".join(refKmer)] += 1; readKmers["".join(readKmer)] += 1
+                    indelFlag = False
+        return (refKmers, readKmers)
+
+    def countKmers(self):
+        refKmers, readKmers = Counter(), Counter()
+
+        for name, seq in fastaRead(self.referenceFastaFile):
+            for i in xrange(kmerSize, len(seq)):
+                if "N" not in seq[ i - kmerSize : i ]:
+                    refKmers[ seq[ i - kmerSize : i ] ] += 1
+
+        for name, seq, qual in fastqRead(self.readFastqFile):
+            for i in xrange(kmerSize, len(seq)):
+                if "N" not in seq[ i - kmerSize : i ]:
+                    readKmers[ seq[ i - kmerSize : i ] ] += 1
+        return (refKmers, readKmers)
+
+    def analyzeCounts(self, refKmers, readKmers, name):
+        refSize, readSize = sum(refKmers.values()), sum(readKmers.values())
+        outf = open(os.path.join(self.getLocalTempDir(), name + "kmer_counts.txt"), "w")
+        outf.write("kmer\trefCount\trefFraction\treadCount\treadFraction\tfoldChange\n")
+        for kmer in itertools.product("ATGC",repeat=5):
+            kmer = "".join(kmer)
+            refFraction, readFraction = 1.0 * refKmers[kmer] / refSize, 1.0 * readKmers[kmer] / readSize
+            foldChange = -log(readFraction / refFraction)
+            outf.write("\t".join(map(str,[kmer, refKmers[kmer], refFraction, readKmers[kmer], readFraction, foldChange]))+"\n")
         outf.close()
-        readf = os.path.join(self.getLocalTempDir(), "reads.fasta")
-        readf_handle = open(readf, "w")
-        try:
-            for name, seq, quals in fastqRead(self.readFastqFile):
-                name = name.split()[0]
-                readf_handle.write(">{}\n{}\n".format(name, seq))
-        except:
-                readf_handle.close()
-                os.remove(os.path.join(self.getLocalTempDir(), "reads.fasta"))
-        else:
-            readf_handle.close()
-            system("nanopore/analyses/kmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "reads.fasta"), os.path.join(self.getLocalTempDir(), "read_" + str(kmer_size) + "mer"), str(kmer_size)))
-            system("nanopore/analyses/kmer.pl {} {} {}".format(self.referenceFastaFile, os.path.join(self.getLocalTempDir(), "ref_" + str(kmer_size) + "mer"), str(kmer_size)))
-            system("nanopore/analyses/cmpKmer.pl {} {} {}".format(os.path.join(self.getLocalTempDir(), "ref_" + str(kmer_size) + "mer"), os.path.join(self.getLocalTempDir(), "read_" + str(kmer_size) + "mer"), os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out")))
-            system("nanopore/analyses/kmer_indel.pl {} {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp"), self.referenceFastaFile, os.path.join(self.outputDir, str(kmer_size) + "mer_deletions.txt"), os.path.join(self.outputDir, str(kmer_size) + "mer_insertions.txt"), str(kmer_size)))
-            system("Rscript nanopore/analyses/kmer_most_under_over.R {} {} {}".format(os.path.join(self.outputDir, str(kmer_size) + "kmer_Cmp.out"), os.path.join(self.outputDir, "top_kmers.tsv"), os.path.join(self.outputDir, "bot_kmers.tsv")))
-        self.finish()
+
+        system("Rscript nanopore/analyses/kmer_analysis.R {} {}".format(os.path.join(self.getLocalTempDir(), name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "kmer_counts.txt")))
+
+    def run(self, kmerSize=5):
+        AbstractAnalysis.run(self)
+        self.kmerSize = kmerSize
+        
+        #analyze kmers across both files
+        refKmers, readKmers = countKmers()
+        analyzeCounts(refKmers, readKmers, "all_bases_")
+
+        #analyze kmers around the boundaries of indels
+        refKmers, readKmers = countIndelKmers()
+        analyzeCounts(refKmers, readKmers, "indel_bases_")
