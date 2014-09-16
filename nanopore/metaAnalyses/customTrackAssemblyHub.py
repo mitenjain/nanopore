@@ -64,7 +64,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam"), outFolderBamFiles + experiment + ".sorted.bam"))
 			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam.bai"), outFolderBamFiles + experiment + ".sorted.bam.bai"))
 
-		genomes = open(parentFolder + "genomes.txt", "w")
+		genomes = open(parentFolder + "genomes.txt", "a")
 		for referenceFastaFile in self.referenceFastaFiles:
 			if referenceFastaFile.endswith(".fa") or referenceFastaFile.endswith(".fasta"):
 				header = referenceFastaFile.split("/")[-1].split(".fasta")[0]
@@ -94,7 +94,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 		track_label = 1
 		for experiment in experiments:
 			hubFastaDir = experiment.split(".fastq")[-1].split(".fasta")[0][1:]
-			tracks = open(parentFolder + hubFastaDir + "/trackDb.txt", "w")
+			tracks = open(parentFolder + hubFastaDir + "/trackDb.txt", "a")
 			label = experiment.split(".fastq")[0].split("_")[-1]
 			readType = experiment.split(".fastq")[0].split("_")[-1]
 			tracks.write("track " + str(track_label) + "_\n")
@@ -113,7 +113,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 
 		genomes.close()
 
-		groups = open(parentFolder + "groups.txt", "w")
+		groups = open(parentFolder + "groups.txt", "a")
 		groups.write("name readType\n")
 		groups.write("label readType\n")
 		groups.write("priority 1\n")
