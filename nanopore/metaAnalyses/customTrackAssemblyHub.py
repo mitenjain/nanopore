@@ -91,6 +91,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 				genomes.write("organism " + header + "\n")
 				genomes.write("defaultPos " + id + ":1-" + str(coord) + "\n")
 				genomes.write("\n")
+		
 		track_label = 1
 		for experiment in experiments:
 			hubFastaDir = experiment.split(".fastq")[-1].split(".fasta")[0][1:]
@@ -99,8 +100,9 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 			readType = experiment.split(".fastq")[0].split("_")[-1]
 			tracks.write("track " + str(track_label) + "_\n")
 			tracks.write("longLabel " + experiment + "\n")
-			tracks.write("shortLabel " + readType + "\n")
-			tracks.write("priority 10\n")
+			shortLabel = experiment.strip().split("_")[-1]
+                        tracks.write("shortLabel " + readType + "_" + shortLabel + "\n")
+                        tracks.write("priority 10\n")
 			tracks.write("visibility pack\n")
 			tracks.write("colorByStrand 150,100,30 230,170,40\n")
 			tracks.write("color 150,100,30\n")
@@ -109,6 +111,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 			tracks.write("type bam\n")
 			tracks.write("group " + readType + "\n")
 			tracks.write("html assembly\n\n")
+			track_label += 1
 			tracks.close()
 
 		genomes.close()
