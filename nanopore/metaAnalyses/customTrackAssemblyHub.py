@@ -42,7 +42,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 		for readFastqFile, readType, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
 			experiment = resultsDir.split("/")[-1]
 			experiments.append(experiment)
-			hubFastaDir = experiment.split(".fastq")[-1].split(".fasta")[0][1:]
+			hubFastaDir = experiment.split(".fastq")[-1].split(".fa")[0][1:]
 			outFolderReferenceFiles = parentFolder + hubFastaDir + "/"
 			outFolderBamFiles = outFolderReferenceFiles + "bamFiles/"
 
@@ -94,7 +94,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 		
 		track_label = 1
 		for experiment in experiments:
-			hubFastaDir = experiment.split(".fastq")[-1].split(".fasta")[0][1:]
+			hubFastaDir = experiment.split(".fastq")[-1].split(".fa")[0][1:]
 			tracks = open(parentFolder + hubFastaDir + "/trackDb.txt", "a")
 			label = experiment.split(".fastq")[0].split("_")[-1]
 			readType = experiment.split(".fastq")[0].split("_")[-1]
