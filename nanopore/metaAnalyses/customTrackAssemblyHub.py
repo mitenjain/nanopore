@@ -56,13 +56,19 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 			bamFile = os.path.join(resultsDir, "mapping.bam")
 			sortedbamFile = os.path.join(resultsDir, "mapping.sorted")
 			if not os.path.isfile(os.path.join(resultsDir, "mapping.bam")):
-				samToBamFile(os.path.join(resultsDir, "mapping.sam"), bamFile)
-				pysam.sort(bamFile, sortedbamFile)
-				pysam.index(sortedbamFile + ".bam")
+				try:
+					samToBamFile(os.path.join(resultsDir, "mapping.sam"), bamFile)
+					pysam.sort(bamFile, sortedbamFile)
+					pysam.index(sortedbamFile + ".bam")
+				except:
+					continue
 
 			# Copy files
-			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam"), outFolderBamFiles + experiment + ".sorted.bam"))
-			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam.bai"), outFolderBamFiles + experiment + ".sorted.bam.bai"))
+			try:
+				system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam"), outFolderBamFiles + experiment + ".sorted.bam"))
+				system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam.bai"), outFolderBamFiles + experiment + ".sorted.bam.bai"))
+			except:
+				continue
 
 		genomes = open(parentFolder + "genomes.txt", "a")
 		for referenceFastaFile in self.referenceFastaFiles:
