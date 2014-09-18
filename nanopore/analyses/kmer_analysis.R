@@ -24,7 +24,7 @@ write.table(finished, outf)
 
 significant <- finished[finished$p_value <= 0.05,]
 
-top <- head(significant[order(significant$foldChange),], n=20L)
-bot <- head(significant[order(significant$foldChange, decreasing=T),], n=20L)
+top <- head(significant[order(significant$logFoldChange),], n=20L)
+bot <- head(significant[order(significant$logFoldChange, decreasing=T),], n=20L)
 
 write.table(rbind(top,bot), args[3])
