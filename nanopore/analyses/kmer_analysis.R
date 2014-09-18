@@ -4,6 +4,7 @@ args <- commandArgs(trailingOnly = T)
 
 data <- read.table(args[1], row.names=1, header=T)
 outf <- args[2]
+outsig <- args[3]
 
 library(stats)
 
@@ -23,7 +24,7 @@ write.table(finished, outf)
 
 significant <- finished[finished$p_value <= 0.05,]
 
-top <- head(significant[order(significant$foldChange),], n=10L)
-bot <- head(significant[order(significant$foldChange, decreasing=T),], n=10L)
+top <- head(significant[order(significant$foldChange),], n=20L)
+bot <- head(significant[order(significant$foldChange, decreasing=T),], n=20L)
 
-write.table(rbind(top,bot), paste("significant_top_bot_10_", outf))
+write.table(rbind(top,bot), args[3])
