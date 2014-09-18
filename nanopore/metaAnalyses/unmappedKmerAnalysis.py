@@ -20,9 +20,9 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
             mappedKmers, unmappedKmers = Counter(), Counter()
             for read in self.reads:
                 if read.readType == readType and read.is_mapped:
-                    mappedKmers += countKmers(read.seq)
+                    mappedKmers += self.countKmers(read.seq)
                 elif read.readType == readType:
-                    unmappedKmers += countKmers(read.seq)
+                    unmappedKmers += self.countKmers(read.seq)
 
             mappedSize, unmappedSize = sum(mappedKmers.values()), sum(unmappedKmers.values())
             outf = open(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), "w")
