@@ -32,8 +32,8 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
             for kmer in itertools.product("ATGC",repeat=5):
                 kmer = "".join(kmer)
                 mappedFraction, unmappedFraction = 1.0 * mappedKmers[kmer] / mappedSize, 1.0 * unmappedKmers[kmer] / unmappedSize
-                foldChange = -log(readFraction / refFraction)
+                foldChange = -log(mappedFraction / unmappedFraction)
                 outf.write("\t".join(map(str,[kmer, mappedKmers[kmer], mappedFraction, unmappedKmers[kmer], unmappedFraction, foldChange]))+"\n")
             outf.close()
 
-            system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), os.path.join(self.outputDir, readType + "kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt")))
+            system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_top_bot_sigkmer_counts.txt")))
