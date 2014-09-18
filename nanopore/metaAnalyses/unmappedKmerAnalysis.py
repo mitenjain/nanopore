@@ -3,6 +3,7 @@ import os, sys
 from jobTree.src.bioio import system
 import itertools
 from collections import Counter
+from math import log
 
 class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
     """Calculates kmer statistics for all reads (in all samples) not mapped by any mapper
