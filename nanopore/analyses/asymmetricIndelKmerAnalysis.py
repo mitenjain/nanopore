@@ -29,29 +29,9 @@ class AsymmetricIndelKmerAnalysis(AbstractAnalysis):
                     if aR.is_reverse:
                         readKmers[reverseComplement(seq)] += 1
                     else:
-                        readKmers[seq] += 1                    
+                        readKmers[seq] += 1
 
-
-            #temp lists of kmers
-            refKmer, readKmer = list(), list()
-            
-            for i in xrange(len(aR.aligned_pairs)):
-                readPos, refPos = aR.aligned_pairs[i]
-                refKmer.append(refPos); readKmer.append(readPos)
-                
-                #if we hit kmerSize bases without indels, start tossing out positions
-                if len(refKmer) == self.kmerSize and None not in refKmer and None not in readKmer:
-                    refKmer = refKmer[1:]; readKmer = readKmer[1:]
-                
-                #we are exiting a window of indels
-                elif None not in refKmer[-self.kmerSize:] and None not in readKmer[-self.kmerSize:] and len(refKmer) > self.kmerSize:
-                    refKmer = [x for x in refKmer if not x == None]
-                    readKmer = [x for x in readKmer if not x == None]
-                    for i in refKmer[self.kmerSize:]:
-                        refKmers[refSeq[i-self.kmerSize:i]] += 1
-                    for i in readKmer[self.kmerSize:]:
-                        readKmers[readSeq[i-self.kmerSize:i]] += 1
-                    refKmer, readKmer = list(), list()
+        return (refKmers, readKmers)                   
 
     def analyzeCounts(self, refKmers, readKmers, name):
         refSize, readSize = sum(refKmers.values()), sum(readKmers.values())
@@ -76,5 +56,6 @@ class AsymmetricIndelKmerAnalysis(AbstractAnalysis):
 
         #analyze kmers around the boundaries of indels
         indelRefKmers, indelReadKmers = self.countIndelKmers()
-        self.analyzeCounts(indelRefKmers, indelReadKmers, "indel_bases_")
+        if len(indelRefKmers) > 0 and len(indelReadKmers) > 0:
+            self.analyzeCounts(indelRefKmers, indelReadKmers, "asymmetric_indel_bases_")
         self.finish()

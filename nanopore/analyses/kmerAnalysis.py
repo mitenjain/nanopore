@@ -47,5 +47,6 @@ class KmerAnalysis(AbstractAnalysis):
         
         #analyze kmers across both files
         refKmers, readKmers = self.countKmers()
-        self.analyzeCounts(refKmers, readKmers, "all_bases_")
+        if len(refKmers) > 0 and len(readKmers) > 0:
+            self.analyzeCounts(refKmers, readKmers, "all_bases_")
         self.finish()

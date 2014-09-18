@@ -41,6 +41,7 @@ class SymmetricIndelKmerAnalysis(AbstractAnalysis):
                         else:
                             readKmers[seq] += 1
                     refKmer, readKmer = list(), list()
+        return (refKmers, readKmers)
 
     def analyzeCounts(self, refKmers, readKmers, name):
         refSize, readSize = sum(refKmers.values()), sum(readKmers.values())
@@ -65,5 +66,6 @@ class SymmetricIndelKmerAnalysis(AbstractAnalysis):
 
         #analyze kmers around the boundaries of indels
         indelRefKmers, indelReadKmers = self.countIndelKmers()
-        self.analyzeCounts(indelRefKmers, indelReadKmers, "indel_bases_")
+        if len(indelRefKmers) > 0 and len(indelReadKmers) > 0:
+            self.analyzeCounts(indelRefKmers, indelReadKmers, "symmetric_indel_bases_")
         self.finish()
