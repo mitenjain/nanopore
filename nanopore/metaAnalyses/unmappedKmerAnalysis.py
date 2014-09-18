@@ -27,7 +27,7 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
                     unmappedKmers += self.countKmers(read.seq)
 
             mappedSize, unmappedSize = sum(mappedKmers.values()), sum(unmappedKmers.values())
-            outf = open(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), "w")
+            outf = open(os.path.join(self.getLocalTempDir(), readType + "_kmer_counts.txt"), "w")
             outf.write("kmer\trefCount\trefFraction\treadCount\treadFraction\tlogFoldChange\n")
             for kmer in itertools.product("ATGC",repeat=5):
                 kmer = "".join(kmer)
@@ -36,4 +36,4 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
                 outf.write("\t".join(map(str,[kmer, mappedKmers[kmer], mappedFraction, unmappedKmers[kmer], unmappedFraction, foldChange]))+"\n")
             outf.close()
 
-            system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_top_bot_sigkmer_counts.txt")))
+            system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_top_bot_sigkmer_counts.txt")))
