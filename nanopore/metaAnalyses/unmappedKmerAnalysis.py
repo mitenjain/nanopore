@@ -10,7 +10,7 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
 
     def countKmers(self, seq):
         kmers = Counter()
-        for i in xrange(kmerSize, len(seq)):
+        for i in xrange(self.kmerSize, len(seq)):
             if "N" not in seq[ i - self.kmerSize : i ]:
                 kmers[ seq[ i - self.kmerSize : i ] ] += 1
         return kmers
