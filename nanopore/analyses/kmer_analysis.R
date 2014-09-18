@@ -21,7 +21,7 @@ colnames(finished) <- c(colnames(finished)[1:dim(finished)[2]-1], "p_value")
 
 write.table(finished, outf)
 
-significant <- finished[finished$p_value <= 0.05]
+significant <- finished[finished$p_value <= 0.05,]
 
 top <- head(significant[order(significant$foldChange),], n=10L)
 bot <- head(significant[order(significant$foldChange, decreasing=T),], n=10L)
