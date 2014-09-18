@@ -18,20 +18,31 @@ class AsymmetricIndelKmerAnalysis(AbstractAnalysis):
                     refSeq = seq
 
             readSeq = aR.query
-
-            readPositions, refPositions = zip(*aR.aligned_pairs)
-
-            for i in xrange(self.kmerSize, len(aR.aligned_pairs)):
-                if None in readPositions[i-self.kmerSize:i] and None not in refPositions[i-self.kmerSize:i]:
-                    refKmers[refSeq[i-self.kmerSize:i]] += 1
-                if None not in readPositions[i-self.kmerSize:i] and None in refPositions[i-self.kmerSize:i]:
-                    seq = readSeq[i-self.kmerSize:i]
-                    if aR.is_reverse:
-                        readKmers[reverseComplement(seq)] += 1
-                    else:
-                        readKmers[seq] += 1
-
-        return (refKmers, readKmers)                   
+            #temp lists of kmers
+            refKmer, readKmer = list(), list()
+            
+            for i in xrange(len(aR.aligned_pairs)):
+                readPos, refPos = aR.aligned_pairs[i]
+                refKmer.append(refPos); readKmer.append(readPos)
+                
+                #if we hit kmerSize bases without indels, start tossing out positions
+                if len(refKmer) == self.kmerSize and None not in refKmer and None not in readKmer:
+                    refKmer = refKmer[1:]; readKmer = readKmer[1:]
+                
+                #we are exiting a window of indels
+                elif None not in refKmer[-self.kmerSize:] and None not in readKmer[-self.kmerSize:] and len(refKmer) > self.kmerSize:
+                    refKmer = [x for x in refKmer if not x == None]
+                    readKmer = [x for x in readKmer if not x == None]
+                    for i in refKmer[self.kmerSize:]:
+                        refKmers[refSeq[i-self.kmerSize:i]] += 1
+                    for i in readKmer[self.kmerSize:]:
+                        seq = readSeq[i-self.kmerSize:i]
+                        if aR.is_reverse:
+                            readKmers[reverseComplement(seq)] += 1
+                        else:
+                            readKmers[seq] += 1
+                    refKmer, readKmer = list(), list()
+        return (refKmers, readKmers)    
 
     def analyzeCounts(self, refKmers, readKmers, name):
         refSize, readSize = sum(refKmers.values()), sum(readKmers.values())
