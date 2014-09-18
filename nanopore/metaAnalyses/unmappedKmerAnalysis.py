@@ -20,7 +20,7 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
             for read in self.reads:
                 if read.readType == readType and read.is_mapped:
                     mappedKmers += countKmers(read.seq)
-                elif read.readType == readType
+                elif read.readType == readType:
                     unmappedKmers += countKmers(read.seq)
 
             mappedSize, unmappedSize = sum(mappedKmers.values()), sum(unmappedKmers.values())
