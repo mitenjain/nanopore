@@ -33,4 +33,4 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
                 outf.write("\t".join(map(str,[kmer, refKmers[kmer], refFraction, readKmers[kmer], readFraction, foldChange]))+"\n")
             outf.close()
 
-        system("Rscript nanopore/analyses/kmer_analysis.R {} {}".format(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), os.path.join(self.outputDir, readType + "kmer_counts.txt")))
+        system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "kmer_counts.txt"), os.path.join(self.outputDir, readType + "kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt")))
