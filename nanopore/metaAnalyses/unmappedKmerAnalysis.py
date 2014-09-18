@@ -11,11 +11,12 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
     def countKmers(self, seq):
         kmers = Counter()
         for i in xrange(kmerSize, len(seq)):
-            if "N" not in seq[ i - kmerSize : i ]:
-                kmers[ seq[ i - kmerSize : i ] ] += 1
+            if "N" not in seq[ i - self.kmerSize : i ]:
+                kmers[ seq[ i - self.kmerSize : i ] ] += 1
         return kmers
 
-    def run(self, kmer_size=5):
+    def run(self, kmerSize=5):
+        self.kmerSize = kmerSize
         for readType in self.readTypes:
             mappedKmers, unmappedKmers = Counter(), Counter()
             for read in self.reads:
