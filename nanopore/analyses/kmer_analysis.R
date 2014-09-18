@@ -9,7 +9,7 @@ library(stats)
 
 trials <- sum(data$readCount)
 
-test <- function(x, p, n){binom.test(x, n, p, alternative="two.sided", conf.level=0.99)$null.value}
+test <- function(x, p, n){binom.test(x, n, p, alternative="two.sided", conf.level=0.99)$p.value}
 
 pvals <- mapply(test, data$readCount, data$refFraction, MoreArgs=list(n=trials))
 
@@ -20,3 +20,10 @@ finished <- cbind(data, adjusted)
 colnames(finished) <- c(colnames(finished)[1:dim(finished)[2]-1], "p_value")
 
 write.table(finished, outf)
+
+significant <- finished[finished$p_value <= 0.05]
+
+top <- head(significant[order(significant$foldChange),], n=10L)
+bot <- head(significant[order(significant$foldChange, decreasing=T),], n=10L)
+
+write.table(rbind(top,bot), paste("significant_top_bot_10_", outf))
