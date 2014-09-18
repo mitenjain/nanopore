@@ -2,6 +2,7 @@ from nanopore.metaAnalyses.abstractUnmappedAnalysis import AbstractUnmappedMetaA
 import os, sys
 from jobTree.src.bioio import system
 from itertools import product
+from collections import Counter
 
 class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
     """Calculates kmer statistics for all reads (in all samples) not mapped by any mapper
