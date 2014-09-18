@@ -28,7 +28,7 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
 
             mappedSize, unmappedSize = sum(mappedKmers.values()), sum(unmappedKmers.values())
             outf = open(os.path.join(self.getLocalTempDir(), readType + "_kmer_counts.txt"), "w")
-            outf.write("kmer\trefCount\trefFraction\treadCount\treadFraction\tlogFoldChange\n")
+            outf.write("kmer\tmappableCount\tmappableFraction\tunmappableCount\tunmappableFraction\tlogFoldChange\n")
             for kmer in itertools.product("ATGC",repeat=5):
                 kmer = "".join(kmer)
                 mappedFraction, unmappedFraction = 1.0 * mappedKmers[kmer] / mappedSize, 1.0 * unmappedKmers[kmer] / unmappedSize
