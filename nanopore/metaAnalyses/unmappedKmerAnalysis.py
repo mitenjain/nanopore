@@ -1,7 +1,7 @@
 from nanopore.metaAnalyses.abstractUnmappedAnalysis import AbstractUnmappedMetaAnalysis
 import os, sys
 from jobTree.src.bioio import system
-from itertools import product
+import itertools
 from collections import Counter
 
 class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
