@@ -27,7 +27,7 @@ class KmerAnalysis(AbstractAnalysis):
     def analyzeCounts(self, refKmers, readKmers, name):
         refSize, readSize = sum(refKmers.values()), sum(readKmers.values())
         outf = open(os.path.join(self.getLocalTempDir(), name + "kmer_counts.txt"), "w")
-        outf.write("kmer\trefCount\trefFraction\treadCount\treadFraction\tfoldChange\n")
+        outf.write("kmer\trefCount\trefFraction\treadCount\treadFraction\tlogFoldChange\n")
         
         for kmer in itertools.product("ATGC", repeat=5):
             kmer = "".join(kmer)
