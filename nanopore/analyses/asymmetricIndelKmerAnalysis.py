@@ -6,23 +6,32 @@ from collections import Counter
 from math import log
 
 
-class KmerAnalysis(AbstractAnalysis):
+class AsymmetricIndelKmerAnalysis(AbstractAnalysis):
     """Runs kmer analysis"""
-
-    def countKmers(self):
+    def countIndelKmers(self):
+        sam = pysam.Samfile(self.samFile)
         refKmers, readKmers = Counter(), Counter()
 
-        for name, seq in fastaRead(self.referenceFastaFile):
-            for i in xrange(self.kmerSize, len(seq)):
-                if "N" not in seq[ i - self.kmerSize : i ]:
-                    refKmers[ seq[ i - self.kmerSize : i ] ] += 1
+        for aR in samIterator(sam):
+            for name, seq in fastaRead(self.referenceFastaFile):
+                if name == sam.getrname(aR.rname):
+                    refSeq = seq
 
-        for name, seq, qual in fastqRead(self.readFastqFile):
-            for i in xrange(self.kmerSize, len(seq)):
-                if "N" not in seq[ i - self.kmerSize : i ]:
-                    readKmers[ seq[ i - self.kmerSize : i ] ] += 1
+            readSeq = aR.query
 
-        return (refKmers, readKmers)
+            readPositions, refPositions = zip(*aR.aligned_pairs)
+
+            for i in xrange(self.kmerSize, len(aR.aligned_pairs)):
+                if None in readPositions[i-self.kmerSize:i] and None not in refPositions[i-self.kmerSize:i]:
+                    refKmers[refSeq[i-self.kmerSize:i]] += 1
+                if None not in readPositions[i-self.kmerSize:i] and None in refPositions[i-self.kmerSize:i]:
+                    seq = readSeq[i-self.kmerSize:i]
+                    if aR.is_reverse:
+                        readKmers[reverseComplement(seq)] += 1
+                    else:
+                        readKmers[seq] += 1
+
+        return (refKmers, readKmers)                   
 
     def analyzeCounts(self, refKmers, readKmers, name):
         refSize, readSize = sum(refKmers.values()), sum(readKmers.values())
@@ -44,9 +53,9 @@ class KmerAnalysis(AbstractAnalysis):
     def run(self, kmerSize=5):
         AbstractAnalysis.run(self)
         self.kmerSize = kmerSize
-        
-        #analyze kmers across both files
-        refKmers, readKmers = self.countKmers()
-        if len(refKmers) > 0 and len(readKmers) > 0:
-            self.analyzeCounts(refKmers, readKmers, "all_bases_")
+
+        #analyze kmers around the boundaries of indels
+        indelRefKmers, indelReadKmers = self.countIndelKmers()
+        if len(indelRefKmers) > 0 and len(indelReadKmers) > 0:
+            self.analyzeCounts(indelRefKmers, indelReadKmers, "asymmetric_indel_bases_")
         self.finish()
