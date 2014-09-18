@@ -8,11 +8,11 @@ outsig <- args[3]
 
 library(stats)
 
-trials <- sum(data$readCount)
+trials <- sum(data$unmappableCount)
 
 test <- function(x, p, n){binom.test(x, n, p, alternative="two.sided", conf.level=0.95)$p.value}
 
-pvals <- mapply(test, data$readCount, data$refFraction, MoreArgs=list(n=trials))
+pvals <- mapply(test, data$unmappableCount, data$mappableFraction, MoreArgs=list(n=trials))
 
 adjusted <- p.adjust(pvals, method="bonferroni")
 
