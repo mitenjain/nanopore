@@ -9,13 +9,13 @@ library(stats)
 
 trials <- sum(data$readCount)
 
-test <- function(x, p, n){binom.test(x, n, p, alternative="two.sided", conf.level=0.99)$p.value}
+test <- function(x, p, n){binom.test(x, n, p, alternative="two.sided", conf.level=0.99)$null.value}
 
 pvals <- mapply(test, data$readCount, data$refFraction, MoreArgs=list(n=trials))
 
 adjusted <- p.adjust(pvals, method="bonferroni")
 
-finished <- rbind(data, adjusted)
+finished <- cbind(data, adjusted)
 
 colnames(finished) <- c(colnames(finished)[1:dim(finished)[2]-1], "p_value")
 
