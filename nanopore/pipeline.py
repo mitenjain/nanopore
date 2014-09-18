@@ -24,7 +24,7 @@ from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
 from nanopore.analyses.symmetricIndelKmerAnalysis import SymmetricIndelKmerAnalysis
-from nanopore.analyeses.asymmetricIndelKmerAnalysis import AsymmetricIndelKmerAnalysis
+from nanopore.analyses.asymmetricIndelKmerAnalysis import AsymmetricIndelKmerAnalysis
 from nanopore.analyses.indels import Indels
 from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
