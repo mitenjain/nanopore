@@ -83,7 +83,7 @@ analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, Alignmen
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
 
 #mappers = [ LastParamsChain , LastParamsRealignTrainedModel, LastParamsRealignTrainedModelAMAP, LastParamsRealignTrainedModelMatchGamma5, BlasrParamsChain , BlasrParamsRealignTrainedModel, BlasrParamsRealignTrainedModelAMAP, BlasrParamsRealignTrainedModelMatchGamma5,  ]
-#mappers = [ LastParamsRealignTrainedModelAMAP ]
+#mappers = [ LastParamsChain, BlasrParamsChain ]
 #analyses = [ MarginAlignSnpCaller ]
 #metaAnalyses = [ MarginAlignMetaAnalysis  ] 
 
@@ -184,7 +184,7 @@ def main():
     referenceFastaFiles = [ makeFastaSequenceNamesUnique(os.path.join(workingDir, "referenceFastaFiles", i), os.path.join(processedFastaFiles, i)) for i in os.listdir(os.path.join(workingDir, "referenceFastaFiles")) if (".fa" in i and i[-3:] == '.fa') or (".fasta" in i and i[-6:] == '.fasta') ]
     
     # call reference mutator script; introduces 1%, and 5% mutations (No nucleotide bias used for now)
-    #referenceFastaFiles = mutateReferenceSequences(referenceFastaFiles)
+    referenceFastaFiles = mutateReferenceSequences(referenceFastaFiles)
 
     #Log the inputs
     logger.info("Using the following working directory: %s" % workingDir)

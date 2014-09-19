@@ -3,6 +3,7 @@ from nanopore.analyses.utils import AlignedPair, getFastaDictionary, getFastqDic
 import os
 import pysam
 import numpy
+import math
 import random
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import reverseComplement, prettyXml, system, fastaWrite, cigarRead, PairwiseAlignment, cigarReadFromString
@@ -16,24 +17,22 @@ def getProb(subMatrix, start, end):
 
 def calcBasePosteriorProbs(baseObservations, refBase, 
                   evolutionarySubstitionMatrix, errorSubstutionMatrix):
-    baseProbs = map(lambda missingBase : getProb(evolutionarySubstitionMatrix, refBase, missingBase) * 
-            sum(map(lambda observedBase : baseObservations[observedBase] * getProb(errorSubstutionMatrix, missingBase, observedBase), bases)), bases)
-    return dict(zip(bases, map(lambda prob : prob/sum(baseProbs), baseProbs)))
+    logBaseProbs = map(lambda missingBase : math.log(getProb(evolutionarySubstitionMatrix, refBase, missingBase)) + 
+            reduce(lambda x, y : x + y, map(lambda observedBase : math.log(getProb(errorSubstutionMatrix, missingBase, observedBase))*baseObservations[observedBase], bases)), bases)
+    totalLogProb = reduce(lambda x, y : x + math.log(1 + math.exp(y-x)), logBaseProbs)
+    return dict(zip(bases, map(lambda logProb : math.exp(logProb - totalLogProb), logBaseProbs)))
 
 def loadHmmErrorSubstitutionMatrix(hmmFile):
     hmm = Hmm.loadHmm(hmmFile)
     m = hmm.emissions[:len(bases)**2]
     m = map(lambda i : m[i] / sum(m[4*(i/4):4*(1 + i/4)]), range(len(m))) #Normalise m
-    return dict(zip(product(bases, bases), m)) 
+    return dict(zip(product(bases, bases), m))
 
 def getNullSubstitutionMatrix():
     return dict(zip(product(bases, bases), [1.0]*len(bases)**2))
 
-def getIdentitySubstitutionMatrix():
-    return dict(zip(product(bases, bases), map(lambda x : 1.0 if x[0] == x[1] else 0.0, product(bases, bases))))
-
-def invertSubstitutionMatrix(substitutionMatrix):
-    return dict(map(lambda x : ((x[1], x[0]), substitutionMatrix[x]), substitutionMatrix.keys()))
+def getJukesCantorTypeSubstitutionMatrix():
+    return dict(zip(product(bases, bases), map(lambda x : 0.75 if x[0] == x[1] else (0.25/3), product(bases, bases))))
 
 class MarginAlignSnpCaller(AbstractAnalysis):
     """Calculates stats on snp calling.
@@ -53,7 +52,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
          
                 #Get substitution matrices
                 nullSubstitionMatrix = getNullSubstitutionMatrix()
-                identitySubstitutionMatrix = getIdentitySubstitutionMatrix()
+                flatSubstitutionMatrix = getJukesCantorTypeSubstitutionMatrix()
                 hmmErrorSubstitutionMatrix = loadHmmErrorSubstitutionMatrix(hmmFile)
             
                 #Load the held out snps
@@ -81,6 +80,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                 
                 totalSampledReads = 0
                 totalAlignedPairs = 0
+                totalReadLength = 0
                 totalReferenceLength = sum(map(len, refSequences.values()))
                 
                 #Get a randomised ordering for the reads
@@ -88,8 +88,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                 random.shuffle(reads)
                 
                 for aR in reads: #Iterate on the sam lines
-                    if totalAlignedPairs/totalReferenceLength >= coverage: #Stop when coverage exceeds the quota
+                    if totalReadLength/totalReferenceLength >= coverage: #Stop when coverage exceeds the quota
                         break
+                    totalReadLength += len(readSequences[aR.qname])
                     totalSampledReads += 1
                     
                     #Exonerate format Cigar string
@@ -137,11 +138,15 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         
                 sam.close()
                 
+                totalHeldOut = len(snpSet)
+                totalNotHeldOut = totalReferenceLength - totalHeldOut
+                
                 class SnpCalls:
                     def __init__(self):
                         self.snpCalls = dict(zip(product("ACTGN", "ACTGN", "ACTGN"), [0.0]*(5**3)))
                         self.falsePositives = []
                         self.truePositives = []
+                        self.falseNegatives = []
                     
                     @staticmethod
                     def bucket(calls):
@@ -152,18 +157,31 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             buckets[int(round(prob*100))] += 1
                         for i in xrange(len(buckets)-2, -1, -1): #Make cumulative
                             buckets[i] += buckets[i+1]
-                        return map(lambda x : 0 if buckets[0] == 0 else x/buckets[0], buckets) #Return normalised buckets
+                        return buckets
                     
-                    def getCumulativeFalsePositives(self):
-                        return self.bucket(self.falsePositives)
+                    def getPrecisionByProbability(self):
+                        tPs = self.bucket(map(lambda x : x[0], self.truePositives)) 
+                        fPs = self.bucket(map(lambda x : x[0], self.truePositives))
+                        return map(lambda i : float(tPs[i]) / (tPs[i] + fPs[i]) if tPs[i] + fPs[i] != 0 else 0, xrange(len(tPs)))
                     
-                    def getCumulativeTruePositives(self):
-                        return self.bucket(self.falsePositives)
+                    def getFalsePositiveRatesByProbability(self):
+                        return map(lambda i : i / (totalHeldOut + totalNotHeldOut), self.bucket(map(lambda x : x[0], self.falsePositives)))
+                    
+                    def getTruePositiveRatesByProbability(self):
+                        return map(lambda i : i/totalHeldOut if totalHeldOut != 0 else 0, self.bucket(map(lambda x : x[0], self.truePositives)))
+                    
+                    def getTruePositiveLocations(self):
+                        return map(lambda x : x[1], self.truePositives)
+                    
+                    def getFalsePositiveLocations(self):
+                        return map(lambda x : x[1], self.falsePositives)
+                    
+                    def getFalseNegativeLocations(self):
+                        return self.falseNegatives[:]
         
                 #The different call sets
                 marginAlignMaxExpectedSnpCalls = SnpCalls()
                 marginAlignMaxLikelihoodSnpCalls = SnpCalls()
-                marginAlignMaxLikelihoodSnpCallsInvertCheck = SnpCalls()
                 maxFrequencySnpCalls = SnpCalls()
                 maximumLikelihoodSnpCalls = SnpCalls()
                 
@@ -177,10 +195,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         
                         #Get base calls
                         for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
-                        ((identitySubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
+                        ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
                          (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
-                         (invertSubstitutionMatrix(hmmErrorSubstitutionMatrix), nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCallsInvertCheck),
-                         (identitySubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
+                         (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
                          (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
                             chosenBase = 'N'
                             if key in baseExpectations:
@@ -192,11 +209,13 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                                            evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
                                     maxPosteriorProb = max(posteriorProbs.values())
                                     chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
-                                    
-                                    if trueRefBase == chosenBase:
-                                        snpCalls.truePositives.append(maxPosteriorProb)
+                                    if trueRefBase != mutatedRefBase:
+                                        if trueRefBase == chosenBase:
+                                            snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
                                     elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
-                                        snpCalls.falsePositives.append(maxPosteriorProb)
+                                        snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
+                            if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
+                                snpCalls.falseNegatives.append(refPosition) #False negative
                                     
                             #Add to margin-align max expected snp calls - "N" is a no-call.
                             snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
@@ -204,7 +223,6 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                 
                 for snpCalls, tagName in ((marginAlignMaxExpectedSnpCalls, "marginAlignMaxExpectedSnpCalls"), 
                                           (marginAlignMaxLikelihoodSnpCalls, "marginAlignMaxLikelihoodSnpCalls"),
-                                          (marginAlignMaxLikelihoodSnpCallsInvertCheck, "marginAlignMaxLikelihoodSnpCallsInvertCheck"),
                                           (maxFrequencySnpCalls, "maxFrequencySnpCalls"),
                                           (maximumLikelihoodSnpCalls, "maximumLikelihoodSnpCalls")):
                 
@@ -237,6 +255,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             "totalReferenceLength":str(totalReferenceLength),
                             "replicate":str(replicate),
                             "totalReads":str(len(reads)),
+                            "avgSampledReadLength":str(float(totalReadLength)/totalSampledReads),
                             "totalSampledReads":str(totalSampledReads),
                             "totalHeldOut":str(totalHeldOut),
                             "totalNonHeldOut":str(totalNonHeldOut),
@@ -248,8 +267,12 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             "totalNonHeldOutCallsTrue":str(totalNonHeldOutCallsTrue),
                             "totalNonHeldOutCallsFalse":str(totalNonHeldOutCallsFalse),
                             "totalNonHeldOutNotCalled":str(totalNonHeldOutNotCalled),
-                            "cumulativeFalsePositives":" ".join(map(str, snpCalls.getCumulativeFalsePositives())),
-                            "cumulativeTruePositives":" ".join(map(str, snpCalls.getCumulativeTruePositives())) })
+                            "falsePositiveRatesByProbability":" ".join(map(str, snpCalls.getFalsePositiveRatesByProbability())),
+                            "truePositiveRatesByProbability":" ".join(map(str, snpCalls.getTruePositiveRatesByProbability())),
+                            "precisionByProbability":" ".join(map(str, snpCalls.getPrecisionByProbability())),
+                            "falsePositiveLocations":" ".join(map(str, snpCalls.getFalsePositiveLocations())),
+                            "falseNegativeLocations":" ".join(map(str, snpCalls.getFalseNegativeLocations())),
+                            "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
                     for snpCall in snpCalls.snpCalls:
                         ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
                 
