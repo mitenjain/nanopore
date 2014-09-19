@@ -42,7 +42,7 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 		for readFastqFile, readType, referenceFastaFile, mapper, analyses, resultsDir in self.experiments:
 			experiment = resultsDir.split("/")[-1]
 			experiments.append(experiment)
-			hubFastaDir = experiment.split(".fastq")[-1].split(".fasta")[0][1:]
+			hubFastaDir = experiment.split(".fastq")[-1].split(".fa")[0][1:]
 			outFolderReferenceFiles = parentFolder + hubFastaDir + "/"
 			outFolderBamFiles = outFolderReferenceFiles + "bamFiles/"
 
@@ -51,15 +51,24 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 				os.mkdir(outFolderReferenceFiles)
 			if not os.path.exists(outFolderBamFiles):
 				os.mkdir(outFolderBamFiles)
-
+			
+			# Check and create bam, sorted bam, and indexed bam files
 			bamFile = os.path.join(resultsDir, "mapping.bam")
 			sortedbamFile = os.path.join(resultsDir, "mapping.sorted")
-			samToBamFile(os.path.join(resultsDir, "mapping.sam"), bamFile)
-			pysam.sort(bamFile, sortedbamFile)
-			pysam.index(sortedbamFile + ".bam")
+			if not os.path.isfile(os.path.join(resultsDir, "mapping.bam")):
+				try:
+					samToBamFile(os.path.join(resultsDir, "mapping.sam"), bamFile)
+					pysam.sort(bamFile, sortedbamFile)
+					pysam.index(sortedbamFile + ".bam")
+				except:
+					continue
 
-			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam"), outFolderBamFiles + experiment + ".sorted.bam"))
-			system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam.bai"), outFolderBamFiles + experiment + ".sorted.bam.bai"))
+			# Copy files
+			try:
+				system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam"), outFolderBamFiles + experiment + ".sorted.bam"))
+				system("cp %s %s" % (os.path.join(resultsDir, "mapping.sorted.bam.bai"), outFolderBamFiles + experiment + ".sorted.bam.bai"))
+			except:
+				continue
 
 		genomes = open(parentFolder + "genomes.txt", "a")
 		for referenceFastaFile in self.referenceFastaFiles:
@@ -88,16 +97,18 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 				genomes.write("organism " + header + "\n")
 				genomes.write("defaultPos " + id + ":1-" + str(coord) + "\n")
 				genomes.write("\n")
-
+		
+		track_label = 1
 		for experiment in experiments:
-			hubFastaDir = experiment.split(".fastq")[-1].split(".fasta")[0][1:]
+			hubFastaDir = experiment.split(".fastq")[-1].split(".fa")[0][1:]
 			tracks = open(parentFolder + hubFastaDir + "/trackDb.txt", "a")
 			label = experiment.split(".fastq")[0].split("_")[-1]
 			readType = experiment.split(".fastq")[0].split("_")[-1]
-			tracks.write("track " + readType + "_\n")
+			tracks.write("track " + str(track_label) + "_\n")
 			tracks.write("longLabel " + experiment + "\n")
-			tracks.write("shortLabel " + readType + "\n")
-			tracks.write("priority 10\n")
+			shortLabel = experiment.strip().split("_")[-1]
+                        tracks.write("shortLabel " + readType + "_" + shortLabel + "\n")
+                        tracks.write("priority 10\n")
 			tracks.write("visibility pack\n")
 			tracks.write("colorByStrand 150,100,30 230,170,40\n")
 			tracks.write("color 150,100,30\n")
@@ -106,7 +117,8 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 			tracks.write("type bam\n")
 			tracks.write("group " + readType + "\n")
 			tracks.write("html assembly\n\n")
-		tracks.close()
+			track_label += 1
+			tracks.close()
 
 		genomes.close()
 
