@@ -7,7 +7,7 @@ from math import log
 
 class SymmetricIndelKmerAnalysis(AbstractAnalysis):
     """Runs kmer analysis"""
-        def countIndelKmers(self):
+    def countIndelKmers(self):
         sam = pysam.Samfile(self.samFile)
         refKmers, readKmers = Counter(), Counter()
 
