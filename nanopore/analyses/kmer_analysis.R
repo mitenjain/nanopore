@@ -61,4 +61,7 @@ significant <- finished[finished$adjusted_p_value <= 0.05,]
 
 ordered <- significant[order(significant$logFoldChange),]
 
-write.table(ordered, outsig)
+top <- head(ordered, n=20L)
+bot <- tail(ordered, n=20L)
+
+write.table(rbind(top,bot), outsig)
