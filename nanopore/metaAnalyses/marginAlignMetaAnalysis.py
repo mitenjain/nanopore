@@ -91,15 +91,20 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                 avgPrecisionByProbability = merge(precisionByProbability, numpy.average)
                 rocCurvesHash[(readType, mapper, algorithm, proportionHeldOut, coverage)] = (avgFalsePositiveRatesByProbability, avgTruePositiveRatesByProbability, precisionByProbability)
         
+        
+        ####Ian todo ###
+        
         #Place to create ROC / precision/recall plots
         variantCallingAlgorithms = list(variantCallingAlgorithms)
         variantCallingAlgorithms.sort()
         proportionsHeldOut = list(proportionsHeldOut)
         proportionsHeldOut.sort()
         for readType, mapper in product(readTypes, self.mappers):
+            
             #Make grid plot for each combination of readType/mapper
+            #Grid dimensions would be variant calling algorithms x proportion held out
+            #On each plot we should show the roc curve (use falsePositiveRatesByProbability vs. truePositiveRatesByProbability) for the different coverages.
             for algorithm in variantCallingAlgorithms:
                 for proportionHeldOut in proportionsHeldOut:
-                    #Make a single plot showing different coverage
                     for coverage in coverageLevels:
                         falsePositiveRatesByProbability, truePositiveRatesByProbability, avgPrecisionByProbability = rocCurvesHash[(readType, mapper.__name__, algorithm, proportionHeldOut, coverage)]
