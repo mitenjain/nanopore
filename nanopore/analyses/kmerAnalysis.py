@@ -33,9 +33,9 @@ class KmerAnalysis(AbstractAnalysis):
             kmer = "".join(kmer)
             refFraction, readFraction = 1.0 * refKmers[kmer] / refSize, 1.0 * readKmers[kmer] / readSize
             if refFraction == 0:
-                foldChange = "Inf"
-            elif readFraction == 0:
                 foldChange = "-Inf"
+            elif readFraction == 0:
+                foldChange = "Inf"
             else:
                 foldChange = -log(readFraction / refFraction)
             outf.write("\t".join(map(str,[kmer, refKmers[kmer], refFraction, readKmers[kmer], readFraction, foldChange]))+"\n")
