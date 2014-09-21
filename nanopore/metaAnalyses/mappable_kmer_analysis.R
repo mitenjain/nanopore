@@ -12,7 +12,7 @@ library(stats)
 #this lets us sample without replacement
 counts <- vector()
 for (i in 1:1024) {
-    counts <- c(counts, rep(i, times=data[i,]$mappableFraction))
+    counts <- c(counts, rep(i, times=data[i,]$mappableCount))
 }
 
 #10,000 trials
