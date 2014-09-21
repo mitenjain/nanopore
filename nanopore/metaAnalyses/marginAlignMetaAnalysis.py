@@ -100,7 +100,7 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
         proportionsHeldOut = list(proportionsHeldOut)
         proportionsHeldOut.sort()
         for readType, mapper in product(readTypes, self.mappers):
-            
+            outf = open(os.path.join(self.getLocalTempDir(), "tmp.tsv"), "w")
             #Make grid plot for each combination of readType/mapper
             #Grid dimensions would be variant calling algorithms x proportion held out
             #On each plot we should show the roc curve (use falsePositiveRatesByProbability vs. truePositiveRatesByProbability) for the different coverages.
@@ -108,3 +108,6 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                 for proportionHeldOut in proportionsHeldOut:
                     for coverage in coverageLevels:
                         falsePositiveRatesByProbability, truePositiveRatesByProbability, avgPrecisionByProbability = rocCurvesHash[(readType, mapper.__name__, algorithm, proportionHeldOut, coverage)]
+                        outf.write("{0}_{1}\t{2}\n{0}_{1}\t{3}\n{0}_{1}\t{4}\n".format(str(algorithm), str(proportionHeldOut)),"\t".join(falsePositiveRatesByProbability), "\t".join(truePositiveRatesByProbability), "\t".join(avgPrecisionByProbability))
+            outf.close()
+            system("Rscript nanopore/metaAnalyses/ROC_marginAlign.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), "tmp.tsv"), os.path.join(self.outputDir, readType + "_" + mapper + "_ROC_curves.pdf"), len(variantCallingAlgorithms), len(proportionsHeldOut)))

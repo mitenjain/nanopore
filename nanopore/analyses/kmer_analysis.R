@@ -29,7 +29,7 @@ trial_fn <- function(counts) {
 test <- function(x, p, n){
     binom.test(x, n, p, alternative="two.sided", conf.level=0.95)$p.value
 }
-#makes a count table out of the trian replicates 
+#makes a count table out of the trials, counting non-present things also
 tableize <- function(x) {
     tmp <- matrix(table(factor(x, levels=1:1024)))[,1]
     tmp/sum(tmp)

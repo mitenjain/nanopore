@@ -13,7 +13,7 @@ par(mfrow=c(cols, rows))
 fprs <- data[seq(1, length(data), 3)]
 tprs <- data[seq(2, length(data), 3)]
 
-for (i in 1:length(fprs)) {
+for (i in 1:dim(fprs)[1]) {
     xyplot(tprs[i,]~fpr[i,], xlab="False positive rate", ylab="True positive rate", main=rowname(fprs[i,]))
 
 }
