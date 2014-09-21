@@ -12,13 +12,13 @@ library(stats)
 #this lets us sample without replacement
 counts <- vector()
 for (i in 1:1024) {
-    counts <- c(counts, rep(i, times=data[i,]$mappableFraction))
+    counts <- c(counts, rep(i, times=data[i,]$mappableCount))
 }
 
 #10,000 trials
 num_trials <- 10000
-#we want each trial to be around 1/10th of the number of kmers seen in the reads
-trial_size <- round(length(counts)/10)
+#we want each trial to be around 1/25th of the number of kmers seen in the reads
+trial_size <- max(round(length(counts)/25), 10000)
 
 
 #samples from the read population
