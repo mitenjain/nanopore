@@ -43,238 +43,246 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         
         node = ET.Element("marginAlignComparison")
-        for coverage in (1000000, 500, 120, 60, 30, 10): 
-            for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
-                sam = pysam.Samfile(self.samFile, "r" )
+        for hmmType in ("trained", "trained_flatEmissions", "cactus"):
+            for coverage in (1000000, 500, 120, 60, 30, 10): 
+                for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
+                    sam = pysam.Samfile(self.samFile, "r" )
+                    
+                    #Trained hmm file to use.q
+                    hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
+                    hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm2.txt")
+             
+                    #Get substitution matrices
+                    nullSubstitionMatrix = getNullSubstitutionMatrix()
+                    flatSubstitutionMatrix = getJukesCantorTypeSubstitutionMatrix()
+                    hmmErrorSubstitutionMatrix = loadHmmErrorSubstitutionMatrix(hmmFile)
                 
-                #Trained hmm file to use.q
-                hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
-         
-                #Get substitution matrices
-                nullSubstitionMatrix = getNullSubstitutionMatrix()
-                flatSubstitutionMatrix = getJukesCantorTypeSubstitutionMatrix()
-                hmmErrorSubstitutionMatrix = loadHmmErrorSubstitutionMatrix(hmmFile)
-            
-                #Load the held out snps
-                snpSet = {}
-                referenceAlignmentFile = self.referenceFastaFile + "_Index.txt"
-                if os.path.exists(referenceAlignmentFile):
-                    seqsAndMutatedSeqs = getFastaDictionary(referenceAlignmentFile)
-                    count = 0
-                    for name in seqsAndMutatedSeqs:
-                        if name in refSequences:
-                            count += 1
-                            trueSeq = seqsAndMutatedSeqs[name]
-                            mutatedSeq = seqsAndMutatedSeqs[name + "_mutated"]
-                            assert mutatedSeq == refSequences[name]
-                            for i in xrange(len(trueSeq)):
-                                if trueSeq[i] != mutatedSeq[i]:
-                                    snpSet[(name, i)] = trueSeq[i] 
+                    #Load the held out snps
+                    snpSet = {}
+                    referenceAlignmentFile = self.referenceFastaFile + "_Index.txt"
+                    if os.path.exists(referenceAlignmentFile):
+                        seqsAndMutatedSeqs = getFastaDictionary(referenceAlignmentFile)
+                        count = 0
+                        for name in seqsAndMutatedSeqs:
+                            if name in refSequences:
+                                count += 1
+                                trueSeq = seqsAndMutatedSeqs[name]
+                                mutatedSeq = seqsAndMutatedSeqs[name + "_mutated"]
+                                assert mutatedSeq == refSequences[name]
+                                for i in xrange(len(trueSeq)):
+                                    if trueSeq[i] != mutatedSeq[i]:
+                                        snpSet[(name, i)] = trueSeq[i] 
+                            else:
+                                assert name.split("_")[-1] == "mutated"
+                        assert count == len(refSequences.keys())
+                    
+                    #The data we collect
+                    expectationsOfBasesAtEachPosition = {}
+                    frequenciesOfAlignedBasesAtEachPosition = {}
+                    
+                    totalSampledReads = 0
+                    totalAlignedPairs = 0
+                    totalReadLength = 0
+                    totalReferenceLength = sum(map(len, refSequences.values()))
+                    
+                    #Get a randomised ordering for the reads
+                    reads = [ aR for aR in samIterator(sam) ]
+                    random.shuffle(reads)
+                    
+                    for aR in reads: #Iterate on the sam lines
+                        if totalReadLength/totalReferenceLength >= coverage: #Stop when coverage exceeds the quota
+                            break
+                        totalReadLength += len(readSequences[aR.qname])
+                        totalSampledReads += 1
+                        
+                        #Exonerate format Cigar string
+                        cigarString = getExonerateCigarFormatString(aR, sam)
+                        
+                        #Temporary files
+                        tempCigarFile = os.path.join(self.getLocalTempDir(), "rescoredCigar.cig")
+                        tempRefFile = os.path.join(self.getLocalTempDir(), "ref.fa")
+                        tempReadFile = os.path.join(self.getLocalTempDir(), "read.fa")
+                        tempPosteriorProbsFile = os.path.join(self.getLocalTempDir(), "probs.tsv")
+                        
+                        #Ref name
+                        refSeqName = sam.getrname(aR.rname)
+                        
+                        #Sequences
+                        refSeq = refSequences[sam.getrname(aR.rname)]
+                        readSeq = aR.query #This excludes bases that were soft-clipped
+                        
+                        #Walk through the aligned pairs to collate the bases of aligned positions
+                        for aP in AlignedPair.iterator(aR, refSeq, readSequences[aR.qname]): 
+                            totalAlignedPairs += 1 #Record an aligned pair
+                            key = (refSeqName, aP.refPos)
+                            if key not in frequenciesOfAlignedBasesAtEachPosition:
+                                frequenciesOfAlignedBasesAtEachPosition[key] = dict(zip(bases, [0.0]*len(bases))) 
+                            readBase = aP.getReadBase() #readSeq[aP.readPos].upper() #Use the absolute read, ins
+                            if readBase in bases:
+                                frequenciesOfAlignedBasesAtEachPosition[key][readBase] += 1
+                        
+                        #Write the temporary files.
+                        fastaWrite(tempRefFile, refSeqName, refSeq) 
+                        fastaWrite(tempReadFile, aR.qname, readSeq)
+                        
+                        #Call to cactus_realign
+                        if hmmType == "trained":
+                            system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile, tempCigarFile))
+                        elif hmmType == "trained_flatEmissions":
+                            system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile2, tempCigarFile))
                         else:
-                            assert name.split("_")[-1] == "mutated"
-                    assert count == len(refSequences.keys())
-                
-                #The data we collect
-                expectationsOfBasesAtEachPosition = {}
-                frequenciesOfAlignedBasesAtEachPosition = {}
-                
-                totalSampledReads = 0
-                totalAlignedPairs = 0
-                totalReadLength = 0
-                totalReferenceLength = sum(map(len, refSequences.values()))
-                
-                #Get a randomised ordering for the reads
-                reads = [ aR for aR in samIterator(sam) ]
-                random.shuffle(reads)
-                
-                for aR in reads: #Iterate on the sam lines
-                    if totalReadLength/totalReferenceLength >= coverage: #Stop when coverage exceeds the quota
-                        break
-                    totalReadLength += len(readSequences[aR.qname])
-                    totalSampledReads += 1
-                    
-                    #Exonerate format Cigar string
-                    cigarString = getExonerateCigarFormatString(aR, sam)
-                    
-                    #Temporary files
-                    tempCigarFile = os.path.join(self.getLocalTempDir(), "rescoredCigar.cig")
-                    tempRefFile = os.path.join(self.getLocalTempDir(), "ref.fa")
-                    tempReadFile = os.path.join(self.getLocalTempDir(), "read.fa")
-                    tempPosteriorProbsFile = os.path.join(self.getLocalTempDir(), "probs.tsv")
-                    
-                    #Ref name
-                    refSeqName = sam.getrname(aR.rname)
-                    
-                    #Sequences
-                    refSeq = refSequences[sam.getrname(aR.rname)]
-                    readSeq = aR.query #This excludes bases that were soft-clipped
-                    
-                    #Walk through the aligned pairs to collate the bases of aligned positions
-                    for aP in AlignedPair.iterator(aR, refSeq, readSequences[aR.qname]): 
-                        totalAlignedPairs += 1 #Record an aligned pair
-                        key = (refSeqName, aP.refPos)
-                        if key not in frequenciesOfAlignedBasesAtEachPosition:
-                            frequenciesOfAlignedBasesAtEachPosition[key] = dict(zip(bases, [0.0]*len(bases))) 
-                        readBase = readSeq[aP.readPos].upper() #Use the absolute read, ins
-                        if readBase in bases:
-                            frequenciesOfAlignedBasesAtEachPosition[key][readBase] += 1
-                    
-                    #Write the temporary files.
-                    fastaWrite(tempRefFile, refSeqName, refSeq) 
-                    fastaWrite(tempReadFile, aR.qname, readSeq)
-                    
-                    #Call to cactus_realign
-                    system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
-                           (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile, tempCigarFile))
-                    
-                    #Now collate the reference position expectations
-                    for refPosition, readPosition, posteriorProb in map(lambda x : map(float, x.split()), open(tempPosteriorProbsFile, 'r')):
-                        key = (refSeqName, int(refPosition))
-                        if key not in expectationsOfBasesAtEachPosition:
-                            expectationsOfBasesAtEachPosition[key] = dict(zip(bases, [0.0]*len(bases))) 
-                        readBase = readSeq[int(readPosition)].upper()
-                        if readBase in bases:
-                            expectationsOfBasesAtEachPosition[key][readBase] += posteriorProb
-        
-                sam.close()
-                
-                totalHeldOut = len(snpSet)
-                totalNotHeldOut = totalReferenceLength - totalHeldOut
-                
-                class SnpCalls:
-                    def __init__(self):
-                        self.snpCalls = dict(zip(product("ACTGN", "ACTGN", "ACTGN"), [0.0]*(5**3)))
-                        self.falsePositives = []
-                        self.truePositives = []
-                        self.falseNegatives = []
-                    
-                    @staticmethod
-                    def bucket(calls):
-                        calls = calls[:]
-                        calls.sort()
-                        buckets = [0.0]*101
-                        for prob in calls: #Discretize
-                            buckets[int(round(prob*100))] += 1
-                        for i in xrange(len(buckets)-2, -1, -1): #Make cumulative
-                            buckets[i] += buckets[i+1]
-                        return buckets
-                    
-                    def getPrecisionByProbability(self):
-                        tPs = self.bucket(map(lambda x : x[0], self.truePositives)) 
-                        fPs = self.bucket(map(lambda x : x[0], self.truePositives))
-                        return map(lambda i : float(tPs[i]) / (tPs[i] + fPs[i]) if tPs[i] + fPs[i] != 0 else 0, xrange(len(tPs)))
-                    
-                    def getFalsePositiveRatesByProbability(self):
-                        return map(lambda i : i / (totalHeldOut + totalNotHeldOut), self.bucket(map(lambda x : x[0], self.falsePositives)))
-                    
-                    def getTruePositiveRatesByProbability(self):
-                        return map(lambda i : i/totalHeldOut if totalHeldOut != 0 else 0, self.bucket(map(lambda x : x[0], self.truePositives)))
-                    
-                    def getTruePositiveLocations(self):
-                        return map(lambda x : x[1], self.truePositives)
-                    
-                    def getFalsePositiveLocations(self):
-                        return map(lambda x : x[1], self.falsePositives)
-                    
-                    def getFalseNegativeLocations(self):
-                        return self.falseNegatives[:]
-        
-                #The different call sets
-                marginAlignMaxExpectedSnpCalls = SnpCalls()
-                marginAlignMaxLikelihoodSnpCalls = SnpCalls()
-                maxFrequencySnpCalls = SnpCalls()
-                maximumLikelihoodSnpCalls = SnpCalls()
-                
-                #Now calculate the calls
-                for refSeqName in refSequences:
-                    refSeq = refSequences[refSeqName]
-                    for refPosition in xrange(len(refSeq)):
-                        mutatedRefBase = refSeq[refPosition].upper()
-                        trueRefBase = (mutatedRefBase if not (refSeqName, refPosition) in snpSet else snpSet[(refSeqName, refPosition)]).upper()
-                        key = (refSeqName, refPosition)
+                            system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s > %s" % \
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, tempCigarFile))
                         
-                        #Get base calls
-                        for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
-                        ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
-                         (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
-                         (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
-                         (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
-                            chosenBase = 'N'
-                            if key in baseExpectations:
-                                #Get posterior likelihoods
-                                expectations = baseExpectations[key]
-                                totalExpectation = sum(expectations.values())
-                                if totalExpectation > 0.0: #expectationCallingThreshold:
-                                    posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
-                                                           evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
-                                    maxPosteriorProb = max(posteriorProbs.values())
-                                    chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
-                                    if trueRefBase != mutatedRefBase:
-                                        if trueRefBase == chosenBase:
-                                            snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
-                                    elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
-                                        snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
-                            if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
-                                snpCalls.falseNegatives.append(refPosition) #False negative
-                                    
-                            #Add to margin-align max expected snp calls - "N" is a no-call.
-                            snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
+                        #Now collate the reference position expectations
+                        for refPosition, readPosition, posteriorProb in map(lambda x : map(float, x.split()), open(tempPosteriorProbsFile, 'r')):
+                            key = (refSeqName, int(refPosition))
+                            if key not in expectationsOfBasesAtEachPosition:
+                                expectationsOfBasesAtEachPosition[key] = dict(zip(bases, [0.0]*len(bases))) 
+                            readBase = readSeq[int(readPosition)].upper()
+                            if readBase in bases:
+                                expectationsOfBasesAtEachPosition[key][readBase] += posteriorProb
+            
+                    sam.close()
+                    
+                    totalHeldOut = len(snpSet)
+                    totalNotHeldOut = totalReferenceLength - totalHeldOut
+                    
+                    class SnpCalls:
+                        def __init__(self):
+                            self.snpCalls = dict(zip(product("ACTGN", "ACTGN", "ACTGN"), [0.0]*(5**3)))
+                            self.falsePositives = []
+                            self.truePositives = []
+                            self.falseNegatives = []
                         
-                
-                for snpCalls, tagName in ((marginAlignMaxExpectedSnpCalls, "marginAlignMaxExpectedSnpCalls"), 
-                                          (marginAlignMaxLikelihoodSnpCalls, "marginAlignMaxLikelihoodSnpCalls"),
-                                          (maxFrequencySnpCalls, "maxFrequencySnpCalls"),
-                                          (maximumLikelihoodSnpCalls, "maximumLikelihoodSnpCalls")):
-                
-                    fraction = lambda selectionFn : sum([ snpCalls.snpCalls[(true, mut, call)] for true, mut, call in snpCalls.snpCalls if selectionFn(true, mut, call) ])
+                        @staticmethod
+                        def bucket(calls):
+                            calls = calls[:]
+                            calls.sort()
+                            buckets = [0.0]*101
+                            for prob in calls: #Discretize
+                                buckets[int(round(prob*100))] += 1
+                            for i in xrange(len(buckets)-2, -1, -1): #Make cumulative
+                                buckets[i] += buckets[i+1]
+                            return buckets
+                        
+                        def getPrecisionByProbability(self):
+                            tPs = self.bucket(map(lambda x : x[0], self.truePositives)) 
+                            fPs = self.bucket(map(lambda x : x[0], self.truePositives))
+                            return map(lambda i : float(tPs[i]) / (tPs[i] + fPs[i]) if tPs[i] + fPs[i] != 0 else 0, xrange(len(tPs)))
+                        
+                        def getFalsePositiveRatesByProbability(self):
+                            return map(lambda i : i / (totalHeldOut + totalNotHeldOut), self.bucket(map(lambda x : x[0], self.falsePositives)))
+                        
+                        def getTruePositiveRatesByProbability(self):
+                            return map(lambda i : i/totalHeldOut if totalHeldOut != 0 else 0, self.bucket(map(lambda x : x[0], self.truePositives)))
+                        
+                        def getTruePositiveLocations(self):
+                            return map(lambda x : x[1], self.truePositives)
+                        
+                        def getFalsePositiveLocations(self):
+                            return map(lambda x : x[1], self.falsePositives)
+                        
+                        def getFalseNegativeLocations(self):
+                            return self.falseNegatives[:]
+            
+                    #The different call sets
+                    marginAlignMaxExpectedSnpCalls = SnpCalls()
+                    marginAlignMaxLikelihoodSnpCalls = SnpCalls()
+                    maxFrequencySnpCalls = SnpCalls()
+                    maximumLikelihoodSnpCalls = SnpCalls()
                     
-                    #Total hold outs
-                    totalHeldOut = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut)
-                    #Total non-held out 
-                    totalNonHeldOut = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut)
-                    #How many of held out cases do we predict correctly?
-                    totalHeldOutCallsTrue = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and true == call)
-                    #How many of held out cases do we predict wrongly and choose the reference?
-                    totalHeldOutCallsFalseAndReference = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and mut == call)
-                    #How many of held out cases do we predict wrongly and not choose the reference 
-                    totalHeldOutCallsFalseAndNonReference = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and call != 'N' and true != mut and mut != call and true != call)
-                    #How many of held out cases do we not call?
-                    totalHeldOutNotCalled = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and call == 'N')
-                    #How many of non-held out cases do we predict correctly?
-                    totalNonHeldOutCallsTrue = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut and true == call)
-                    #How many of non-held out cases do we predict wrongly?
-                    totalNonHeldOutCallsFalse = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and call != 'N' and true == mut and true != call)
-                    #How many/proportion of non-held out cases do we not call?
-                    totalNonHeldOutNotCalled = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut and call == 'N')
+                    #Now calculate the calls
+                    for refSeqName in refSequences:
+                        refSeq = refSequences[refSeqName]
+                        for refPosition in xrange(len(refSeq)):
+                            mutatedRefBase = refSeq[refPosition].upper()
+                            trueRefBase = (mutatedRefBase if not (refSeqName, refPosition) in snpSet else snpSet[(refSeqName, refPosition)]).upper()
+                            key = (refSeqName, refPosition)
+                            
+                            #Get base calls
+                            for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
+                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
+                                chosenBase = 'N'
+                                if key in baseExpectations:
+                                    #Get posterior likelihoods
+                                    expectations = baseExpectations[key]
+                                    totalExpectation = sum(expectations.values())
+                                    if totalExpectation > 0.0: #expectationCallingThreshold:
+                                        posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
+                                                               evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
+                                        maxPosteriorProb = max(posteriorProbs.values())
+                                        chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
+                                        if trueRefBase != mutatedRefBase:
+                                            if trueRefBase == chosenBase:
+                                                snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
+                                        elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
+                                            snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
+                                    if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
+                                        snpCalls.falseNegatives.append(refPosition) #(refPosition, trueRefBase, mutatedRefBaseexpectations[:])) #False negative
+                                        
+                                #Add to margin-align max expected snp calls - "N" is a no-call.
+                                snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
+                            
                     
-                    #Write out the substitution info
-                    node2 = ET.SubElement(node, tagName, {  
-                            "coverage":str(coverage),
-                            "actualCoverage":str(float(totalAlignedPairs)/totalReferenceLength),
-                            "totalAlignedPairs":str(totalAlignedPairs),
-                            "totalReferenceLength":str(totalReferenceLength),
-                            "replicate":str(replicate),
-                            "totalReads":str(len(reads)),
-                            "avgSampledReadLength":str(float(totalReadLength)/totalSampledReads),
-                            "totalSampledReads":str(totalSampledReads),
-                            "totalHeldOut":str(totalHeldOut),
-                            "totalNonHeldOut":str(totalNonHeldOut),
-                            "totalHeldOutCallsTrue":str(totalHeldOutCallsTrue),
-                            "totalFalsePositives":str(len(snpCalls.falsePositives)),
-                            "totalHeldOutCallsFalseAndReference":str(totalHeldOutCallsFalseAndReference),
-                            "totalHeldOutCallsFalseAndNonReference":str(totalHeldOutCallsFalseAndNonReference),
-                            "totalHeldOutNotCalled":str(totalHeldOutNotCalled),
-                            "totalNonHeldOutCallsTrue":str(totalNonHeldOutCallsTrue),
-                            "totalNonHeldOutCallsFalse":str(totalNonHeldOutCallsFalse),
-                            "totalNonHeldOutNotCalled":str(totalNonHeldOutNotCalled),
-                            "falsePositiveRatesByProbability":" ".join(map(str, snpCalls.getFalsePositiveRatesByProbability())),
-                            "truePositiveRatesByProbability":" ".join(map(str, snpCalls.getTruePositiveRatesByProbability())),
-                            "precisionByProbability":" ".join(map(str, snpCalls.getPrecisionByProbability())),
-                            "falsePositiveLocations":" ".join(map(str, snpCalls.getFalsePositiveLocations())),
-                            "falseNegativeLocations":" ".join(map(str, snpCalls.getFalseNegativeLocations())),
-                            "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
-                    for snpCall in snpCalls.snpCalls:
-                        ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
+                    for snpCalls, tagName in ((marginAlignMaxExpectedSnpCalls, "marginAlignMaxExpectedSnpCalls"), 
+                                              (marginAlignMaxLikelihoodSnpCalls, "marginAlignMaxLikelihoodSnpCalls"),
+                                              (maxFrequencySnpCalls, "maxFrequencySnpCalls"),
+                                              (maximumLikelihoodSnpCalls, "maximumLikelihoodSnpCalls")):
+                        fraction = lambda selectionFn : sum([ snpCalls.snpCalls[(true, mut, call)] for true, mut, call in snpCalls.snpCalls if selectionFn(true, mut, call) ])
+                        
+                        #Total hold outs
+                        totalHeldOut = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut)
+                        #Total non-held out 
+                        totalNonHeldOut = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut)
+                        #How many of held out cases do we predict correctly?
+                        totalHeldOutCallsTrue = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and true == call)
+                        #How many of held out cases do we predict wrongly and choose the reference?
+                        totalHeldOutCallsFalseAndReference = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and mut == call)
+                        #How many of held out cases do we predict wrongly and not choose the reference 
+                        totalHeldOutCallsFalseAndNonReference = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and call != 'N' and true != mut and mut != call and true != call)
+                        #How many of held out cases do we not call?
+                        totalHeldOutNotCalled = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and call == 'N')
+                        #How many of non-held out cases do we predict correctly?
+                        totalNonHeldOutCallsTrue = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut and true == call)
+                        #How many of non-held out cases do we predict wrongly?
+                        totalNonHeldOutCallsFalse = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and call != 'N' and true == mut and true != call)
+                        #How many/proportion of non-held out cases do we not call?
+                        totalNonHeldOutNotCalled = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut and call == 'N')
+                        
+                        #Write out the substitution info
+                        node2 = ET.SubElement(node, tagName + "_" + hmmType, {  
+                                "coverage":str(coverage),
+                                "actualCoverage":str(float(totalAlignedPairs)/totalReferenceLength),
+                                "totalAlignedPairs":str(totalAlignedPairs),
+                                "totalReferenceLength":str(totalReferenceLength),
+                                "replicate":str(replicate),
+                                "totalReads":str(len(reads)),
+                                "avgSampledReadLength":str(float(totalReadLength)/totalSampledReads),
+                                "totalSampledReads":str(totalSampledReads),
+                                "totalHeldOut":str(totalHeldOut),
+                                "totalNonHeldOut":str(totalNonHeldOut),
+                                "totalHeldOutCallsTrue":str(totalHeldOutCallsTrue),
+                                "totalFalsePositives":str(len(snpCalls.falsePositives)),
+                                "totalHeldOutCallsFalseAndReference":str(totalHeldOutCallsFalseAndReference),
+                                "totalHeldOutCallsFalseAndNonReference":str(totalHeldOutCallsFalseAndNonReference),
+                                "totalHeldOutNotCalled":str(totalHeldOutNotCalled),
+                                "totalNonHeldOutCallsTrue":str(totalNonHeldOutCallsTrue),
+                                "totalNonHeldOutCallsFalse":str(totalNonHeldOutCallsFalse),
+                                "totalNonHeldOutNotCalled":str(totalNonHeldOutNotCalled),
+                                "falsePositiveRatesByProbability":" ".join(map(str, snpCalls.getFalsePositiveRatesByProbability())),
+                                "truePositiveRatesByProbability":" ".join(map(str, snpCalls.getTruePositiveRatesByProbability())),
+                                "precisionByProbability":" ".join(map(str, snpCalls.getPrecisionByProbability())),
+                                "falsePositiveLocations":" ".join(map(str, snpCalls.getFalsePositiveLocations())),
+                                "falseNegativeLocations":" ".join(map(str, snpCalls.getFalseNegativeLocations())),
+                                "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
+                        for snpCall in snpCalls.snpCalls:
+                            ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
                 
         open(os.path.join(self.outputDir, "marginaliseConsensus.xml"), "w").write(prettyXml(node))
         
