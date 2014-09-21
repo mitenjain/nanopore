@@ -481,8 +481,8 @@ def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, refer
         #Because these are global alignments using with reverse complement coordinates reversed the following should all be true
         assert aR.pos == 0
         assert aR.qstart == 0
-        assert aR.qend == len(readSeq)
-        assert aR.aend == len(refSeq)
+        assert aR.qend == len(aR.query)
+        assert aR.aend == len(refSequences[sam.getrname(aR.rname)])
         
         #Add a child target to do the alignment
         target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], hmmFile, gapGamma, matchGamma))
