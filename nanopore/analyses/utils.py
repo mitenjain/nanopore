@@ -3,6 +3,7 @@ from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarRead
 import os
 import sys
 from cactus.bar import cactus_expectationMaximisation
+import random
 
 def pathToBaseNanoporeDir():
     import nanopore
