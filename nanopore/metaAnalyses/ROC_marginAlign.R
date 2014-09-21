@@ -20,7 +20,7 @@ if (algorithms %% 2 == 0) {
 
 for (page in seq(algorithms * algorithms, dim(data)[1], algorithms * algorithms)) {
     for (pos in seq(algorithms, page, algorithms)) {
-        count <- 0
+        count <- 1
         tprs <- data[seq(pos-10, pos+1, 2),]
         fprs <- data[seq(pos-11, pos, 2),]
         coverages <- tprs[,4]
