@@ -32,8 +32,11 @@ for (page in seq(algorithms * algorithms, dim(data)[1], algorithms * algorithms)
         legend("topright", legend=coverages, col=c(1:length(coverages)), cex=0.35, pch="-", title="Coverage")
         count <- count + 1
     }
-    for (i in seq(count, plots)) {
-        plot.new()
+    if (count < plots) {
+        while (count < plots) {
+            plot.new()
+            count <- count + 1
+        }
     }
 }
 dev.off()
