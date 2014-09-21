@@ -10,16 +10,12 @@ rows <- as.numeric(args[4])
 #set it to variant calling algorithms x proportion held out plots
 par(mfrow=c(cols, rows))
 
-for (i in 1:cols*rows) {
-    if (i %% 2) {
-        tpr <- data[i,]
-    }
-    else if (i %% 3) {
-        fpr <- data[i,]
-    }
-    else {
-        xyplot(tpr~fpr, xlab="False positive rate", ylab="True positive rate", main=rowname(data[i,]))
-    }
+fprs <- data[seq(1, length(data), 3)]
+tprs <- data[seq(2, length(data), 3)]
+
+for (i in 1:length(fprs)) {
+    xyplot(tprs[i,]~fpr[i,], xlab="False positive rate", ylab="True positive rate", main=rowname(fprs[i,]))
+
 }
 
 dev.off()
