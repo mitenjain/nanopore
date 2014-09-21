@@ -280,7 +280,7 @@ if (dim(data)[2] > 0) {
     pdf(args[2])
     x <- vennCounts(data[,2:dim(data)[2]])
     vennDiagram(x)
-    x[,5] <- round(100 * x[,5] / sum(x[,5]), 2)
+    x[,dim(x)[2]] <- round(100 * x[,dim(x)[2]] / sum(x[,dim(x)[2]]), 2)
     vennDiagram(x)
     dev.off()
 }
