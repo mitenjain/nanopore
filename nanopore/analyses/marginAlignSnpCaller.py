@@ -127,6 +127,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         assert aR.qstart == 0
                         assert aR.qend == len(readSeq)
                         assert aR.aend == len(refSeq)
+
                         cigarString = getExonerateCigarFormatString(aR, sam)
                         
                         #Call to cactus_realign

@@ -418,17 +418,19 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     cigars = os.path.join(target.getGlobalTempDir(), "temp.cigar")
     fH = open(cigars, 'w')
     sam = pysam.Samfile(samFile, "r" )
-    for aR in sam: #Iterate on the sam lines realigning them in parallel
+    for aR in sam: #Iterate on the sam lines realigning them in parallel            
+        #Because these are global alignments with reverse complement coordinates reversed the following should all be true
         assert aR.pos == 0
         assert aR.qstart == 0
-        assert aR.qend == len(readSeq)
-        assert aR.aend == len(refSeq)
+        assert aR.qend == len(readSequences[aR.qname]) #aR.query)
+        assert aR.aend == len(refSequences[sam.getrname(aR.rname)])
+        assert len(aR.query) == len(readSequences[aR.qname])
         if aR.is_reverse: #Deal with reverse complements
-            assert aR.query == reverseComplement(readSequences[aR.qname])
+            assert aR.query.upper() == reverseComplement(readSequences[aR.qname]).upper()
             aR.qname += "_reverse"
-            assert aR.qname in readSequences
         else:
-            assert aR.query == readSequences[aR.qname]
+            assert aR.query.upper() == readSequences[aR.qname].upper()
+            
         fH.write(getExonerateCigarFormatString(aR, sam) + "\n")
         #Exonerate format Cigar string, using global coordinates
         #fH.write(getGlobalAlignmentExonerateCigarFormatString(aR, sam, refSequences[sam.getrname(aR.rname)], readSequences[aR.qname]) + "\n")
@@ -470,6 +472,7 @@ def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile,
 def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, referenceFastaFile, hmmFile, gapGamma, matchGamma):
     #Load reference sequences
     refSequences = getFastaDictionary(referenceFastaFile) #Hash of names to sequences
+    readSequences = getFastqDictionary(readFastqFile) #Hash of names to sequences
     
     #Read through the SAM file
     sam = pysam.Samfile(samFile, "r" )
@@ -477,12 +480,6 @@ def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, refer
     for aR, index in zip(samIterator(sam), xrange(sys.maxint)): #Iterate on the sam lines realigning them in parallel
         #Temporary cigar file
         tempCigarFiles.append(os.path.join(target.getGlobalTempDir(), "rescoredCigar_%i.cig" % index))
-        
-        #Because these are global alignments using with reverse complement coordinates reversed the following should all be true
-        assert aR.pos == 0
-        assert aR.qstart == 0
-        assert aR.qend == len(aR.query)
-        assert aR.aend == len(refSequences[sam.getrname(aR.rname)])
         
         #Add a child target to do the alignment
         target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], hmmFile, gapGamma, matchGamma))
