@@ -18,7 +18,7 @@ for (i in 1:1024) {
 #10,000 trials
 num_trials <- 10000
 #we want each trial to be around 1/25th of the number of kmers seen in the reads
-trial_size <- round(length(counts)/25)
+trial_size <- max(round(length(counts)/25), 10000)
 
 
 #samples from the read population
