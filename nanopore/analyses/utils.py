@@ -111,6 +111,46 @@ def getExonerateCigarFormatString(alignedRead, sam):
     assert sum([ op.length for op in pA.operationList if op.type == PairwiseAlignment.PAIRWISE_MATCH ]) == len([ readPos for readPos, refPos in alignedRead.aligned_pairs if readPos != None and refPos != None ])
     return completeCigarString
 
+"""
+def getGlobalAlignmentExonerateCigarFormatString(alignedRead, sam, refSeq, readSeq):
+    #Gets a complete exonerate like cigar-string describing the sam line, but is global alignment (not in soft-clipped coordinates).
+    ops = []
+    matchLength = 0
+    for aP in AlignedPair.iterator(alignedRead, refSeq, readSeq):
+        deleteLength = aP.getPrecedingReadDeletionLength(globalAlignment=True)
+        insertLength = aP.getPrecedingReadInsertionLength(globalAlignment=True)
+        if (deleteLength > 0 or insertLength > 0) and matchLength > 0:
+            ops.append(("M", matchLength))
+            matchLength = 1
+            if deleteLength > 0:
+                ops.append(("D", deleteLength))
+            if insertLength > 0:
+                ops.append(("I", insertLength))
+        else:
+            matchLength += 1
+    if matchLength > 0:
+        ops.append(("M", matchLength))
+    cumulativeRefLength = sum(map(lambda x : 0 if x[0] == 'I' else x[1], ops))
+    cumulativeReadLength = sum(map(lambda x : 0 if x[0] == 'D' else x[1], ops))
+    assert cumulativeRefLength <= len(refSeq)
+    assert cumulativeReadLength <= len(readSeq)
+    if cumulativeRefLength < len(refSeq):
+        ops.append("D", len(refSeq) - cumulativeRefLength)
+    if cumulativeReadLength < len(readSeq):
+        ops.append("I", len(readSeq) - cumulativeReadLength)
+    assert sum(map(lambda x : 0 if x[0] == 'I' else x[1], ops)) == len(refSeq)
+    assert sum(map(lambda x : 0 if x[0] == 'D' else x[1], ops)) == len(readSeq)
+    
+    readCoordinates = ("%i 0 -" if alignedRead.is_reverse else "0 %i +") % len(readSeq)
+    completeCigarString = "cigar: %s %s %s %i %i + 1 %s" % (alignedRead.qname, readCoordinates,
+    sam.getrname(alignedRead.rname), 0, len(refSeq), " ".join(map(lambda x : "%s %i" % (x[0], x[1]), ops)))
+    
+    pA = cigarReadFromString(completeCigarString) #This checks it's an okay formatted cigar
+    assert sum([ op.length for op in pA.operationList if op.type == PairwiseAlignment.PAIRWISE_MATCH ]) == len([ readPos for readPos, refPos in alignedRead.aligned_pairs if readPos != None and refPos != None ])
+    
+    return completeCigarString
+"""
+
 def samToBamFile(samInputFile, bamOutputFile):
     """Converts a sam file to a bam file (sorted)
     """
@@ -363,10 +403,15 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     """Does expectation maximisation on sam file to learn the hmm for the sam file.
     """
     #Convert the read file to fasta
+    refSequences = getFastaDictionary(referenceFastaFile) #Hash of names to sequences
+    readSequences = getFastqDictionary(readFastqFile) #Hash of names to sequences
+    
     reads = os.path.join(target.getGlobalTempDir(), "temp.fa")
     fH = open(reads, 'w')
-    for name, seq, quals in fastqRead(readFastqFile):
+    for name in readSequences.keys():
+        seq = readSequences[name]
         fastaWrite(fH, name, seq)
+        fastaWrite(fH, name + "_reverse", reverseComplement(seq))
     fH.close()
     
     #Get cigars file
@@ -374,8 +419,19 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     fH = open(cigars, 'w')
     sam = pysam.Samfile(samFile, "r" )
     for aR in sam: #Iterate on the sam lines realigning them in parallel
-        #Exonerate format Cigar string
+        assert aR.pos == 0
+        assert aR.qstart == 0
+        assert aR.qend == len(readSeq)
+        assert aR.aend == len(refSeq)
+        if aR.is_reverse: #Deal with reverse complements
+            assert aR.query == reverseComplement(readSequences[aR.qname])
+            aR.qname += "_reverse"
+            assert aR.qname in readSequences
+        else:
+            assert aR.query == readSequences[aR.qname]
         fH.write(getExonerateCigarFormatString(aR, sam) + "\n")
+        #Exonerate format Cigar string, using global coordinates
+        #fH.write(getGlobalAlignmentExonerateCigarFormatString(aR, sam, refSequences[sam.getrname(aR.rname)], readSequences[aR.qname]) + "\n")
     fH.close()
     
     #Run cactus_expectationMaximisation
@@ -419,11 +475,14 @@ def realignSamFile2TargetFn(target, samFile, outputSamFile, readFastqFile, refer
     sam = pysam.Samfile(samFile, "r" )
     tempCigarFiles = []
     for aR, index in zip(samIterator(sam), xrange(sys.maxint)): #Iterate on the sam lines realigning them in parallel
-        #Exonerate format Cigar string
-        cigarString = getExonerateCigarFormatString(aR, sam)
-        
         #Temporary cigar file
         tempCigarFiles.append(os.path.join(target.getGlobalTempDir(), "rescoredCigar_%i.cig" % index))
+        
+        #Because these are global alignments using with reverse complement coordinates reversed the following should all be true
+        assert aR.pos == 0
+        assert aR.qstart == 0
+        assert aR.qend == len(readSeq)
+        assert aR.aend == len(refSeq)
         
         #Add a child target to do the alignment
         target.addChildTargetFn(realignCigarTargetFn, args=(getExonerateCigarFormatString(aR, sam), sam.getrname(aR.rname), refSequences[sam.getrname(aR.rname)], aR.qname, aR.query, tempCigarFiles[-1], hmmFile, gapGamma, matchGamma))

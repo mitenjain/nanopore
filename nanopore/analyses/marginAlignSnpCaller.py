@@ -95,9 +95,6 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         totalReadLength += len(readSequences[aR.qname])
                         totalSampledReads += 1
                         
-                        #Exonerate format Cigar string
-                        cigarString = getExonerateCigarFormatString(aR, sam)
-                        
                         #Temporary files
                         tempCigarFile = os.path.join(self.getLocalTempDir(), "rescoredCigar.cig")
                         tempRefFile = os.path.join(self.getLocalTempDir(), "ref.fa")
@@ -109,7 +106,6 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         
                         #Sequences
                         refSeq = refSequences[sam.getrname(aR.rname)]
-                        readSeq = aR.query #This excludes bases that were soft-clipped
                         
                         #Walk through the aligned pairs to collate the bases of aligned positions
                         for aP in AlignedPair.iterator(aR, refSeq, readSequences[aR.qname]): 
@@ -122,8 +118,16 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                 frequenciesOfAlignedBasesAtEachPosition[key][readBase] += 1
                         
                         #Write the temporary files.
+                        readSeq = aR.query #This excludes bases that were soft-clipped and is always of positive strand coordinates
                         fastaWrite(tempRefFile, refSeqName, refSeq) 
                         fastaWrite(tempReadFile, aR.qname, readSeq)
+                        
+                        #Exonerate format Cigar string, which is in readSeq coordinates (positive strand).
+                        assert aR.pos == 0
+                        assert aR.qstart == 0
+                        assert aR.qend == len(readSeq)
+                        assert aR.aend == len(refSeq)
+                        cigarString = getExonerateCigarFormatString(aR, sam)
                         
                         #Call to cactus_realign
                         if hmmType == "trained":
