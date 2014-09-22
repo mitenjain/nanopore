@@ -9,15 +9,14 @@ from nanopore.analyses.mutate_reference import mutateReferenceSequences
 from nanopore.analyses.utils import makeFastaSequenceNamesUnique, makeFastqSequenceNamesUnique
 
 #The following specify which mappers and analyses get run
-
 from nanopore.mappers.lastz import Lastz, LastzChain, LastzRealign, LastzRealignEm, LastzRealignTrainedModel
 from nanopore.mappers.lastzParams import LastzParams, LastzParamsChain, LastzParamsRealign, LastzParamsRealignEm, LastzParamsRealignTrainedModel
 from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm, BwaRealignTrainedModel
 from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign, BwaParamsRealignEm, BwaParamsRealignTrainedModel
 from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm, LastRealignTrainedModel
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm, BlasrRealignTrainedModel
-from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel, BlasrParamsRealignTrainedModelAMAP, BlasrParamsRealignTrainedModelMatchGamma5
-from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel, LastParamsRealignTrainedModelAMAP, LastParamsRealignTrainedModelMatchGamma5
+from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel
+from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel
 from nanopore.mappers.combinedMapper import CombinedMapper, CombinedMapperChain, CombinedMapperRealign, CombinedMapperRealignEm, CombinedMapperRealignTrainedModel
 
 from nanopore.analyses.substitutions import Substitutions
@@ -42,52 +41,47 @@ from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.customTrackAssemblyHub import CustomTrackAssemblyHub
 from nanopore.metaAnalyses.marginAlignMetaAnalysis import MarginAlignMetaAnalysis  
 
-mappers = [ Bwa,
+mappers = [ #Bwa,
            BwaChain,
-           BwaParams,
+           #BwaParams,
            BwaParamsChain,
            BwaParamsRealign,
            BwaParamsRealignEm,
            BwaParamsRealignTrainedModel,
-           Blasr,
+           #Blasr,
            BlasrChain,
-           BlasrParams,
+           #BlasrParams,
            BlasrParamsChain,
            BlasrParamsRealign,
            BlasrRealignEm,
            BlasrParamsRealignTrainedModel,
-           BlasrParamsRealignTrainedModelAMAP, 
-           BlasrParamsRealignTrainedModelMatchGamma5,
-           Last,
+           #Last,
            LastChain,
-           LastParams,
+           #LastParams,
            LastParamsChain,
            LastParamsRealign,
            LastParamsRealignEm,
            LastParamsRealignTrainedModel,
-           LastParamsRealignTrainedModelAMAP, 
-           LastParamsRealignTrainedModelMatchGamma5,
-           Lastz,
+           #Lastz,
            LastzChain,
-           LastzParams,
+           #LastzParams,
            LastzParamsChain,
            LastzParamsRealign,
            LastzParamsRealignEm,
            LastzParamsRealignTrainedModel,
-           CombinedMapper,
+           #CombinedMapper,
            CombinedMapperChain, 
            CombinedMapperRealign,
            CombinedMapperRealignEm,
            CombinedMapperRealignTrainedModel ]
 
-analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, SymmetricIndelKmerAnalysis, AsymmetricIndelKmerAnalysis, ChannelMappability, MarginAlignSnpCaller ]#, FastQC, QualiMap, Consensus]
-
+analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, SymmetricIndelKmerAnalysis, AsymmetricIndelKmerAnalysis, ChannelMappability] #, FastQC, QualiMap, Consensus]
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
-
-#mappers = [ LastParamsChain , LastParamsRealignTrainedModel, LastParamsRealignTrainedModelAMAP, LastParamsRealignTrainedModelMatchGamma5, BlasrParamsChain , BlasrParamsRealignTrainedModel, BlasrParamsRealignTrainedModelAMAP, BlasrParamsRealignTrainedModelMatchGamma5,  ]
-#mappers = [ LastParamsChain ]
 #analyses = [ MarginAlignSnpCaller ]
 #metaAnalyses = [ MarginAlignMetaAnalysis  ] 
+
+#mappers = [ LastParamsChain , LastParamsRealignTrainedModel, LastParamsRealignTrainedModelAMAP, LastParamsRealignTrainedModelMatchGamma5, BlasrParamsChain , BlasrParamsRealignTrainedModel, BlasrParamsRealignTrainedModelAMAP, BlasrParamsRealignTrainedModelMatchGamma5,  ]
+#mappers = [ LastParamsRealignEm, LastParamsRealignTrainedModelAMAP  ]
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
