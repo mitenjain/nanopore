@@ -31,8 +31,20 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
             outf.write("kmer\tmappableCount\tmappableFraction\tunmappableCount\tunmappableFraction\tlogFoldChange\n")
             for kmer in itertools.product("ATGC",repeat=5):
                 kmer = "".join(kmer)
-                mappedFraction, unmappedFraction = 1.0 * mappedKmers[kmer] / mappedSize, 1.0 * unmappedKmers[kmer] / unmappedSize
-                foldChange = -log(mappedFraction / unmappedFraction)
+                if mappedSize > 0:
+                    mappedFraction = 1.0 * mappedKmers[kmer] / mappedSize
+                else:
+                    mappedFraction = 0
+                if unmappedSize > 0:
+                    unmappedFraction = 1.0 * unmappedKmers[kmer] / unmappedSize
+                else:
+                    unmappedFraction = 0
+                if unmappedFraction == 0:
+                    foldChange = "-Inf"
+                elif mappedFraction == 0:
+                    foldChange = "Inf"
+                else:
+                    foldChange = -log(mappedFraction / unmappedFraction)
                 outf.write("\t".join(map(str,[kmer, mappedKmers[kmer], mappedFraction, unmappedKmers[kmer], unmappedFraction, foldChange]))+"\n")
             outf.close()
 

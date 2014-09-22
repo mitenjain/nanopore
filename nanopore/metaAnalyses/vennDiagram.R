@@ -2,7 +2,7 @@
 #
 args <- commandArgs(trailingOnly = T)
 
-data <- read.table(args[1], header=T, row.names=1)
+data <- read.table(args[1], header = T)
 
 library(methods)
 
@@ -278,7 +278,7 @@ function (object, include = "both", names, mar = rep(1, 4), cex = 1.5,
 
 if (dim(data)[2] > 0) {
     pdf(args[2])
-    x <- vennCounts(data[,2:dim(data)[2]])
+    x <- vennCounts(data[,3:dim(data)[2]])
     vennDiagram(x)
     x[,dim(x)[2]] <- round(100 * x[,dim(x)[2]] / sum(x[,dim(x)[2]]), 2)
     vennDiagram(x)
