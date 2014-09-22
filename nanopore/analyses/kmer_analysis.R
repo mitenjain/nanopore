@@ -10,7 +10,7 @@ library(stats)
 #turn the count of reads into a vector representing the number of times each kmer is seen
 #i.e. there will be 100 1's if AAAAA was seen 100 times in the read set
 #this lets us sample without replacement
-counts <- vector()
+counts <- double()
 for (i in 1:1024) {
     counts <- c(counts, rep(i, times=data[i,]$readCount))
 }
