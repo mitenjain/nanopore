@@ -1,6 +1,6 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from jobTree.src.bioio import fastqRead, fastaRead, system, reverseComplement
-from nanopore.analyses.utils import samIterator
+from nanopore.analyses.utils import samIterator, getFastaDictionary
 import pysam, os, itertools
 from collections import Counter
 from math import log
@@ -11,12 +11,13 @@ class SymmetricIndelKmerAnalysis(AbstractAnalysis):
         sam = pysam.Samfile(self.samFile)
         refKmers, readKmers = Counter(), Counter()
 
+        refDict = getFastaDictionary(self.referenceFastaFile)
+
         for aR in samIterator(sam):
-            refSeq = None
-            for name, seq in fastaRead(self.referenceFastaFile):
-                if name == sam.getrname(aR.rname):
-                    refSeq = seq
-            if refSeq is None:
+            name = sam.getrname(aR.rname)
+            if name is not None:
+                refSeq = refDict[name]
+            else:
                 continue
 
             readSeq = aR.query
