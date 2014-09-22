@@ -26,13 +26,3 @@ class BlasrParamsRealignTrainedModel(BlasrParams):
     def run(self):
         BlasrParams.run(self)
         self.realignSamFile(useTrainedModel=True)
-
-class BlasrParamsRealignTrainedModelAMAP(BlasrParams):
-    def run(self):
-        BlasrParams.run(self)
-        self.realignSamFile(useTrainedModel=True, gapGamma=0.5, matchGamma=0.0)
-
-class BlasrParamsRealignTrainedModelMatchGamma5(BlasrParams):
-    def run(self):
-        BlasrParams.run(self)
-        self.realignSamFile(useTrainedModel=True, gapGamma=0.0, matchGamma=0.5)
