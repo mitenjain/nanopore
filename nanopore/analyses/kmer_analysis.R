@@ -34,6 +34,7 @@ tableize <- function(x) {
     tmp <- matrix(table(factor(x, levels=1:1024)))[,1]
     tmp/sum(tmp)
 }
+#count the number of times a trial came very close to the expected value
 count_success <- function(x, real) {
     std <- sd(x)
     #std/10 just to remove float rounding issues and stuff
@@ -43,24 +44,24 @@ count_success <- function(x, real) {
 trials <- trial_fn(counts)
 #count the number of times each kmer was found in the trial dataset
 trial_table <- sapply(trials, tableize)
-
+#initialize empty vector to store pvalues in
 p_values <- rep(0, 1024)
-
+#loop over each kmer, count the number of successful trials, then run a binomial test on that
 for (kmer in 1:1024) {
     s <- count_success(trial_table[kmer,], real=data[kmer,]$refFraction)
     p_values[kmer] <- binom.test(x=s, n=num_trials, p=data[kmer,]$refFraction)$p.value
 }
-
+#do a bonferroni correction on the pvalues
 adjusted_p_value <- p.adjust(p_values, method="bonferroni")
-
+#combine original data frame with two new vectors
 finished <- cbind(data, p_values, adjusted_p_value)
-
+#write full dataset
 write.table(finished, outf)
-
+#find significant hits
 significant <- finished[finished$adjusted_p_value <= 0.05,]
-
+#sort the significant hits by fold change
 ordered <- significant[order(significant$logFoldChange),]
-
+#report the top 20 and bottom 20 significant hits
 top <- head(ordered, n=20L)
 bot <- tail(ordered, n=20L)
 
