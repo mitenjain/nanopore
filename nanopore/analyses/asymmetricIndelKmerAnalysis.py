@@ -11,16 +11,18 @@ class AsymmetricIndelKmerAnalysis(AbstractAnalysis):
     def countIndelKmers(self):
         sam = pysam.Samfile(self.samFile)
         refKmers, readKmers = Counter(), Counter()
-
+        
         for aR in samIterator(sam):
+            refSeq = None
             for name, seq in fastaRead(self.referenceFastaFile):
                 if name == sam.getrname(aR.rname):
                     refSeq = seq
+            if refSeq is None:
+                continue
 
             readSeq = aR.query
             #temp lists of kmers
             refKmer, readKmer = list(), list()
-            
             for i in xrange(len(aR.aligned_pairs)):
                 readPos, refPos = aR.aligned_pairs[i]
                 refKmer.append(refPos); readKmer.append(readPos)

@@ -12,9 +12,12 @@ class SymmetricIndelKmerAnalysis(AbstractAnalysis):
         refKmers, readKmers = Counter(), Counter()
 
         for aR in samIterator(sam):
+            refSeq = None
             for name, seq in fastaRead(self.referenceFastaFile):
                 if name == sam.getrname(aR.rname):
                     refSeq = seq
+            if refSeq is None:
+                continue
 
             readSeq = aR.query
 
