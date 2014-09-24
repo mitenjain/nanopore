@@ -54,14 +54,14 @@ class CoverageSummary(AbstractMetaAnalysis):
         for entry in self.db:
             entry_map[entry.referenceFastaFile].append(entry)
         for referenceFastaFile, entries in entry_map.iteritems():
-            self.write_file_analyze(entries, referenceFastaFile)
+            self.write_file_analyze(entries, referenceFastaFile, multiple_read_types=True)
 
-    def write_file_analyze(self, entries, name):
-        path = os.path.join(self.outputDir, name + ".tsv")
+    def write_file_analyze(self, entries, name, multiple_read_types=False):
+        path = os.path.join(self.outputDir, name + ".csv")
         outf = open(path, "w")
         outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMismatchesPerReadBase", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
         entries = sorted(entries, key = lambda x: x.mapper)
-        entries = self.resolve_duplicate_rownames(entries)
+        entries = self.resolve_duplicate_rownames(entries, multiple_read_types)
         for entry in entries:
             outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
                                entry.XML.attrib["avgreadCoverage"], entry.XML.attrib["avgreferenceCoverage"],
@@ -72,7 +72,7 @@ class CoverageSummary(AbstractMetaAnalysis):
                                entry.XML.attrib["numberOfUnmappedReads"],
                                entry.XML.attrib["numberOfReads"]]) + "\n")
         outf.close()
-        path2 = os.path.join(self.outputDir, name + "_distribution.tsv")
+        path2 = os.path.join(self.outputDir, name + "_distribution.csv")
         outf = open(path2, "w")
         for entry in entries:
             outf.write(",".join([entry.mapper] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
@@ -81,14 +81,24 @@ class CoverageSummary(AbstractMetaAnalysis):
         system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, name, os.path.join(self.outputDir, name + "_distribution.pdf")))
 
 
-    def resolve_duplicate_rownames(self, entries):
-        mappers = Counter()
+    def resolve_duplicate_rownames(self, entries, multiple_read_types=False):
+        last_mapper = None; count = 1
         for entry in entries:
-            if entry.mapper not in mappers:
-                mappers[entry.mapper] = 0
+            if multiple_read_types is True and entry.mapper + "_" + entry.readType == last_mapper:
+                entry.mapper = entry.mapper + "_" + entry.readType + "." + str(count)
+                last_mapper = entry.mapper + "_" + entry.readType
+                count += 1
+            elif multiple_read_types is True:
+                entry.mapper = entry.mapper + "_" + entry.readType
+                count = 1
+                last_mapper = entry.mapper + "_" + entry.readType
+            elif multiple_read_types is False and entry.mapper == last_mapper:
+                entry.mapper = entry.mapper + "." + str(count)
+                last_mapper = entry.mapper
+                count += 1
             else:
-                mappers[entry.mapper] += 1
-                entry.mapper = entry.mapper + "." + str(mappers[entry.mapper])
+                count = 1
+                last_mapper = entry.mapper
         return entries
 
 
