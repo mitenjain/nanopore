@@ -7,23 +7,44 @@ outf <- args[2]
 outsig <- args[3]
 library(stats)
 
-#turn the count of reads into a vector representing the number of times each kmer is seen
-#i.e. there will be 100 1's if AAAAA was seen 100 times in the read set
-#this lets us sample without replacement
-counts <- double()
-for (i in 1:1024) {
-    counts <- c(counts, rep(i, times=data[i,]$mappableCount))
+mySample <- function(values, size, nElementsPerValue){
+  nElementsPerValue <- as.integer(nElementsPerValue)
+  if(sum(nElementsPerValue) < size)
+    stop("Total number of elements per value is lower than the sample size")
+  if(length(values) != length(nElementsPerValue))
+    stop("nElementsPerValue must have the same length of values")
+  if(any(nElementsPerValue < 0))
+    stop("nElementsPerValue cannot contain a negative numbers")
+
+  # remove values having zero elements inside
+  nElementsPerValue <- nElementsPerValue[which(nElementsPerValue > 0)]
+  values <- values[which(nElementsPerValue > 0)]
+
+  # pre-allocate the result vector
+  res <- rep.int(0.0,size)
+  for(i in 1:size){
+    idx <- sample(1:length(values),size=1,replace=F,prob=nElementsPerValue)
+    res[i] <- values[idx]
+    # remove sampled value from nElementsPerValue
+    nElementsPerValue[idx] <- nElementsPerValue[idx] - 1
+    # if zero elements remove also from values
+    if(nElementsPerValue[idx] == 0){
+      values <- values[-idx]
+      nElementsPerValue <- nElementsPerValue[-idx]
+    }
+  }
+  return(res)
 }
 
 #10,000 trials
 num_trials <- 10000
-#we want each trial to be around 1/25th of the number of kmers seen in the reads
-trial_size <- max(round(length(counts)/25), 10000)
+#we want each trial to be around 1/50th of the number of kmers seen in the reads
+trial_size <- round(length(counts)/50)
 
 
 #samples from the read population
-trial_fn <- function(counts) {
-   replicate(num_trials, sample(counts, size=trial_size, replace=F), simplify=F)
+trial_fn <- function(data, num_trials) {
+    replicate(num_trials, mySample(1:1024, trial_size, data$readCount), simplify=F)
 }
 #runs binomial exact test
 test <- function(x, p, n){
@@ -40,7 +61,7 @@ count_success <- function(x, real) {
     length(x[x <= real+std/10 && x >= real-std/10])
 }
 #generate a trial dataset by sampling from the counts vector without replacement
-trials <- trial_fn(counts)
+trials <- trial_fn(data, num_trials)
 #count the number of times each kmer was found in the trial dataset
 trial_table <- sapply(trials, tableize)
 
