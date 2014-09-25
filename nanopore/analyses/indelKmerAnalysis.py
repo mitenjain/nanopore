@@ -5,7 +5,7 @@ import pysam, os, itertools
 from collections import Counter
 from math import log
 
-class SymmetricIndelKmerAnalysis(AbstractAnalysis):
+class IndelKmerAnalysis(AbstractAnalysis):
     """Runs kmer analysis"""
     def countIndelKmers(self):
         sam = pysam.Samfile(self.samFile)
