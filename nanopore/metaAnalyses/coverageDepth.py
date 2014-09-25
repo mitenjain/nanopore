@@ -34,7 +34,7 @@ class Fastaseq():
 
 class CoverageDepth(AbstractMetaAnalysis):
 	"""
-	plots coverage depth per base across reference
+	Uses samtoold depth to obtain and plot coverage depth per base across reference
 	"""
 	def __init__(self, outputDir, experiments):
 		AbstractMetaAnalysis.__init__(self, outputDir, experiments)
@@ -58,6 +58,8 @@ class CoverageDepth(AbstractMetaAnalysis):
 					continue
 			else:
 				continue
+			
+			# if sorted bam file present then compute coverage and plot
 			if os.path.isfile(sortedbamFile + ".bam"):
 				try:
 					system("samtools depth %s > %s" % (sortedbamFile + ".bam", depthFile))
