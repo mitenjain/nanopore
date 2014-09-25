@@ -10,8 +10,8 @@ library(stats)
 
 #10,000 trials
 num_trials <- 5000
-#we want each trial to be around 1/30th of the number of kmers seen in the reads
-trial_size <- round(sum(data$readCount/30))
+#we want each trial to be around 1/40th of the number of kmers seen in the reads
+trial_size <- round(sum(data$readCount/40))
 
 #initialize empty vector of trial success counts
 counts <- rep(0, 1024)
@@ -19,8 +19,8 @@ counts <- rep(0, 1024)
 trial_fn <- function(data) {
     #sample from the population with replacement so this doesn't take years to process
     tmp <- matrix(table(factor(sample(1024, trial_size, prob=data$readFraction, replace=T), levels=1:1024)))[,1]
-    #round the result for floating point problems, 4 values should work for 1024 options
-    round(tmp/sum(tmp),4) == round(data$refFraction,4)
+    #round the result for floating point problems
+    round(tmp/sum(tmp),8) == round(data$refFraction,8)
 }
 #do num_trials trials, saving the number of successes for each kmer along the way
 for (i in 1:num_trials){
