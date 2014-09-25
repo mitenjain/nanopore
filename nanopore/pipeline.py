@@ -40,6 +40,7 @@ from nanopore.metaAnalyses.comparePerReadMappabilityByMapper import ComparePerRe
 from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.customTrackAssemblyHub import CustomTrackAssemblyHub
 from nanopore.metaAnalyses.marginAlignMetaAnalysis import MarginAlignMetaAnalysis  
+from nanopore.metaAnalyses.coverageDepth import CoverageDepth
 
 mappers = [ #Bwa,
            BwaChain,
@@ -76,7 +77,7 @@ mappers = [ #Bwa,
            CombinedMapperRealignTrainedModel ]
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, SymmetricIndelKmerAnalysis, AsymmetricIndelKmerAnalysis, ChannelMappability] #, FastQC, QualiMap, Consensus]
-metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
+metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub, CoverageDepth ]
 #analyses = [ MarginAlignSnpCaller ]
 #metaAnalyses = [ MarginAlignMetaAnalysis  ] 
 
