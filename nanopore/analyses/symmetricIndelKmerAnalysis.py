@@ -12,25 +12,40 @@ class SymmetricIndelKmerAnalysis(AbstractAnalysis):
         refKmers, readKmers = Counter(), Counter()
 
         refDict = getFastaDictionary(self.referenceFastaFile)
+        for x in refDict:
+            refDict[x] = tuple(refDict[x])
 
-        for aR in samIterator(sam):
-            name = sam.getrname(aR.rname)
-            if name is not None:
-                refSeq = refDict[name]
-            else:
-                continue
-
-            readSeq = aR.query
-
-            readPositions, refPositions = zip(*aR.aligned_pairs)
-
-            for i in xrange(self.kmerSize, len(aR.aligned_pairs)):
+        aRs = list()
+        for record in samIterator(sam):
+            aRs.append([record.aligned_pairs, tuple(record.query), sam.getrname(record.rname), record.is_reverse])
+            #trying to be fast while not running out of RAM
+            if len(aRs) % 5000 == 0:
+                for aP, readSeq, name, is_reverse in aRs:
+                    refSeq = refDict[name]
+                    refKmer, readKmer, cutoff = list(), list(), 0
+                    readPositions, refPositions = zip(*aP)
+                    for i in xrange(self.kmerSize, len(aP)):
+                        if None in readPositions[i-self.kmerSize:i] and None not in refPositions[i-self.kmerSize:i]:
+                            refKmers[refSeq[i-self.kmerSize:i]] += 1
+                        if None not in readPositions[i-self.kmerSize:i] and None in refPositions[i-self.kmerSize:i]:
+                            seq = readSeq[i-self.kmerSize:i]
+                            if is_reverse:
+                                readKmers[seq[::-1]] += 1
+                            else:
+                                readKmers[seq] += 1
+                aRs = list()
+        #need to get the last 5000 records
+        for aP, readSeq, name, is_reverse in aRs:
+            refSeq = refDict[name]
+            refKmer, readKmer, cutoff = list(), list(), 0
+            readPositions, refPositions = zip(*aP)
+            for i in xrange(self.kmerSize, len(aP)):
                 if None in readPositions[i-self.kmerSize:i] and None not in refPositions[i-self.kmerSize:i]:
                     refKmers[refSeq[i-self.kmerSize:i]] += 1
                 if None not in readPositions[i-self.kmerSize:i] and None in refPositions[i-self.kmerSize:i]:
                     seq = readSeq[i-self.kmerSize:i]
-                    if aR.is_reverse:
-                        readKmers[reverseComplement(seq)] += 1
+                    if is_reverse:
+                        readKmers[seq[::-1]] += 1
                     else:
                         readKmers[seq] += 1
 
