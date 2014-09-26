@@ -84,21 +84,22 @@ class CoverageSummary(AbstractMetaAnalysis):
     def resolve_duplicate_rownames(self, entries, multiple_read_types=False):
         last_mapper = None; count = 1
         for entry in entries:
+            print (last_mapper, entry.mapper)
             if multiple_read_types is True and entry.mapper + "_" + entry.readType == last_mapper:
-                entry.mapper = entry.mapper + "_" + entry.readType + "." + str(count)
                 last_mapper = entry.mapper + "_" + entry.readType
+                entry.mapper = entry.mapper + "_" + entry.readType + "." + str(count)
                 count += 1
             elif multiple_read_types is True:
+                last_mapper = entry.mapper + "_" + entry.readType
                 entry.mapper = entry.mapper + "_" + entry.readType
                 count = 1
-                last_mapper = entry.mapper + "_" + entry.readType
             elif multiple_read_types is False and entry.mapper == last_mapper:
-                entry.mapper = entry.mapper + "." + str(count)
                 last_mapper = entry.mapper
+                entry.mapper = entry.mapper + "." + str(count)
                 count += 1
             else:
-                count = 1
                 last_mapper = entry.mapper
+                count = 1
         return entries
 
 

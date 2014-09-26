@@ -26,7 +26,7 @@ class KmerAnalysis(AbstractAnalysis):
 
     def analyzeCounts(self, refKmers, readKmers, name):
         refSize, readSize = sum(refKmers.values()), sum(readKmers.values())
-        outf = open(os.path.join(self.getLocalTempDir(), name + "kmer_counts.txt"), "w")
+        outf = open(os.path.join(self.outputDir, name + "kmer_counts.txt"), "w")
         outf.write("kmer\trefCount\trefFraction\treadCount\treadFraction\tlogFoldChange\n")
         
         for kmer in itertools.product("ATGC", repeat=5):
@@ -41,7 +41,7 @@ class KmerAnalysis(AbstractAnalysis):
             outf.write("\t".join(map(str,[kmer, refKmers[kmer], refFraction, readKmers[kmer], readFraction, foldChange]))+"\n")
         outf.close()
         
-        system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.getLocalTempDir(), name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt")))
+        system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.outputDir, name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "pval_kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt")))
 
     def run(self, kmerSize=5):
         AbstractAnalysis.run(self)
