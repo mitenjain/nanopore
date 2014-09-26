@@ -291,7 +291,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         for refPosition, trueRefBase, posteriorProbs in snpCalls.falseNegatives:
                             ET.SubElement(node2, "falseNegative_%s" % trueRefBase, { "posteriorProbs":" ".join(map(str, posteriorProbs))})
                         for base in  bases:
-                            posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, posteriorProbs in snpCalls.falseNegatives if refPosition.upper() == base.upper() ]
+                            posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, posteriorProbs in snpCalls.falseNegatives if trueRefBase.upper() == base.upper() ]
                             if len(posteriorProbsArray) > 0:
                                 summedProbs = reduce(lambda x, y : map(lambda i : x[i] + y[i], xrange(len(x))), )
                                 summedProbs = map(lambda x : float(x)/sum(summedProbs), summedProbs)
