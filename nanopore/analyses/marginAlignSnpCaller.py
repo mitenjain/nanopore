@@ -50,7 +50,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     
                     #Trained hmm file to use.q
                     hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
-                    hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm2.txt")
+                    hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm3.txt")
              
                     #Get substitution matrices
                     nullSubstitionMatrix = getNullSubstitutionMatrix()
@@ -191,7 +191,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             return map(lambda x : x[1], self.falsePositives)
                         
                         def getFalseNegativeLocations(self):
-                            return self.falseNegatives[:]
+                            return map(lambda x : x[0], self.falseNegatives)
             
                     #The different call sets
                     marginAlignMaxExpectedSnpCalls = SnpCalls()
@@ -229,7 +229,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                         elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
                                             snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
                                     if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
-                                        snpCalls.falseNegatives.append(refPosition) #(refPosition, trueRefBase, mutatedRefBaseexpectations[:])) #False negative
+                                        snpCalls.falseNegatives.append((refPosition, trueRefBase, posteriorProbs)) #False negative
                                         
                                 #Add to margin-align max expected snp calls - "N" is a no-call.
                                 snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
@@ -288,7 +288,15 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                 "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
                         for snpCall in snpCalls.snpCalls:
                             ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
-                
+                        for refPosition, trueRefBase, posteriorProbs in snpCalls.falseNegatives:
+                            ET.SubElement(node2, "falseNegative_%s" % trueRefBase, { "posteriorProbs":" ".join(map(str, posteriorProbs))})
+                        for base in  bases:
+                            posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, posteriorProbs in snpCalls.falseNegatives if refPosition.upper() == base.upper() ]
+                            if len(posteriorProbsArray) > 0:
+                                summedProbs = reduce(lambda x, y : map(lambda i : x[i] + y[i], xrange(len(x))), )
+                                summedProbs = map(lambda x : float(x)/sum(summedProbs), summedProbs)
+                                ET.SubElement(node2, "combinedFalseNegative_%s" % base, { "posteriorProbs":" ".join(map(str, summedProbs))})
+                        
         open(os.path.join(self.outputDir, "marginaliseConsensus.xml"), "w").write(prettyXml(node))
         
         ####Put in ROC curves here
