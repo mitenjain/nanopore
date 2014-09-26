@@ -1,12 +1,23 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
 from jobTree.src.bioio import fastqRead, fastaRead, system, reverseComplement
-from nanopore.analyses.utils import samIterator, getFastaDictionary
+from nanopore.analyses.utils import samIterator, getFastaDictionary, UniqueList
 import pysam, os, itertools
 from collections import Counter
 from math import log
 
 class IndelKmerAnalysis(AbstractAnalysis):
     """Runs kmer analysis"""
+
+    def indelKmerFinder(self, aligned):
+        r = UniqueList(); s = self.kmerSize+1
+        for i in xrange(len(aligned)):
+            r.add(aligned[i])
+            if r[0] == None or (len(r) == s and r[self.kmerSize] == None) or (None not in r and len(r) == s):
+                r.remove(last=False)
+            elif None in r and len(r) == s:
+                yield (r[0],r[self.kmerSize])
+                r.remove(last=False)
+
     def countIndelKmers(self):
         sam = pysam.Samfile(self.samFile)
         refKmers, readKmers = Counter(), Counter()
@@ -15,41 +26,19 @@ class IndelKmerAnalysis(AbstractAnalysis):
         for x in refDict:
             refDict[x] = tuple(refDict[x])
 
-        aRs = list()
         for record in samIterator(sam):
-            aRs.append([record.aligned_pairs, tuple(record.query), sam.getrname(record.rname), record.is_reverse])
-            #trying to be fast while not running out of RAM
-            if len(aRs) % 5000 == 0:
-                for aP, readSeq, name, is_reverse in aRs:
-                    refSeq = refDict[name]
-                    refKmer, readKmer, cutoff = list(), list(), 0
-                    readPositions, refPositions = zip(*aP)
-                    for i in xrange(self.kmerSize, len(aP)):
-                        if None in readPositions[i-self.kmerSize:i] and None not in refPositions[i-self.kmerSize:i]:
-                            refKmers[refSeq[i-self.kmerSize:i]] += 1
-                        if None not in readPositions[i-self.kmerSize:i] and None in refPositions[i-self.kmerSize:i]:
-                            seq = readSeq[i-self.kmerSize:i]
-                            if is_reverse:
-                                readKmers[seq[::-1]] += 1
-                            else:
-                                readKmers[seq] += 1
-                aRs = list()
-        #need to get the last 5000 records
-        for aP, readSeq, name, is_reverse in aRs:
-            refSeq = refDict[name]
-            refKmer, readKmer, cutoff = list(), list(), 0
-            readPositions, refPositions = zip(*aP)
-            for i in xrange(self.kmerSize, len(aP)):
-                if None in readPositions[i-self.kmerSize:i] and None not in refPositions[i-self.kmerSize:i]:
-                    refKmers[refSeq[i-self.kmerSize:i]] += 1
-                if None not in readPositions[i-self.kmerSize:i] and None in refPositions[i-self.kmerSize:i]:
-                    seq = readSeq[i-self.kmerSize:i]
-                    if is_reverse:
-                        readKmers[seq[::-1]] += 1
-                    else:
-                        readKmers[seq] += 1
-
-        return (refKmers, readKmers) 
+            refSeq = refDict[sam.getrname(record.rname)]
+            readSeq = tuple(record.query)
+            readAligned, refAligned = zip(*record.aligned_pairs)
+            for start, end in self.indelKmerFinder(readAligned):
+                if record.is_reverse:
+                    readKmer = readSeq[start:end+1][::-1]
+                else:
+                    readKmer = readSeq[start:end+1]
+                readKmers[readKmer] += 1
+            for start, end in self.indelKmerFinder(refAligned):
+                refKmers[refSeq[start:end+1]] += 1
+        return (refKmers, readKmers)
 
 
     def analyzeCounts(self, refKmers, readKmers, name):
@@ -77,5 +66,5 @@ class IndelKmerAnalysis(AbstractAnalysis):
         #analyze kmers around the boundaries of indels
         indelRefKmers, indelReadKmers = self.countIndelKmers()
         if len(indelRefKmers) > 0 and len(indelReadKmers) > 0:
-            self.analyzeCounts(indelRefKmers, indelReadKmers, "symmetric_indel_bases_")
+            self.analyzeCounts(indelRefKmers, indelReadKmers, "indel_bases_")
         self.finish()
