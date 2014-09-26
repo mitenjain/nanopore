@@ -229,7 +229,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                         elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
                                             snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
                                     if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
-                                        snpCalls.falseNegatives.append((refPosition, trueRefBase, posteriorProbs)) #False negative
+                                        snpCalls.falseNegatives.append((refPosition, trueRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
                                         
                                 #Add to margin-align max expected snp calls - "N" is a no-call.
                                 snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
