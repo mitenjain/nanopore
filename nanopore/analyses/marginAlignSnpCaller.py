@@ -51,7 +51,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     #Trained hmm file to use.q
                     hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
                     hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm2.txt")
-                    hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm3.txt")
+                    hmmFile3 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm3.txt")
              
                     #Get substitution matrices
                     nullSubstitionMatrix = getNullSubstitutionMatrix()
