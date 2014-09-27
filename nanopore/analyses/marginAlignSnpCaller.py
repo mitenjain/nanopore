@@ -43,13 +43,14 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         
         node = ET.Element("marginAlignComparison")
-        for hmmType in ("trained", "trained_flatEmissions", "cactus"):
+        for hmmType in ("trained", "trained_flatEmissions", "trained_adjustedEmissions", "cactus"):
             for coverage in (1000000, 500, 120, 60, 30, 10): 
                 for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
                     sam = pysam.Samfile(self.samFile, "r" )
                     
                     #Trained hmm file to use.q
                     hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
+                    hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm2.txt")
                     hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm3.txt")
              
                     #Get substitution matrices
@@ -137,6 +138,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         elif hmmType == "trained_flatEmissions":
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
                                    (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile2, tempCigarFile))
+                        elif hmmType == "trained_adjustedEmissions":
+                            system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile3, tempCigarFile))
                         else:
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s > %s" % \
                                    (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, tempCigarFile))
