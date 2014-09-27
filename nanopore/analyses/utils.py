@@ -516,6 +516,7 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     #options.useDefaultModelAsStart = True
     #options.setJukesCantorStartingEmissions=0.3
     options.trainEmissions=True
+    options.tieEmissions = True
     target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
 
 def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, 

@@ -43,7 +43,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         
         node = ET.Element("marginAlignComparison")
-        for hmmType in ("trained", "trained_flatEmissions", "cactus"):
+        for hmmType in ("trained_adjustedEmissions", "cactus"): #"trained", "trained_flatEmissions", 
             for coverage in (1000000, 500, 120, 60, 30, 10): 
                 for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
                     sam = pysam.Samfile(self.samFile, "r" )
@@ -51,7 +51,8 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     #Trained hmm file to use.q
                     hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
                     hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm2.txt")
-             
+                    hmmFile3 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm3.txt")
+              
                     #Get substitution matrices
                     nullSubstitionMatrix = getNullSubstitutionMatrix()
                     flatSubstitutionMatrix = getJukesCantorTypeSubstitutionMatrix()
@@ -137,6 +138,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         elif hmmType == "trained_flatEmissions":
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
                                    (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile2, tempCigarFile))
+                        elif hmmType == "trained_adjustedEmissions":
+                            system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile3, tempCigarFile))
                         else:
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s > %s" % \
                                    (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, tempCigarFile))
@@ -191,10 +195,13 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             return map(lambda x : x[1], self.falsePositives)
                         
                         def getFalseNegativeLocations(self):
-                            return self.falseNegatives[:]
+                            return map(lambda x : x[0], self.falseNegatives)
             
                     #The different call sets
                     marginAlignMaxExpectedSnpCalls = SnpCalls()
+                    marginAlignMaxExpectedSnpCallsBias8 = SnpCalls()
+                    marginAlignMaxExpectedSnpCallsBias6 = SnpCalls()
+                    marginAlignMaxExpectedSnpCallsBias4 = SnpCalls()
                     marginAlignMaxLikelihoodSnpCalls = SnpCalls()
                     maxFrequencySnpCalls = SnpCalls()
                     maximumLikelihoodSnpCalls = SnpCalls()
@@ -208,11 +215,14 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             key = (refSeqName, refPosition)
                             
                             #Get base calls
-                            for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
-                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
+                            for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, biasFactor, snpCalls in \
+                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxExpectedSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.8, marginAlignMaxExpectedSnpCallsBias8),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.6, marginAlignMaxExpectedSnpCallsBias6),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.4, marginAlignMaxExpectedSnpCallsBias4),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxLikelihoodSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maxFrequencySnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maximumLikelihoodSnpCalls)):
                                 chosenBase = 'N'
                                 if key in baseExpectations:
                                     #Get posterior likelihoods
@@ -221,6 +231,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                     if totalExpectation > 0.0: #expectationCallingThreshold:
                                         posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
                                                                evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
+                                        posteriorProbs[mutatedRefBase] *= biasFactor
                                         maxPosteriorProb = max(posteriorProbs.values())
                                         chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
                                         if trueRefBase != mutatedRefBase:
@@ -229,13 +240,16 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                         elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
                                             snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
                                     if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
-                                        snpCalls.falseNegatives.append(refPosition) #(refPosition, trueRefBase, mutatedRefBaseexpectations[:])) #False negative
+                                         snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
                                         
                                 #Add to margin-align max expected snp calls - "N" is a no-call.
                                 snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
                             
                     
                     for snpCalls, tagName in ((marginAlignMaxExpectedSnpCalls, "marginAlignMaxExpectedSnpCalls"), 
+                                              (marginAlignMaxExpectedSnpCallsBias8, "marginAlignMaxExpectedSnpCallsBias8"), 
+                                              (marginAlignMaxExpectedSnpCallsBias6, "marginAlignMaxExpectedSnpCallsBias6"), 
+                                              (marginAlignMaxExpectedSnpCallsBias4, "marginAlignMaxExpectedSnpCallsBias4"), 
                                               (marginAlignMaxLikelihoodSnpCalls, "marginAlignMaxLikelihoodSnpCalls"),
                                               (maxFrequencySnpCalls, "maxFrequencySnpCalls"),
                                               (maximumLikelihoodSnpCalls, "maximumLikelihoodSnpCalls")):
@@ -288,10 +302,17 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                 "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
                         for snpCall in snpCalls.snpCalls:
                             ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
-                
+                        for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives:
+                            ET.SubElement(node2, "falseNegative_%s_%s" % (trueRefBase, mutatedRefBase), { "posteriorProbs":" ".join(map(str, posteriorProbs))})
+                        for falseNegativeBase in bases:
+                            for mutatedBase in bases:
+                                posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives if (trueRefBase.upper() == falseNegativeBase.upper() and mutatedBase.upper() == mutatedRefBase.upper() ) ]
+                                if len(posteriorProbsArray) > 0:
+                                    summedProbs = reduce(lambda x, y : map(lambda i : x[i] + y[i], xrange(len(x))), posteriorProbsArray)
+                                    summedProbs = map(lambda x : float(x)/sum(summedProbs), summedProbs)
+                                    ET.SubElement(node2, "combinedFalseNegative_%s_%s" % (falseNegativeBase, mutatedBase), { "posteriorProbs":" ".join(map(str, summedProbs))})
+                        
         open(os.path.join(self.outputDir, "marginaliseConsensus.xml"), "w").write(prettyXml(node))
-        
-        ####Put in ROC curves here
         
         
         #Indicate everything is all done
