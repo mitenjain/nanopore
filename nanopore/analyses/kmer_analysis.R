@@ -28,7 +28,7 @@ read <- replicate(num_trials, trial_fn(d=data$readFraction, t=trial_size))
 p_values <- rep(0, 1024)
 
 for (i in 1:1024) {
-    p_values[i] <- t.test(ref[i,], read[i,])$p.value
+    p_values[i] <- ks.test(ref[i,], read[i,])$p.value
 }
 
 adjusted_p_value <- p.adjust(p_values, method="bonferroni")
