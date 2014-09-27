@@ -43,7 +43,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         
         node = ET.Element("marginAlignComparison")
-        for hmmType in ("trained", "trained_flatEmissions", "trained_adjustedEmissions", "cactus"):
+        for hmmType in ("trained_adjustedEmissions", "cactus"): #"trained", "trained_flatEmissions", 
             for coverage in (1000000, 500, 120, 60, 30, 10): 
                 for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
                     sam = pysam.Samfile(self.samFile, "r" )
@@ -199,6 +199,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
             
                     #The different call sets
                     marginAlignMaxExpectedSnpCalls = SnpCalls()
+                    marginAlignMaxExpectedSnpCallsBias8 = SnpCalls()
+                    marginAlignMaxExpectedSnpCallsBias6 = SnpCalls()
+                    marginAlignMaxExpectedSnpCallsBias4 = SnpCalls()
                     marginAlignMaxLikelihoodSnpCalls = SnpCalls()
                     maxFrequencySnpCalls = SnpCalls()
                     maximumLikelihoodSnpCalls = SnpCalls()
@@ -212,11 +215,14 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             key = (refSeqName, refPosition)
                             
                             #Get base calls
-                            for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
-                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
+                            for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, biasFactor, snpCalls in \
+                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxExpectedSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.8, marginAlignMaxExpectedSnpCallsBias8),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.6, marginAlignMaxExpectedSnpCallsBias6),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.4, marginAlignMaxExpectedSnpCallsBias4),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxLikelihoodSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maxFrequencySnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maximumLikelihoodSnpCalls)):
                                 chosenBase = 'N'
                                 if key in baseExpectations:
                                     #Get posterior likelihoods
@@ -225,6 +231,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                     if totalExpectation > 0.0: #expectationCallingThreshold:
                                         posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
                                                                evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
+                                        posteriorProbs[mutatedRefBase] *= biasFactor
                                         maxPosteriorProb = max(posteriorProbs.values())
                                         chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
                                         if trueRefBase != mutatedRefBase:
