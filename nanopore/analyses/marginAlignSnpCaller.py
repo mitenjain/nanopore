@@ -229,7 +229,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                         elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
                                             snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
                                     if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
-                                        snpCalls.falseNegatives.append((refPosition, trueRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
+                                         snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
                                         
                                 #Add to margin-align max expected snp calls - "N" is a no-call.
                                 snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
@@ -288,18 +288,17 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                 "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
                         for snpCall in snpCalls.snpCalls:
                             ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
-                        for refPosition, trueRefBase, posteriorProbs in snpCalls.falseNegatives:
-                            ET.SubElement(node2, "falseNegative_%s" % trueRefBase, { "posteriorProbs":" ".join(map(str, posteriorProbs))})
-                        for base in  bases:
-                            posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, posteriorProbs in snpCalls.falseNegatives if trueRefBase.upper() == base.upper() ]
-                            if len(posteriorProbsArray) > 0:
-                                summedProbs = reduce(lambda x, y : map(lambda i : x[i] + y[i], xrange(len(x))), posteriorProbsArray)
-                                summedProbs = map(lambda x : float(x)/sum(summedProbs), summedProbs)
-                                ET.SubElement(node2, "combinedFalseNegative_%s" % base, { "posteriorProbs":" ".join(map(str, summedProbs))})
+                        for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives:
+                            ET.SubElement(node2, "falseNegative_%s_s" % (trueRefBase, mutatedRefBase), { "posteriorProbs":" ".join(map(str, posteriorProbs))})
+                        for falseNegativeBase in bases:
+                            for mutatedBase in bases:
+                                posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives if (trueRefBase.upper() == base.upper() and mutatedBase.upper() == mutatedRefBase.upper() ) ]
+                                if len(posteriorProbsArray) > 0:
+                                    summedProbs = reduce(lambda x, y : map(lambda i : x[i] + y[i], xrange(len(x))), posteriorProbsArray)
+                                    summedProbs = map(lambda x : float(x)/sum(summedProbs), summedProbs)
+                                    ET.SubElement(node2, "combinedFalseNegative_%s_%s" % (base, mutatedBase), { "posteriorProbs":" ".join(map(str, summedProbs))})
                         
         open(os.path.join(self.outputDir, "marginaliseConsensus.xml"), "w").write(prettyXml(node))
-        
-        ####Put in ROC curves here
         
         
         #Indicate everything is all done
