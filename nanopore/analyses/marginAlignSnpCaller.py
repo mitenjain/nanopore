@@ -289,14 +289,14 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         for snpCall in snpCalls.snpCalls:
                             ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
                         for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives:
-                            ET.SubElement(node2, "falseNegative_%s_s" % (trueRefBase, mutatedRefBase), { "posteriorProbs":" ".join(map(str, posteriorProbs))})
+                            ET.SubElement(node2, "falseNegative_%s_%s" % (trueRefBase, mutatedRefBase), { "posteriorProbs":" ".join(map(str, posteriorProbs))})
                         for falseNegativeBase in bases:
                             for mutatedBase in bases:
-                                posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives if (trueRefBase.upper() == base.upper() and mutatedBase.upper() == mutatedRefBase.upper() ) ]
+                                posteriorProbsArray = [ posteriorProbs for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives if (trueRefBase.upper() == falseNegativeBase.upper() and mutatedBase.upper() == mutatedRefBase.upper() ) ]
                                 if len(posteriorProbsArray) > 0:
                                     summedProbs = reduce(lambda x, y : map(lambda i : x[i] + y[i], xrange(len(x))), posteriorProbsArray)
                                     summedProbs = map(lambda x : float(x)/sum(summedProbs), summedProbs)
-                                    ET.SubElement(node2, "combinedFalseNegative_%s_%s" % (base, mutatedBase), { "posteriorProbs":" ".join(map(str, summedProbs))})
+                                    ET.SubElement(node2, "combinedFalseNegative_%s_%s" % (falseNegativeBase, mutatedBase), { "posteriorProbs":" ".join(map(str, summedProbs))})
                         
         open(os.path.join(self.outputDir, "marginaliseConsensus.xml"), "w").write(prettyXml(node))
         
