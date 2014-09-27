@@ -22,8 +22,7 @@ from nanopore.mappers.combinedMapper import CombinedMapper, CombinedMapperChain,
 from nanopore.analyses.substitutions import Substitutions
 from nanopore.analyses.coverage import LocalCoverage, GlobalCoverage
 from nanopore.analyses.kmerAnalysis import KmerAnalysis
-from nanopore.analyses.symmetricIndelKmerAnalysis import SymmetricIndelKmerAnalysis
-from nanopore.analyses.asymmetricIndelKmerAnalysis import AsymmetricIndelKmerAnalysis
+from nanopore.analyses.indelKmerAnalysis import IndelKmerAnalysis
 from nanopore.analyses.indels import Indels
 from nanopore.analyses.fastqc import FastQC
 from nanopore.analyses.qualimap import QualiMap
@@ -76,7 +75,7 @@ mappers = [ #Bwa,
            CombinedMapperRealignEm,
            CombinedMapperRealignTrainedModel ]
 
-analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, SymmetricIndelKmerAnalysis, AsymmetricIndelKmerAnalysis, ChannelMappability] #, FastQC, QualiMap, Consensus]
+analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, IndelKmerAnalysis, ChannelMappability] #, FastQC, QualiMap, Consensus]
 
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
 
