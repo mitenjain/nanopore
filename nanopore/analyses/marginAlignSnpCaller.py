@@ -247,6 +247,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             
                     
                     for snpCalls, tagName in ((marginAlignMaxExpectedSnpCalls, "marginAlignMaxExpectedSnpCalls"), 
+                                              (marginAlignMaxExpectedSnpCallsBias8, "marginAlignMaxExpectedSnpCallsBias8"), 
+                                              (marginAlignMaxExpectedSnpCallsBias6, "marginAlignMaxExpectedSnpCallsBias6"), 
+                                              (marginAlignMaxExpectedSnpCallsBias4, "marginAlignMaxExpectedSnpCallsBias4"), 
                                               (marginAlignMaxLikelihoodSnpCalls, "marginAlignMaxLikelihoodSnpCalls"),
                                               (maxFrequencySnpCalls, "maxFrequencySnpCalls"),
                                               (maximumLikelihoodSnpCalls, "maximumLikelihoodSnpCalls")):
