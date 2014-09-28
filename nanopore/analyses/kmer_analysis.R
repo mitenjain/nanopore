@@ -16,21 +16,22 @@ if (sum(data$refCount/50) > 10000) {
     trial_size <- sum(data$refCount)/50
 }
 
-
+#builds a table of samples from a kmer count distribution
+#samples the probability distribution d t times
 trial_fn <- function(d, t) {
     matrix(table(factor(sample(1024, t, prob=d, replace=T), levels=1:1024)))[,1]
 }
-
+#do num_trials trials of sampling from the refFraction distribution
 ref <- replicate(num_trials, trial_fn(d=data$refFraction, t=trial_size))
-
+#do num_trials trials of sampling from the readFraction distribution
 read <- replicate(num_trials, trial_fn(d=data$readFraction, t=trial_size))
-
+#initialize a p_value vector
 p_values <- rep(0, 1024)
-
+#loop over each kmer and do a Kolmogorov-Smirnov test comparing the two distributions
 for (i in 1:1024) {
     p_values[i] <- ks.test(ref[i,], read[i,])$p.value
 }
-
+#Bonferroni correction for multiple hypotheses
 adjusted_p_value <- p.adjust(p_values, method="bonferroni")
 #combine original data frame with two new vectors
 finished <- cbind(data, p_values, adjusted_p_value)
