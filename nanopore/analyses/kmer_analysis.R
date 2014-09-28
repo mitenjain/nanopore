@@ -8,10 +8,10 @@ outsig <- args[3]
 library(stats)
 
 
-num_trials <- 5000
-#trial size is a max of 10,000
-if (sum(data$refCount/50) > 10000) {
-    trial_size <- 10000
+num_trials <- 10000
+#trial size is a max of 20,000
+if (sum(data$refCount/50) > 20000) {
+    trial_size <- 20000
 } else {
     trial_size <- sum(data$refCount)/50
 }
