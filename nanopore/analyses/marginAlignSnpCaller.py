@@ -43,7 +43,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         
         node = ET.Element("marginAlignComparison")
-        for hmmType in ("trained_adjustedEmissions", "cactus"): #"trained", "trained_flatEmissions", 
+        for hmmType in ("trained_adjustedEmissions", "cactus", "trained", "trained_flatEmissions"): 
             for coverage in (1000000, 500, 120, 60, 30, 10): 
                 for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
                     sam = pysam.Samfile(self.samFile, "r" )
