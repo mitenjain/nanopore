@@ -14,13 +14,18 @@ class KmerAnalysis(AbstractAnalysis):
 
         for name, seq in fastaRead(self.referenceFastaFile):
             for i in xrange(self.kmerSize, len(seq)):
-                if "N" not in seq[ i - self.kmerSize : i ]:
-                    refKmers[ seq[ i - self.kmerSize : i ] ] += 1
+                s = seq[ i - self.kmerSize : i ]
+                if "N" not in s:
+                    refKmers[s] += 1
+                    refKmers[reverseComplement(s)] += 1
+
 
         for name, seq, qual in fastqRead(self.readFastqFile):
             for i in xrange(self.kmerSize, len(seq)):
-                if "N" not in seq[ i - self.kmerSize : i ]:
-                    readKmers[ seq[ i - self.kmerSize : i ] ] += 1
+                s = seq[ i - self.kmerSize : i ]
+                if "N" not in s:
+                    readKmers[s] += 1
+                    readKmers[reverseComplement(s)] += 1
 
         return (refKmers, readKmers)
 
@@ -41,7 +46,7 @@ class KmerAnalysis(AbstractAnalysis):
             outf.write("\t".join(map(str,[kmer, refKmers[kmer], refFraction, readKmers[kmer], readFraction, foldChange]))+"\n")
         outf.close()
         
-        system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.outputDir, name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "pval_kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt")))
+        system("Rscript nanopore/analyses/kmer_analysis.R {} {} {} {} {}".format(os.path.join(self.outputDir, name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "pval_kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt"), os.path.join(self.outputDir, name + "volcano_plot.pdf"), "Kmer"))
 
     def run(self, kmerSize=5):
         AbstractAnalysis.run(self)
