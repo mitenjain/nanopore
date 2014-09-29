@@ -48,4 +48,4 @@ class UnmappedKmerAnalysis(AbstractUnmappedMetaAnalysis):
                 outf.write("\t".join(map(str,[kmer, mappedKmers[kmer], mappedFraction, unmappedKmers[kmer], unmappedFraction, foldChange]))+"\n")
             outf.close()
 
-            system("Rscript nanopore/metaAnalyses/mappable_kmer_analysis.R {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_top_bot_sigkmer_counts.txt")))
+            system("Rscript nanopore/metaAnalyses/mappable_kmer_analysis.R {} {} {} {}".format(os.path.join(self.getLocalTempDir(), readType + "_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_kmer_counts.txt"), os.path.join(self.outputDir, readType + "_unmapped_top_bot_sigkmer_counts.txt"), os.path.join(self.outputDir, readType + "_volcano_plot.pdf")))

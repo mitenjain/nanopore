@@ -1,5 +1,5 @@
 from nanopore.analyses.abstractAnalysis import AbstractAnalysis
-from jobTree.src.bioio import fastqRead, fastaRead, system, reverseComplement
+from jobTree.src.bioio import fastqRead, fastaRead, system
 from nanopore.analyses.utils import samIterator, getFastaDictionary, UniqueList
 import pysam, os, itertools
 from collections import Counter
@@ -31,13 +31,13 @@ class IndelKmerAnalysis(AbstractAnalysis):
             readSeq = tuple(record.query)
             readAligned, refAligned = zip(*record.aligned_pairs)
             for start, end in self.indelKmerFinder(readAligned):
-                if record.is_reverse:
-                    readKmer = readSeq[start:end+1][::-1]
-                else:
-                    readKmer = readSeq[start:end+1]
-                readKmers[readKmer] += 1
+                s = readSeq[start:end+1]
+                readKmers[s] += 1
+                refKmers[s[::-1]] += 1
             for start, end in self.indelKmerFinder(refAligned):
-                refKmers[refSeq[start:end+1]] += 1
+                s = refSeq[start:end+1]
+                refKmers[s] += 1
+                refKmers[s[::-1]] += 1
         return (refKmers, readKmers)
 
 
@@ -57,7 +57,7 @@ class IndelKmerAnalysis(AbstractAnalysis):
                 outf.write("\t".join(map(str,["".join(kmer), refKmers[kmer], refFraction, readKmers[kmer], readFraction, foldChange]))+"\n")
             outf.close()
         
-            system("Rscript nanopore/analyses/kmer_analysis.R {} {} {}".format(os.path.join(self.outputDir, name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "pval_kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt")))
+            system("Rscript nanopore/analyses/kmer_analysis.R {} {} {} {} {}".format(os.path.join(self.outputDir, name + "kmer_counts.txt"), os.path.join(self.outputDir, name + "pval_kmer_counts.txt"), os.path.join(self.outputDir, name + "top_bot_sigkmer_counts.txt"), os.path.join(self.outputDir, name + "volcano_plot.pdf"), "Indel_Kmer"))
 
     def run(self, kmerSize=5):
         AbstractAnalysis.run(self)
