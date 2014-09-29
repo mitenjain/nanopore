@@ -10,7 +10,7 @@ library(stats)
 library(lattice)
 
 
-num_trials <- 5000
+num_trials <- 1000
 trial_size <- 5000
 
 
@@ -35,8 +35,8 @@ finished <- cbind(data, p_values, adjusted_p_value)
 write.table(finished, outf)
 #find significant hits
 significant <- finished[finished$adjusted_p_value <= 0.05,]
-
-xyplot(finished$adjusted_p_value~finished$logFoldChange, main="Unmappable vs. Mappable Volcano Plot")
+pdf(outplot)
+xyplot(finished$adjusted_p_value~finished$logFoldChange, xlab="Log Fold Change", ylab="Adjusted P Value", main="Unmappable vs. Mappable Volcano Plot")
 dev.off()
 #sort the significant hits by fold change
 ordered <- significant[order(significant$logFoldChange),]

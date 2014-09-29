@@ -10,7 +10,7 @@ library(stats)
 library(lattice)
 
 
-num_trials <- 5000
+num_trials <- 1000
 trial_size <- 5000
 
 #builds a table of samples from a kmer count distribution
@@ -38,7 +38,7 @@ write.table(finished, outf)
 significant <- finished[finished$adjusted_p_value <= 0.05,]
 #plot volcano plot
 pdf(outplot)
-xyplot(finished$adjusted_p_value~finished$logFoldChange, main=paste(args[5], "Volcano Plot", sep=" "))
+xyplot(finished$adjusted_p_value~finished$logFoldChange, xlab="Log Fold Change", ylab="Adjusted P Value", main=paste(args[5], "Volcano Plot", sep=" "))
 dev.off()
 #sort the significant hits by fold change
 ordered <- significant[order(significant$logFoldChange),]
