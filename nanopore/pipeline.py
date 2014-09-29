@@ -80,9 +80,9 @@ analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, Alignmen
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
 
 
-analyses = [ GlobalCoverage ]
-metaAnalyses = [ ] 
-mappers = [LastParamsRealignEm  ]
+#analyses = [ GlobalCoverage ]
+#metaAnalyses = [ ] 
+#mappers = [LastParamsRealignEm  ]
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
