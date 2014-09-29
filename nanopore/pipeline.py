@@ -53,7 +53,7 @@ mappers = [ #Bwa,
            #BlasrParams,
            BlasrParamsChain,
            BlasrParamsRealign,
-           BlasrRealignEm,
+           BlasrParamsRealignEm,
            BlasrParamsRealignTrainedModel,
            #Last,
            LastChain,
@@ -75,14 +75,14 @@ mappers = [ #Bwa,
            CombinedMapperRealignEm,
            CombinedMapperRealignTrainedModel ]
 
-analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, KmerAnalysis, IndelKmerAnalysis, ChannelMappability] #, FastQC, QualiMap, Consensus]
+analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, ChannelMappability, KmerAnalysis, IndelKmerAnalysis ] #, FastQC, QualiMap, Consensus]
 
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
 
 
-#analyses = [ MarginAlignSnpCaller ]
-#metaAnalyses = [ MarginAlignMetaAnalysis  ] 
-#mappers = [LastParamsRealignEm  ]
+analyses = [ GlobalCoverage ]
+metaAnalyses = [ ] 
+mappers = [LastParamsRealignEm  ]
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
