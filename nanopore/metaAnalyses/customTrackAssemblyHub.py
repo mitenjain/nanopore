@@ -73,11 +73,12 @@ class CustomTrackAssemblyHub(AbstractMetaAnalysis):
 		genomes = open(parentFolder + "genomes.txt", "a")
 		for referenceFastaFile in self.referenceFastaFiles:
 			if referenceFastaFile.endswith(".fa") or referenceFastaFile.endswith(".fasta"):
-				header = referenceFastaFile.split("/")[-1].split(".fasta")[0]
+				header = referenceFastaFile.split("/")[-1].split(".fa")[0]
 				system("cp %s %s" % (referenceFastaFile, parentFolder + header + "/"))
 
 				# Create 2bit referenceFastaFile
-				newreferenceFastaFile = parentFolder + header + "/" + header + ".fasta"
+				oldreferenceFastaFile = referenceFastaFile.split("/")[-1]
+				newreferenceFastaFile = parentFolder + header + "/" + oldreferenceFastaFile
 				ref2bit = newreferenceFastaFile.split(".fa")[0] + ".2bit"
 				system("/cluster/bin/x86_64/faToTwoBit %s %s" % (newreferenceFastaFile, ref2bit))
 				
