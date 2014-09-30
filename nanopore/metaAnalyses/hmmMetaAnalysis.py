@@ -23,30 +23,31 @@ class HmmMetaAnalysis(AbstractMetaAnalysis):
                     if readFileReadType == readType:
                         for mapper in self.mappers:
                             analyses, resultsDir = self.experimentHash[((readFastqFile, readType), referenceFastaFile, mapper)]
-                            hmmsNode = ET.parse(os.path.join(resultsDir, "hmm.txt.xml")).getroot()
-                            
-                            #Aggregate transition expectations
-                            for transition in hmmsNode.findall("transition"):
-                                if float(transition.attrib["avg"]) > 0.0:
-                                    key= (transition.attrib["from"], transition.attrib["to"])
-                                    if key not in transitions:
-                                        transitions[key] = []
-                                    transitions[key].append((float(transition.attrib["avg"]), float(transition.attrib["std"])))
-                            
-                            #Aggregate substitution expectations
-                            #Plot match emission data
-                            insertEmissions2 = dict(zip(bases, [0.0]*len(bases)))
-                            deleteEmissions2 = dict(zip(bases, [0.0]*len(bases)))
-                            for emission in hmmsNode.findall("emission"): 
-                                if emission.attrib["state"] == '0':
-                                    substitutionEmissions[(emission.attrib["x"], emission.attrib["y"])].append((float(emission.attrib["avg"]), float(emission.attrib["std"])))
-                                elif emission.attrib["state"] == '1':
-                                    deleteEmissions2[emission.attrib["x"]] += float(emission.attrib["avg"])
-                                elif emission.attrib["state"] == '2':
-                                    insertEmissions2[emission.attrib["y"]] += float(emission.attrib["avg"])
-                            for base in bases:
-                                insertEmissions[base].append(insertEmissions2[base])
-                                deleteEmissions[base].append(deleteEmissions2[base])
+                            if os.path.exists(os.path.join(resultsDir, "hmm.txt.xml")):
+                                hmmsNode = ET.parse(os.path.join(resultsDir, "hmm.txt.xml")).getroot()
+                                
+                                #Aggregate transition expectations
+                                for transition in hmmsNode.findall("transition"):
+                                    if float(transition.attrib["avg"]) > 0.0:
+                                        key= (transition.attrib["from"], transition.attrib["to"])
+                                        if key not in transitions:
+                                            transitions[key] = []
+                                        transitions[key].append((float(transition.attrib["avg"]), float(transition.attrib["std"])))
+                                
+                                #Aggregate substitution expectations
+                                #Plot match emission data
+                                insertEmissions2 = dict(zip(bases, [0.0]*len(bases)))
+                                deleteEmissions2 = dict(zip(bases, [0.0]*len(bases)))
+                                for emission in hmmsNode.findall("emission"): 
+                                    if emission.attrib["state"] == '0':
+                                        substitutionEmissions[(emission.attrib["x"], emission.attrib["y"])].append((float(emission.attrib["avg"]), float(emission.attrib["std"])))
+                                    elif emission.attrib["state"] == '1':
+                                        deleteEmissions2[emission.attrib["x"]] += float(emission.attrib["avg"])
+                                    elif emission.attrib["state"] == '2':
+                                        insertEmissions2[emission.attrib["y"]] += float(emission.attrib["avg"])
+                                for base in bases:
+                                    insertEmissions[base].append(insertEmissions2[base])
+                                    deleteEmissions[base].append(deleteEmissions2[base])
             
             #Write out a dot file representing the avg HMM transitions with std errors
             
