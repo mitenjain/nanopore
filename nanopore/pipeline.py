@@ -40,6 +40,7 @@ from nanopore.metaAnalyses.coverageSummary import CoverageSummary
 from nanopore.metaAnalyses.customTrackAssemblyHub import CustomTrackAssemblyHub
 from nanopore.metaAnalyses.marginAlignMetaAnalysis import MarginAlignMetaAnalysis  
 from nanopore.metaAnalyses.coverageDepth import CoverageDepth
+from nanopore.metaAnalyses.hmmMetaAnalysis import HmmMetaAnalysis
 
 mappers = [ #Bwa,
            BwaChain,
@@ -77,12 +78,11 @@ mappers = [ #Bwa,
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, ChannelMappability, KmerAnalysis, IndelKmerAnalysis ] #, FastQC, QualiMap, Consensus]
 
-metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper ]# CustomTrackAssemblyHub ]
+metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper, HmmMetaAnalysis ]# CustomTrackAssemblyHub ]
 
-
-#analyses = [ GlobalCoverage ]
-#metaAnalyses = [ ] 
-#mappers = [LastParamsRealignEm  ]
+analyses = [ Hmm ]
+metaAnalyses = [ HmmMetaAnalysis ] 
+mappers = [LastParamsRealignEm, LastzParamsRealignEm  ]
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
