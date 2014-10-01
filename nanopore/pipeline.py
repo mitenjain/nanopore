@@ -80,9 +80,9 @@ analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, Alignmen
 
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper, HmmMetaAnalysis ]# CustomTrackAssemblyHub ]
 
-analyses = [ MarginAlignSnpCaller ]
-metaAnalyses = [ MarginAlignMetaAnalysis ] 
-mappers = [ LastParamsChain, LastParamsRealignTrainedModel ]
+#analyses = [ MarginAlignSnpCaller ]
+#metaAnalyses = [ MarginAlignMetaAnalysis ] 
+#mappers = [ LastParamsChain, LastParamsRealignTrainedModel,
 #            LastParamsRealignTrainedModel20, LastParamsRealignTrainedModel40, 
 #            BlasrParamsChain, BlasrParamsRealignTrainedModel, 
 #            BlasrParamsRealignTrainedModel20, BlasrParamsRealignTrainedModel40,   ]
