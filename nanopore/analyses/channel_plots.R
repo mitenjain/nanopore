@@ -103,6 +103,9 @@ if (dim(data)[1] > 1) {
 
     print(p)
 
+    dev.off()
+    png(args[5], height=1000, width=1000, type="cairo")
+
     #do it again except with total # of reads
     reads <- data$ReadCount
     reads[is.nan(reads)] <- 0

@@ -20,27 +20,29 @@ if (! is.null(dim(dist))) {
 			}
 		}
 
-		pdf(args[3])
-		#this is all so hacky - first we make a color topo.colors
-		n <- 1
-		r <- topo.colors(length(rownames(dist)))
-		#then we find the biggest y value
-		m <- 0
-		for (i in 1:length(rownames(dist))) {
-			x <- density(as.numeric(dist[i,]), na.rm=T)
-			m <- max(m, max(x$y))
-		}
-		#now we iterate over all of the mappers and plot based on the biggest y value and varying colors
-		plot(density(as.numeric(dist[1,]), na.rm=T, adjust=0.7), xlab="Identity", xlim=c(0,1), main=paste(args[2],"Identity by Mapper", sep="\n"), ylim=c(0,m), col=r[n])
-		if (dim(dist)[1] > 1) {
-			for (i in 2:length(rownames(dist))) {
-				n <- n + 1
-				lines(density(as.numeric(dist[i,]), na.rm=T, adjust=0.7), col = r[n])
-			}
-		}
-		legend(x="top", col=r, legend=rownames(dist), cex=0.7, lty=1)
+		if (dim(dist)[1] > 1){
+			pdf(args[3])
 
-		dev.off()
+			hists <- list()
+			xmax <- 0
+			ymax <- 0
+			for (i in 1:length(rownames(dist))){
+				hists[[i]] <- hist(dist[i,])
+				xmax <- max(xmax, hists[[i]]$mids)
+				ymax <- max(ymax, hists[[i]]$counts)
+			}
+			colmap <- expand.grid(length(hists), ceiling(length(hists)/8))
+			#whatever
+			plot(1, xlim=c(0,xmax), ylim=c(0,ymax), main=paste(args[2],"Identity by Mapper", sep="\n"), xlab="Identity", type="n", ylab="Frequency")
+
+			for (i in 1:length(hists)) {
+				x <- hists[[i]]
+				points(x$mids, x$counts, col=colmap[i,1], pch=colmap[i,2])
+				lines(x$mids, x$counts, col=colmap[i,2], pch=colmap[i,2])
+
+			legend(x="top", col=colmap[,1], lty=colmap[,2], legend=rownames(dist), cex=0.7)
+
+			dev.off()
 		}
 	}
 }

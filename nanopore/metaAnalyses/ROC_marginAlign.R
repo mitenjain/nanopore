@@ -28,7 +28,7 @@ for (page in seq(algorithms * algorithms, dim(data)[1], algorithms * algorithms)
         held_out <- tprs[,3][1]
         tprs <- tprs[,-(1:4)]
         fprs <- fprs[,-(1:4)]
-        matplot(t(fprs), t(tprs), type="l", col=c(1:length(coverages)), xlim=c(0,1), ylim=c(0,1), main=paste("VariantCaller:\n", algorithm, "\nProportionHeldOut: ", held_out, sep=""), cex.main=0.5, cex.axis=0.5, xlab="False Positive Rate", ylab="True Positive Rate")
+        matplot(t(fprs), t(tprs), type="l", col=c(1:length(coverages)), main=paste("VariantCaller:\n", algorithm, "\nProportionHeldOut: ", held_out, sep=""), cex.main=0.5, cex.axis=0.5, xlab="False Positive Rate", ylab="True Positive Rate")
         legend("topright", legend=coverages, col=c(1:length(coverages)), cex=0.35, pch="-", title="Coverage")
         count <- count + 1
     }
