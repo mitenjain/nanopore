@@ -56,7 +56,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     #Get substitution matrices
                     nullSubstitionMatrix = getNullSubstitutionMatrix()
                     flatSubstitutionMatrix = getJukesCantorTypeSubstitutionMatrix()
-                    hmmErrorSubstitutionMatrix = loadHmmErrorSubstitutionMatrix(hmmFile)
+                    hmmErrorSubstitutionMatrix = loadHmmErrorSubstitutionMatrix(hmmFile0)
                 
                     #Load the held out snps
                     snpSet = {}
@@ -201,10 +201,13 @@ class MarginAlignSnpCaller(AbstractAnalysis):
             
                     #The different call sets
                     marginAlignMaxExpectedSnpCalls = SnpCalls()
+                    marginAlignMaxExpectedSnpCallsBias95 = SnpCalls()
                     marginAlignMaxExpectedSnpCallsBias8 = SnpCalls()
                     marginAlignMaxExpectedSnpCallsBias6 = SnpCalls()
-                    marginAlignMaxExpectedSnpCallsBias4 = SnpCalls()
                     marginAlignMaxLikelihoodSnpCalls = SnpCalls()
+                    marginAlignMaxLikelihoodSnpCallsBias95 = SnpCalls()
+                    marginAlignMaxLikelihoodSnpCallsBias8 = SnpCalls()
+                    marginAlignMaxLikelihoodSnpCallsBias6 = SnpCalls()
                     maxFrequencySnpCalls = SnpCalls()
                     maximumLikelihoodSnpCalls = SnpCalls()
                     
@@ -219,10 +222,13 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             #Get base calls
                             for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, biasFactor, snpCalls in \
                             ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxExpectedSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.95, marginAlignMaxExpectedSnpCallsBias95),
                              (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.8, marginAlignMaxExpectedSnpCallsBias8),
                              (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.6, marginAlignMaxExpectedSnpCallsBias6),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.4, marginAlignMaxExpectedSnpCallsBias4),
                              (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxLikelihoodSnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.95, marginAlignMaxLikelihoodSnpCallsBias95),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.8, marginAlignMaxLikelihoodSnpCallsBias8),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.6, marginAlignMaxLikelihoodSnpCallsBias6),
                              (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maxFrequencySnpCalls),
                              (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maximumLikelihoodSnpCalls)):
                                 chosenBase = 'N'
@@ -249,9 +255,12 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             
                     
                     for snpCalls, tagName in ((marginAlignMaxExpectedSnpCalls, "marginAlignMaxExpectedSnpCalls"), 
+                                              (marginAlignMaxExpectedSnpCallsBias95, "marginAlignMaxExpectedSnpCallsBias95"), 
                                               (marginAlignMaxExpectedSnpCallsBias8, "marginAlignMaxExpectedSnpCallsBias8"), 
                                               (marginAlignMaxExpectedSnpCallsBias6, "marginAlignMaxExpectedSnpCallsBias6"), 
-                                              (marginAlignMaxExpectedSnpCallsBias4, "marginAlignMaxExpectedSnpCallsBias4"), 
+                                              (marginAlignMaxLikelihoodSnpCallsBias95, "marginAlignMaxLikelihoodSnpCallsBias95"), 
+                                              (marginAlignMaxLikelihoodSnpCallsBias8, "marginAlignMaxLikelihoodSnpCallsBias8"), 
+                                              (marginAlignMaxLikelihoodSnpCallsBias6, "marginAlignMaxLikelihoodSnpCallsBias6"), 
                                               (marginAlignMaxLikelihoodSnpCalls, "marginAlignMaxLikelihoodSnpCalls"),
                                               (maxFrequencySnpCalls, "maxFrequencySnpCalls"),
                                               (maximumLikelihoodSnpCalls, "maximumLikelihoodSnpCalls")):
