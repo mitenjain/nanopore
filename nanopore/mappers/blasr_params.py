@@ -26,3 +26,13 @@ class BlasrParamsRealignTrainedModel(BlasrParams):
     def run(self):
         BlasrParams.run(self)
         self.realignSamFile(useTrainedModel=True)
+        
+class BlasrParamsRealignTrainedModel20(BlasrParams):
+    def run(self):
+        BlasrParams.run(self)
+        self.realignSamFile(useTrainedModel=True, trainedModelFile="BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_20.txt")
+        
+class BlasrParamsRealignTrainedModel40(BlasrParams):
+    def run(self):
+        BlasrParams.run(self)
+        self.realignSamFile(useTrainedModel=True, trainedModelFile="BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_40.txt")

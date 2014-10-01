@@ -43,15 +43,15 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         readSequences = getFastqDictionary(self.readFastqFile) #Hash of names to sequences
         
         node = ET.Element("marginAlignComparison")
-        for hmmType in ("trained_adjustedEmissions", "cactus", "trained", "trained_flatEmissions"): 
+        for hmmType in ("cactus", "trained_0",  "trained_20", "trained_40"): 
             for coverage in (1000000, 500, 120, 60, 30, 10): 
                 for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
                     sam = pysam.Samfile(self.samFile, "r" )
                     
                     #Trained hmm file to use.q
-                    hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
-                    hmmFile2 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm2.txt")
-                    hmmFile3 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm3.txt")
+                    hmmFile0 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_0.txt")
+                    hmmFile20 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_20.txt")
+                    hmmFile40 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_40.txt")
               
                     #Get substitution matrices
                     nullSubstitionMatrix = getNullSubstitutionMatrix()
@@ -132,15 +132,15 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         cigarString = getExonerateCigarFormatString(aR, sam)
                         
                         #Call to cactus_realign
-                        if hmmType == "trained":
+                        if hmmType == "trained_0":
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
-                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile, tempCigarFile))
-                        elif hmmType == "trained_flatEmissions":
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile0, tempCigarFile))
+                        elif hmmType == "trained_20":
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
-                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile2, tempCigarFile))
-                        elif hmmType == "trained_adjustedEmissions":
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile20, tempCigarFile))
+                        elif hmmType == "trained_40":
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s --loadHmm=%s > %s" % \
-                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile3, tempCigarFile))
+                                   (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, hmmFile40, tempCigarFile))
                         else:
                             system("echo %s | cactus_realign %s %s --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputAllPosteriorProbs=%s > %s" % \
                                    (cigarString, tempRefFile, tempReadFile, tempPosteriorProbsFile, tempCigarFile))
@@ -153,6 +153,8 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             readBase = readSeq[int(readPosition)].upper()
                             if readBase in bases:
                                 expectationsOfBasesAtEachPosition[key][readBase] += posteriorProb
+                        
+                        #Collate aligned positions from cigars
             
                     sam.close()
                     

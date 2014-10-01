@@ -15,8 +15,8 @@ from nanopore.mappers.bwa import Bwa, BwaChain, BwaRealign, BwaRealignEm, BwaRea
 from nanopore.mappers.bwa_params import BwaParams, BwaParamsChain, BwaParamsRealign, BwaParamsRealignEm, BwaParamsRealignTrainedModel
 from nanopore.mappers.last import Last, LastChain, LastRealign, LastRealignEm, LastRealignTrainedModel
 from nanopore.mappers.blasr import Blasr, BlasrChain, BlasrRealign, BlasrRealignEm, BlasrRealignTrainedModel
-from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel
-from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel
+from nanopore.mappers.blasr_params import BlasrParams, BlasrParamsChain, BlasrParamsRealign, BlasrParamsRealignEm, BlasrParamsRealignTrainedModel, BlasrParamsRealignTrainedModel20, BlasrParamsRealignTrainedModel40
+from nanopore.mappers.last_params import LastParams, LastParamsChain, LastParamsRealign, LastParamsRealignEm, LastParamsRealignTrainedModel, LastParamsRealignTrainedModel20, LastParamsRealignTrainedModel40
 from nanopore.mappers.combinedMapper import CombinedMapper, CombinedMapperChain, CombinedMapperRealign, CombinedMapperRealignEm, CombinedMapperRealignTrainedModel
 
 from nanopore.analyses.substitutions import Substitutions
@@ -80,9 +80,12 @@ analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, Alignmen
 
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper, HmmMetaAnalysis ]# CustomTrackAssemblyHub ]
 
-#analyses = [ Hmm ]
-#metaAnalyses = [ HmmMetaAnalysis ] 
-#mappers = [LastParamsRealignEm, LastzParamsRealignEm  ]
+#analyses = [ MarginAlignSnpCaller ]
+#metaAnalyses = [ MarginAlignMetaAnalysis ] 
+#mappers = [ LastParamsChain, LastParamsRealignTrainedModel, 
+#            LastParamsRealignTrainedModel20, LastParamsRealignTrainedModel40, 
+#            BlasrParamsChain, BlasrParamsRealignTrainedModel, 
+#            BlasrParamsRealignTrainedModel20, BlasrParamsRealignTrainedModel40,   ]
 
 #The following runs the mapping and analysis for every combination of readFastqFile, referenceFastaFile and mapper
 def setupExperiments(target, readFastqFiles, referenceFastaFiles, mappers, analysers, metaAnalyses, outputDir):
