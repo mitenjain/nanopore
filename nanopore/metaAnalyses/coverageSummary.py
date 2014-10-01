@@ -72,7 +72,7 @@ class CoverageSummary(AbstractMetaAnalysis):
                                entry.XML.attrib["numberOfUnmappedReads"],
                                entry.XML.attrib["numberOfReads"]]) + "\n")
         outf.close()
-        path2 = os.path.join(self.outputDir, name + "_distribution.csv")
+        path2 = os.path.join(self.outputDir, n + "_distribution.csv")
         outf = open(path2, "w")
         for entry in entries:
             outf.write(",".join([entry.mapper] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
