@@ -43,7 +43,7 @@ if (! is.null(dim(dist)) && dim(dist)[2] > 2 && dim(dist)[1] > 1) {
 
     }
 
-    legend(x="top", col=rep(c(colmap[,1], rep("NA", times=4)),times=length(hists)), pch=colmap[,2], legend=cbind(rownames(dist),q), ncol=2, title="\t\tAverage % Identity", cex=0.6,bty="n")
+    legend(x="top", col=c(colmap[,1], rep("NA", times=4)), pch=colmap[,2], legend=cbind(rownames(dist),q), ncol=2, title="\t\tAverage % Identity", cex=0.6,bty="n")
     
 
 
