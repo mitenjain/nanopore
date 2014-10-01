@@ -16,7 +16,7 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     par(mfrow=c(2,2))
     #plot the mapped/unmapped read lengths
     #future - stack them; remove very long unmapped reads?
-    lengths <- cbind(data$MappedReadLengths, data$UnmappedReadLengths)
+    lengths <- c(data$MappedReadLengths, data$UnmappedReadLengths)
     lengths.sort <- lengths[order(lengths)]
     #remove the 5% longest reads so they don't skew the graph
     xmax <- lengths.sort[round(0.95*length(lengths.sort))]
@@ -37,19 +37,57 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     plot(u, col=rgb(0,0,1,0.5), add=T, xlim=c(0,xmax), ylim=c(0,ymax), main="", xlab="", ylab="")
     legend("topleft", pch=15, legend=c(paste("Mapped n =", length(data$MappedReadLengths)), paste("Unmapped n =", length(data$UnmappedReadLengths))), col=c(rgb(1,0,0),rgb(0,0,1)))
     
-    p1 <- xyplot(data$ReadIdentity~data$MappedReadLengths, main=list("Read Identity vs.\nRead Length", cex=0.92), xlab="Read Length", ylab="Read Identity", grid=T, panel=panel.smoothScatter)
-    p2 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$MappedReadLengths, main=list("Indels Per Aligned Base vs.\nRead Length", cex=0.92), xlab="Read Length", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
-    p3 <- xyplot(data$MismatchesPerReadBase~data$MappedReadLengths, main=list("Mismatches Per Aligned Base vs.\nRead Length", cex=0.92), ylab="Mismatches Per Aligned Base", xlab="Read Length", grid=T, panel=panel.smoothScatter)
+    p1 <- xyplot(data$ReadIdentity~data$MappedReadLengths, main=list("Read Identity vs.\nRead Length", cex=0.95), xlab="Read Length", ylab="Read Identity", grid=T, panel=panel.smoothScatter)
+    p2 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$MappedReadLengths, main=list("Indels Per Aligned Base vs.\nRead Length", cex=0.95), xlab="Read Length", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
+    p3 <- xyplot(data$MismatchesPerReadBase~data$MappedReadLengths, main=list("Mismatches Per Aligned Base vs.\nRead Length", cex=0.95), ylab="Mismatches Per Aligned Base", xlab="Read Length", grid=T, panel=panel.smoothScatter)
     
     #print the graphs
     print(p1, position=c(0, 0.5, 0.5, 1), more=T)
     print(p2, position=c(0.5, 0.5, 1, 1), more=T)
     print(p3, position=c(0, 0, 0.5, 0.5))
+
+    #now time to do more graphs
+    #filter out any read identities that are outside of 3 sd's from mean for fit lines
+    #but still plot the points
+    m <- mean(data$ReadIdentity)
+    s <- sd(data$ReadIdentity)
+    inliers <- which(data$ReadIdentity >= m - 3 * s & data$ReadIdentity <= m + 3 * s)
     
-    p1 <- xyplot(data$MismatchesPerReadBase~(data$InsertionsPerBase+data$DeletionsPerBase), main=list("Mismatches Per Aligned Base vs.\nIndels Per Aligned Base", cex=0.92), xlab="Indels Per Aligned Base", ylab="Mismatches Per Aligned Base", grid=T, panel=panel.smoothScatter)
-    p2 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$ReadIdentity, main=list("Indels Per Aligned Base vs.\nRead Identity", cex=0.92), xlab="Read Identity", ylab="Indels Per Base", grid=T, panel=panel.smoothScatter)
-    p3 <- xyplot(data$MismatchesPerReadBase~data$ReadIdentity, main=list("Mismatches Per Aligned Base vs.\nRead Identity",cex=0.92), ylab="Mismatches Per Aligned Base", xlab="Read Identity", grid=T, panel=panel.smoothScatter)
-    p4 <- xyplot(data$InsertionsPerBase~data$DeletionsPerBase, main=list("Insertions Per Aligned Base vs.\nDeletions Per Aligned Base",cex=0.92), xlab="Deletions Per Aligned Base", ylab="Insertions Per Aligned Base", grid=T, panel=panel.smoothScatter)
+    p1 <- xyplot(data$MismatchesPerReadBase~(data$InsertionsPerBase+data$DeletionsPerBase), 
+        main=list("Mismatches Per Aligned Base vs.\nIndels Per Aligned Base", cex=0.95), 
+        xlab="Indels Per Aligned Base", ylab="Mismatches Per Aligned Base", grid=T, panel=function(...){
+        panel.smoothScatter(...)
+        panel.lmline(..., lwd=1.2)
+        },
+        key=simpleKey(paste("R^2 =", as.character(round(summary.lm(
+        lm(data$MismatchesPerReadBase~(data$InsertionsPerBase+data$DeletionsPerBase)))$adj.r.squared,3)), sep=" "),
+        points=F, corner=c(0,1), cex=0.9))
+    p2 <- xyplot((data$InsertionsPerBase+data$DeletionsPerBase)~data$ReadIdentity, 
+        main=list("Indels Per Aligned Base vs.\nRead Identity", cex=0.95), xlab="Read Identity", 
+        ylab="Indels Per Base", grid=T, panel=function(...){
+        panel.smoothScatter(...)
+        panel.abline(lwd=1.2, lm((data$InsertionsPerBase+data$DeletionsPerBase)[inliers]~data$ReadIdentity[inliers]))
+        },
+        key=simpleKey(paste("R^2 =", as.character(round(summary.lm(
+        lm((data$InsertionsPerBase+data$DeletionsPerBase)~data$ReadIdentity))$adj.r.squared,3)), sep=" "),
+        points=F, corner=c(1,1), cex=0.9))
+    p3 <- xyplot(data$MismatchesPerReadBase~data$ReadIdentity, main=list("Mismatches Per Aligned Base vs.\nRead Identity",cex=0.95), 
+        ylab="Mismatches Per Aligned Base", xlab="Read Identity", grid=T, panel=function(...){
+        panel.smoothScatter(...)
+        panel.abline(lwd=1.2, lm(data$MismatchesPerReadBase[data$ReadIdentity>0.6]~data$ReadIdentity[data$ReadIdentity>0.6]))
+        },
+        key=simpleKey(paste("R^2 =", as.character(round(summary.lm(
+        lm((data$InsertionsPerBase+data$DeletionsPerBase)~data$ReadIdentity))$adj.r.squared,3)), sep=" "),
+        points=F, corner=c(0,0), cex=0.9))
+    p4 <- xyplot(data$InsertionsPerBase~data$DeletionsPerBase, main=list("Insertions Per Aligned Base vs.\nDeletions Per Aligned Base",cex=0.95), 
+        xlab="Deletions Per Aligned Base", ylab="Insertions Per Aligned Base", grid=T, panel=function(...){
+            panel.smoothScatter(...)
+            panel.lmline(..., lwd=1.2)
+        },
+        key=simpleKey(paste("R^2 =", as.character(round(summary.lm(
+        lm(data$InsertionsPerBase~data$DeletionsPerBase))$adj.r.squared,3)), sep=" "),
+        points=F, corner=c(0,1), cex=0.9))
+
     
     #print the graphs
     print(p1, position=c(0, 0.5, 0.5, 1), more=T)
