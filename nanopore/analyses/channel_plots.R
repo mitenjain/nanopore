@@ -50,7 +50,7 @@ if (dim(data)[1] > 1) {
 
     png(args[3], height=3000, width=3000, type="cairo")
 
-    q<- barplot(sorted, main=paste("Sorted Channel Mappability", paste("# Reporting = ", length(sorted[1,]), "/512", sep=""), sep="\n"), xlab="Channel", ylab="Read Counts", legend.text=T, xaxt="n", col=c("blue","red"), args.legend=c(cex=4), cex.names=3, cex.main=6)
+    q<- barplot(sorted, main=paste("Sorted Channel Mappability", paste("# Reporting = ", length(sorted[1,]), "/512", sep=""), sep="     "), xlab="Channel", ylab="Read Counts", legend.text=T, xaxt="n", col=c("blue","red"), args.legend=c(cex=4), cex.names=3, cex.main=5)
     text(cex=0.5, x=q-.25, y=-1.25, colnames(sorted), xpd=T, srt=65)
 
     #geometric fit - tried it, was not a good fit

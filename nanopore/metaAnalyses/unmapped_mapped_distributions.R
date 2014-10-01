@@ -29,9 +29,9 @@ if (length(unmapped[,1]) >= 1 && length(mapped[1,]) >= 1) {
     lines(unmapped.density, col="red")
     legend(x="topright", col=c("blue","red"), legend=c("Mapped","Unmapped"), pch="-")
 
-    m <- hist(mapped, breaks = "FD", plot=F)
-    u <- hist(unmapped, breaks = "FD", plot=F)
-    combined <- c(mapped, unmapped)
+    m <- hist(mapped[1,], breaks = "FD", plot=F)
+    u <- hist(unmapped[1,], breaks = "FD", plot=F)
+    combined <- c(mapped[1,], unmapped[1,])
     combined <- combined[!is.na(combined)]
     combined.sort <- combined[order(combined)]
     xmax <- combined.sort[round(0.95*length(combined.sort))]
@@ -44,7 +44,7 @@ if (length(unmapped[,1]) >= 1 && length(mapped[1,]) >= 1) {
     ymax <- max(u$counts, m$counts)
     plot(m, col=rgb(1,0,0,0.5), xlim=c(0,xmax), ylim=c(0,ymax), main="Mapped and Unmapped Read Length Distributions", xlab="Read Length")
     plot(u, col=rgb(0,0,1,0.5), add=T, xlim=c(0,xmax), ylim=c(0,ymax), main="", xlab="", ylab="")
-    legend("topleft", pch=15, legend=c(paste("Mapped n=", length(data$MappedReadLengths)), paste("Unmapped n= ", length(data$UnmappedReadLengths))), col=c(rgb(1,0,0),rgb(0,0,1)))
+    legend("topleft", pch=15, legend=c(paste("Mapped n=", length(m)), paste("Unmapped n= ", length(u))), col=c(rgb(1,0,0),rgb(0,0,1)))
      
 
     lengths <- c(length(unmapped[,1]), length(mapped[,1]))
