@@ -10,9 +10,9 @@ class UnmappedLengthDistributionAnalysis(AbstractUnmappedMetaAnalysis):
             unmapped = open(os.path.join(self.outputDir, readType + "_unmapped.txt"), "w")
             mapped = open(os.path.join(self.outputDir, readType + "_mapped.txt"), "w")
             for read in self.reads:
-                if read.is_mapped:
+                if read.is_mapped is True and read.readType == readType:
                     mapped.write("{}\n".format(len(read.seq)))
-                else:
+                elif read.readType == readType:
                     unmapped.write("{}\n".format(len(read.seq)))
             unmapped.close(); mapped.close()
             if os.path.getsize(os.path.join(self.outputDir, readType + "_unmapped.txt")) > 0 and os.path.getsize(os.path.join(self.outputDir, readType + "_mapped.txt")) > 0:
@@ -22,7 +22,7 @@ class UnmappedLengthDistributionAnalysis(AbstractUnmappedMetaAnalysis):
             unmapped = open(os.path.join(self.outputDir, os.path.basename(reference) + "_unmapped.txt"), "w")
             mapped = open(os.path.join(self.outputDir, os.path.basename(reference) + "_mapped.txt"), "w")
             for read in self.reads:
-                if read.is_mapped:
+                if read.is_mapped is True:
                     mapped.write("{}\n".format(len(read.seq)))
                 else:
                     unmapped.write("{}\n".format(len(read.seq)))
