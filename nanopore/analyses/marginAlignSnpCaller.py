@@ -56,7 +56,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     #Get substitution matrices
                     nullSubstitionMatrix = getNullSubstitutionMatrix()
                     flatSubstitutionMatrix = getJukesCantorTypeSubstitutionMatrix()
-                    hmmErrorSubstitutionMatrix = loadHmmErrorSubstitutionMatrix(hmmFile0)
+                    hmmErrorSubstitutionMatrix = loadHmmErrorSubstitutionMatrix(hmmFile20)
                 
                     #Load the held out snps
                     snpSet = {}
