@@ -1,6 +1,8 @@
 import pysam, sys, os, collections
 from jobTree.src.bioio import reverseComplement, fastaRead, fastqRead, cigarReadFromString, PairwiseAlignment, system, fastaWrite, fastqWrite, cigarRead, logger, nameValue, absSymPath
 from cactus.bar import cactus_expectationMaximisation
+from cactus.bar.cactus_expectationMaximisation import Hmm, SYMBOL_NUMBER
+import numpy as np
 
 class UniqueList(collections.MutableSet):
     def __init__(self, iterable=None):
@@ -383,7 +385,7 @@ def mergeChainedAlignedReads(chainedAlignedReads, refSequence, readSequence):
     
     return cAR
 
-def chainFn(alignedReads, refSeq, readSeq, scoreFn=lambda alignedRead, refSeq, readSeq : len(list(AlignedPair.iterator(alignedRead, refSeq, readSeq)))):
+def chainFn(alignedReads, refSeq, readSeq, scoreFn=lambda alignedRead, refSeq, readSeq : len(list(AlignedPair.iterator(alignedRead, refSeq, readSeq))), maxGap=200):
     """Gets the highest scoring chain of alignments on either the forward or reverse strand. Score is (by default) number of aligned positions.
     """
     def getStartAndEndCoordinates(alignedRead):
@@ -406,6 +408,7 @@ def chainFn(alignedReads, refSeq, readSeq, scoreFn=lambda alignedRead, refSeq, r
             rStart2, qStart2, rEnd2, qEnd2 = alignedReadToCoordinates[aR2]
             assert rStart2 <= rStart
             if rStart > rEnd2 and qStart > qEnd2 and aR.is_reverse == aR2.is_reverse and \
+            rStart - rEnd2 + qStart - qEnd2 <= maxGap and \
             score + alignedReadToScores[aR2] > alignedReadToScores[aR]: #Conditions for a chain
                 alignedReadToScores[aR] = score + alignedReadToScores[aR2]
                 alignedReadPointers[aR] = aR2
@@ -516,8 +519,22 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     #options.useDefaultModelAsStart = True
     #options.setJukesCantorStartingEmissions=0.3
     options.trainEmissions=True
-    options.tieEmissions = True
-    target.setFollowOnTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, outputModel, options))
+    #options.tieEmissions = True
+    
+    unnormalisedOutputModel = outputModel + "_unnormalised"
+    #Do training if necessary
+    if not os.path.exists(unnormalisedOutputModel):
+        target.addChildTargetFn(cactus_expectationMaximisation.expectationMaximisationTrials, args=(" ".join([reads, referenceFastaFile ]), cigars, unnormalisedOutputModel, options))
+    
+    #Now set up normalisation
+    target.setFollowOnTargetFn(learnModelFromSamFileTargetFn2, args=(unnormalisedOutputModel, outputModel))
+
+def learnModelFromSamFileTargetFn2(target, unnormalisedOutputModel, outputModel):
+    hmm = Hmm.loadHmm(unnormalisedOutputModel)
+    setHmmIndelEmissionsToBeFlat(hmm)
+    #Normalise background emission frequencies, if requested to GC% given
+    normaliseHmmByReferenceGCContent(hmm, 0.5)
+    hmm.write(outputModel)
 
 def realignSamFileTargetFn(target, samFile, outputSamFile, readFastqFile, 
                            referenceFastaFile, gapGamma, matchGamma, hmmFile=None, trainHmmFile=False, chainFn=chainFn):
@@ -589,4 +606,24 @@ def realignSamFile3TargetFn(target, samFile, outputSamFile, tempCigarFiles):
     #Finish up
     sam.close()
     outputSam.close()
+    
+toMatrix = lambda e : map(lambda i : e[SYMBOL_NUMBER*i:SYMBOL_NUMBER*(i+1)], xrange(SYMBOL_NUMBER))
+fromMatrix = lambda e : reduce(lambda x, y : list(x) + list(y), e)
+    
+def normaliseHmmByReferenceGCContent(hmm, gcContent):
+    #Normalise background emission frequencies, if requested to GC% given
+    for state in range(hmm.stateNumber):
+        if state not in (2, 4): #Don't normalise GC content of insert states (as they don't have any ref bases!)
+            n = toMatrix(hmm.emissions[(SYMBOL_NUMBER**2) * state:(SYMBOL_NUMBER**2) * (state+1)])
+            hmm.emissions[(SYMBOL_NUMBER**2) * state:(SYMBOL_NUMBER**2) * (state+1)] = fromMatrix(map(lambda i : map(lambda j : (n[i][j]/sum(n[i])) * (gcContent/2.0 if i in [1, 2] else (1.0-gcContent)/2.0), range(SYMBOL_NUMBER)), range(SYMBOL_NUMBER))) #Normalise
 
+def modifyHmmEmissionsByExpectedVariationRate(hmm, substitutionRate):
+    #Normalise background emission frequencies, if requested to GC% given
+    n = toMatrix(map(lambda i : (1.0-substitutionRate) if i % SYMBOL_NUMBER == i / SYMBOL_NUMBER else substitutionRate/(SYMBOL_NUMBER-1), xrange(SYMBOL_NUMBER**2)))
+    hmm.emissions[:SYMBOL_NUMBER**2] = fromMatrix(np.dot(toMatrix(hmm.emissions[:SYMBOL_NUMBER**2]), n))
+
+def setHmmIndelEmissionsToBeFlat(hmm):
+    #Set indel emissions to all be flat
+    for state in range(1, hmm.stateNumber):
+        hmm.emissions[(SYMBOL_NUMBER**2) * state:(SYMBOL_NUMBER**2) * (state+1)] = [1.0/(SYMBOL_NUMBER**2)]*SYMBOL_NUMBER**2
+    

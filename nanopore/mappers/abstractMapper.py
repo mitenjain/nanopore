@@ -22,7 +22,7 @@ class AbstractMapper(Target):
         system("cp %s %s" % (self.outputSamFile, tempSamFile))
         chainSamFile(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile)
     
-    def realignSamFile(self, gapGamma=0.5, matchGamma=0.0, doEm=False,  useTrainedModel=False):
+    def realignSamFile(self, gapGamma=0.5, matchGamma=0.0, doEm=False,  useTrainedModel=False, trainedModelFile="BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_0.txt"):
         """Chains and then realigns the resulting global alignments.
         """
         tempSamFile = os.path.join(self.getGlobalTempDir(), "temp.sam")
@@ -32,7 +32,7 @@ class AbstractMapper(Target):
         if doEm:
             hmmFile = self.emptyHmmFile
         elif useTrainedModel:
-            hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "last_em_575_M13_2D_hmm.txt")
+            hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", trainedModelFile)
         else:
             hmmFile = None
         self.addChildTargetFn(realignSamFileTargetFn, args=(tempSamFile, self.outputSamFile, 

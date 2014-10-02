@@ -1,37 +1,31 @@
 ###Modify HMMs output from EM training to normalise for background nucleotide frequencies.
 from cactus.bar.cactus_expectationMaximisation import Hmm, SYMBOL_NUMBER
-import numpy as np
 import sys
+from nanopore.analyses.utils import setHmmIndelEmissionsToBeFlat, normaliseHmmByReferenceGCContent, modifyHmmEmissionsByExpectedVariationRate, toMatrix
+import numpy as np
 
 def main():
     print "ARGS", sys.argv
     #Load HMM
     hmm = Hmm.loadHmm(sys.argv[1])
 
-    #Convert to matrix
-    toMatrix = lambda e : map(lambda i : e[SYMBOL_NUMBER*i:SYMBOL_NUMBER*(i+1)], xrange(SYMBOL_NUMBER))
-    fromMatrix = lambda e : reduce(lambda x, y : list(x) + list(y), e)
-    
-    #Set indel emissions to all be normalised
-    for state in range(1, hmm.stateNumber):
-        hmm.emissions[(SYMBOL_NUMBER**2) * state:(SYMBOL_NUMBER**2) * (state+1)] = [1.0/(SYMBOL_NUMBER**2)]*SYMBOL_NUMBER**2
+    #setHmmIndelEmissionsToBeFlat(hmm)
 
-    #Normalise background emission frequencies, if requested to frequencies in given file
+    #Normalise background emission frequencies, if requested to GC% given
     gcContent = float(sys.argv[2])
     print "Got GC content", gcContent
-    for state in range(hmm.stateNumber):
-        n = toMatrix(hmm.emissions[(SYMBOL_NUMBER**2) * state:(SYMBOL_NUMBER**2) * (state+1)])
-        hmm.emissions[(SYMBOL_NUMBER**2) * state:(SYMBOL_NUMBER**2) * (state+1)] = fromMatrix(map(lambda i : map(lambda j : (n[i][j]/sum(n[i])) * (gcContent/2.0 if i in [1, 2] else (1.0-gcContent)/2.0), range(SYMBOL_NUMBER)), range(SYMBOL_NUMBER))) #Normalise
-
+    normaliseHmmByReferenceGCContent(hmm, gcContent)
+    
     #Modify match emissions by proposed substitution rate
     substitutionRate = float(sys.argv[3])
     print "Got substitution rate", substitutionRate
-    n = toMatrix(map(lambda i : (1.0-substitutionRate) if i % SYMBOL_NUMBER == i / SYMBOL_NUMBER else substitutionRate/(SYMBOL_NUMBER-1), xrange(SYMBOL_NUMBER**2)))
-    print "Got substitution matrix", n
-    hmm.emissions[:SYMBOL_NUMBER**2] = fromMatrix(np.dot(toMatrix(hmm.emissions[:SYMBOL_NUMBER**2]), n))
-
-    #Modify 
-
+    modifyHmmEmissionsByExpectedVariationRate(hmm, substitutionRate)
+    
+    for state in range(0, hmm.stateNumber):
+        n = toMatrix(hmm.emissions[(SYMBOL_NUMBER**2) * state:(SYMBOL_NUMBER**2) * (state+1)])
+        print "For state, ref frequencies", map(sum, n)
+        print "For state, read frequencies", map(sum, np.transpose(n))
+    
     #Write out HMM
     hmm.write(sys.argv[4])
 

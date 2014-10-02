@@ -21,7 +21,7 @@ if ( dim(d)[1] > 0 && sum(d) > 0) {
 
     pdf(out)
 
-    p <- levelplot(as.matrix(-log(d)), main=inf, xlab="Read bases", ylab="Reference bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
+    p <- levelplot(as.matrix(-log(d)), main=inf, xlab="Reference bases", ylab="Read bases", panel = myPanel, col.regions=colorRampPalette(c("white","red"))(256))
 
     print(p)
 
