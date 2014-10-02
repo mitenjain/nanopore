@@ -18,11 +18,11 @@ if (algorithms %% 2 == 0) {
 }
 
 
-for (page in seq(1, dim(data)[1], algorithms)) {
-    for (pos in seq(page, algorithms)) {
+for (page in seq(0, dim(data)[1], algorithms)) {
+    for (pos in seq(1, algorithms)) {
         count <- 0
-        tprs <- data[seq(pos-10*page, pos+1*page, 2),]
-        fprs <- data[seq(pos-11*page, pos*page, 2),]
+        tprs <- data[seq(page+pos-10, page+pos+1, 2),]
+        fprs <- data[seq(page+pos-11, page+pos, 2),]
         coverages <- tprs[,4]
         algorithm <- tprs[,2][1]
         held_out <- tprs[,3][1]
