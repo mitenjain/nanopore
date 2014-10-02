@@ -86,12 +86,13 @@ class CoverageSummary(AbstractMetaAnalysis):
         names = list()
         for entry in entries:
             if multiple_read_types is True and entry.mapper + "_" + entry.readType == last_mapper:
+                count += 1
                 last_mapper = entry.mapper + "_" + entry.readType
-                if count != 1:
+                if start is not True:
                     names.append(entry.mapper + "_" + entry.readType + "." + str(count))
                 else:
                     names.append(entry.mapper + "_" + entry.readType)
-                count += 1
+                    start = False
             elif multiple_read_types is True:
                 last_mapper = entry.mapper + "_" + entry.readType
                 names.append(entry.mapper + "_" + entry.readType)
