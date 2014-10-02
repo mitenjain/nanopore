@@ -104,7 +104,7 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
         proportionsHeldOut = list(proportionsHeldOut)
         proportionsHeldOut.sort()
         for readType, mapper in product(readTypes, self.mappers):
-            outf = open(os.path.join(self.outputDir, readType + "_" + mapper + ".tsv"), "w")
+            outf = open(os.path.join(self.outputDir, readType + "_" + mapper.__name__ + ".tsv"), "w")
             #Make grid plot for each combination of readType/mapper
             #Grid dimensions would be variant calling algorithms x proportion held out
             #On each plot we should show the roc curve (use falsePositiveRatesByProbability vs. truePositiveRatesByProbability) for the different coverages.
