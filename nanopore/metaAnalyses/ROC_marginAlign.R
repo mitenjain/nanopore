@@ -4,37 +4,38 @@ args <- commandArgs(trailingOnly = T)
 library(lattice)
 
 data <- read.table(args[1])
-outf <- pdf(args[2])
-algorithms <- as.numeric(args[3])
 
-#plot every algorithm on one page, one page per held out amount
-#each plot contains ROC curves for each coverage tested
-if (algorithms %% 2 == 0) {
-    par(mfrow=c(ceiling(sqrt(algorithms)), floor(sqrt(algorithms))))
-    plots <- ceiling(sqrt(algorithms)) * floor(sqrt(algorithms))
-} else {
-    par(mfrow=c(ceiling(sqrt(algorithms)), ceiling(sqrt(algorithms))))
-    plots <- ceiling(sqrt(algorithms)) * ceiling(sqrt(algorithms))
-}
-
-
-for (page in seq(1, dim(data)[1], algorithms)) {
-    count <- 0
-    tprs <- data[seq(page, algorithms+page-1, 2),]
-    fprs <- data[seq(page+1, algorithms+page, 2),]
-    coverages <- tprs[,4]
-    algorithm <- tprs[,2][1]
-    held_out <- tprs[,3][1]
-    tprs <- tprs[,-(1:4)]
-    fprs <- fprs[,-(1:4)]
-    matplot(t(fprs), t(tprs), type="l", col=c(1:length(coverages)), main=paste("VariantCaller:\n", algorithm, "\nProportionHeldOut: ", held_out, sep=""), cex.main=0.5, cex.axis=0.5, xlab="False Positive Rate", ylab="True Positive Rate")
-    legend("topright", legend=coverages, col=c(1:length(coverages)), cex=0.35, pch="-", title="Coverage")
-    count <- count + 1
-    if (count < plots) {
-        while (count < plots) {
-            plot.new()
-            count <- count + 1
-        }
+#find # of algorithms, coverages and proportions heldout used
+algorithms <- length(unique(data[,2]))
+coverage <- length(unique(data[,4]))
+heldout <- length(unique(data[,3]))
+#make a plot x heldout by y algorithms
+outf <- png(args[2],height=algorithms*420,width=heldout*420)
+#set this parameter
+par(mfrow=c(algorithms, heldout))
+#loop over every algorithm block, which is heldout*coverage*2
+#this corresponds to each row of plots
+for (i in seq(1, algorithms*heldout*coverage*2, heldout*coverage*2)) {
+    #loop over every fpr/tpr block, which happens every coverage*2
+    #this corresponds to one plot in a row
+    for (j in seq(i, i+heldout*coverage*2-heldout-coverage, coverage*2)) {
+        #pull out these fprs and tprs (which alternate down the whole file)
+        fprs <- data[seq(j, j+coverage*2-1, 2),]
+        tprs <- data[seq(j+1, j+coverage*2, 2),]
+        #find the coverages for this plot *should always be the same*
+        coverages <- tprs[,4]
+        #find this trials algorithm *should be the same for each row*
+        algorithm <- tprs[,2][1]
+        #find the proportion heldout for this plot, turn into a text percentage
+        held_out <- paste(formatC(100*round(tprs[,3][1],6), format="f", digits=2), "%", sep="")
+        #remove the non-data columns in preparation for plotting
+        tprs <- tprs[,-(1:4)]
+        fprs <- fprs[,-(1:4)]
+        #plot and draw legend
+        matplot(t(fprs), t(tprs), type="l", col=c(1:length(coverages)), main=paste("VariantCaller:\n", algorithm, "\nProportionHeldOut: ", held_out, sep=""), cex.main=0.8, cex.axis=0.7, xlab="False Positive Rate", ylab="True Positive Rate")
+        legend("topleft", legend=coverages, col=c(1:length(coverages)), cex=0.8, pch="-", title="Coverage")
     }
 }
+
 dev.off()
+
