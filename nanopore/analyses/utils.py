@@ -385,7 +385,7 @@ def mergeChainedAlignedReads(chainedAlignedReads, refSequence, readSequence):
     
     return cAR
 
-def chainFn(alignedReads, refSeq, readSeq, scoreFn=lambda alignedRead, refSeq, readSeq : len(list(AlignedPair.iterator(alignedRead, refSeq, readSeq)))):
+def chainFn(alignedReads, refSeq, readSeq, scoreFn=lambda alignedRead, refSeq, readSeq : len(list(AlignedPair.iterator(alignedRead, refSeq, readSeq))), maxGap=200):
     """Gets the highest scoring chain of alignments on either the forward or reverse strand. Score is (by default) number of aligned positions.
     """
     def getStartAndEndCoordinates(alignedRead):
@@ -408,6 +408,7 @@ def chainFn(alignedReads, refSeq, readSeq, scoreFn=lambda alignedRead, refSeq, r
             rStart2, qStart2, rEnd2, qEnd2 = alignedReadToCoordinates[aR2]
             assert rStart2 <= rStart
             if rStart > rEnd2 and qStart > qEnd2 and aR.is_reverse == aR2.is_reverse and \
+            rStart - rEnd2 + qStart - qEnd2 <= maxGap and \
             score + alignedReadToScores[aR2] > alignedReadToScores[aR]: #Conditions for a chain
                 alignedReadToScores[aR] = score + alignedReadToScores[aR2]
                 alignedReadPointers[aR] = aR2
