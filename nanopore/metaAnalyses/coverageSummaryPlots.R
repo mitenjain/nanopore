@@ -27,6 +27,7 @@ if (dim(summary)[1] >= 1) {
     for (i in 1:8){
         colmap <- c(colmap, rep(i, times=num))
     }
+
     pchmap <- rep(15:(15+num-1), times=ceiling(length(hists)/num))
 
     pdf(args[3])
@@ -36,8 +37,8 @@ if (dim(summary)[1] >= 1) {
     ####Looking at insertion/deletion/match rates
     ################################################
     
-    plot(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, xlab="Avg. Insertions Per Aligned Read Base", ylab="Avg. Deletions Per Aligned Read Base", main=name, col=colmap, pch=pchmap, xlim=c(0,0.2), ylim=c(0,0.2), cex.main=0.9, alpha=0.7)
-    legend("topright", cex=0.75, legend=names, pch="*", col=1:8)
+    plot(summary$AvgInsertionsPerReadBase, summary$AvgDeletionsPerReadBase, xlab="Avg. Insertions Per Aligned Read Base", ylab="Avg. Deletions Per Aligned Read Base", main=name, col=colmap, pch=pchmap, xlim=c(0,0.2), ylim=c(0,0.2), cex.main=0.9)
+    legend("topright", cex=0.75, legend=names, pch="*", col=1:8, pt.cex=1.2)
     
     #scatterplot of Avg identity coverage vs Avg # of indels per base
     plot(100 * summary$AvgIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, ylab="Avg. Indels Per Aligned Read Base", xlab="Avg. Match Identity", main=name, col=colmap, pch=pchmap, xlim=c(0,100), cex.main=0.9)
