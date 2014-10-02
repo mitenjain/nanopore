@@ -29,11 +29,11 @@ if (! is.null(dim(dist)) && dim(dist)[2] > 2 && dim(dist)[1] > 1) {
         b <- max(b, nclass.FD(dist[i,][!is.na(dist[i,])]))
     }
     for (i in 1:length(rownames(dist))){
-        hists[[i]] <- hist(dist[i,][!is.na(dist[i,])], plot=F, breaks=b, xlim=c(0, xmax), ylim=c(0,ymax))
+        hists[[i]] <- hist(dist[i,][!is.na(dist[i,])], plot=F, breaks=b)
         xmax <- max(xmax, hists[[i]]$mids)
         ymax <- max(ymax, hists[[i]]$counts)
     }
-    colmap <- expand.grid(1:length(hists), 15:15+ceiling(length(hists)/8))
+    colmap <- expand.grid(1:length(hists), 15:(15+ceiling(length(hists)/8)))
     #whatever
     plot(1, xlim=c(0,xmax), ylim=c(0,ymax), main=paste(args[2],"Identity by Mapper", sep="\n"), xlab="Identity", type="n", ylab="Frequency")
 
