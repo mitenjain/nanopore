@@ -48,12 +48,14 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
         
         fH2 = open(os.path.join(self.outputDir, "marginAlignSquares.txt"), 'w')
         coverageLevels = list(coverageLevels)
+        if 500 in coverageLevels: #Hack to reduce amount of fields
+            coverageLevels.remove(500)
         coverageLevels.sort()
         fH2.write("\t".join(["readType", "mapper", "caller", 
                             "%heldOut",
-                           "\t".join([ ("recall_coverage_%s" % coverage) for coverage in coverageLevels]),
-                           "\t".join([ ("precision_coverage_%s" % coverage) for coverage in coverageLevels]),
-                           "\t".join([ ("fscore_coverage_%s" % coverage) for coverage in coverageLevels]) ]) + "\n")
+                           "\t".join([ ("min_recall_coverage_%s\t" % coverage) + ("avg_recall_coverage_%s\t" % coverage) + ("\tmax_recall_coverage_%s" % coverage) for coverage in coverageLevels]),
+                           "\t".join([ ("min_precision_coverage_%s\t" % coverage) + ("avg_precision_coverage_%s\t" % coverage) + ("\tmax_precision_coverage_%s" % coverage) for coverage in coverageLevels]),
+                           "\t".join([ ("min_fscore_coverage_%s\t" % coverage) + ("avg_fscore_coverage_%s\t" % coverage) + ("\tmax_fscore_coverage_%s" % coverage) for coverage in coverageLevels]), "\n" ]))
         
         keys = hash.keys()
         keys.sort()
@@ -77,10 +79,10 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                                    r(fScore), r(recall), r(precision), r(notCalled), r(actualCoverage)]) + "\n")
             
             fH2.write("\t".join([readType, mapper, algorithm, str(proportionHeldOut)]) + "\t")
-            fH2.write("\t".join(map(str, [ numpy.average(map(recall, nodes[coverage])) for coverage in coverageLevels ])) + "\t")
-            fH2.write("\t".join(map(str, [ numpy.average(map(precision, nodes[coverage])) for coverage in coverageLevels ])) + "\t")
-            fH2.write("\t".join(map(str, [ numpy.average(map(fScore, nodes[coverage])) for coverage in coverageLevels ])) + "\n")
-            
+            f2 = lambda f, end : fH2.write(str(min(map(f, nodes[coverage]))) + "\t" + str(numpy.average(map(f, nodes[coverage]))) + "\t" + str(max(map(f, nodes[coverage]))) + end)
+            f2(recall, "\t")
+            f2(precision, "\t")
+            f2(fScore, "\n")
             
             #Make ROC curves
             for coverage in coverageLevels:
