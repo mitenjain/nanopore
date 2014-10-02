@@ -3,44 +3,54 @@
 args <- commandArgs(trailingOnly = T)
 
 if (file.info(args[1])$size != 0) {
-	cols <- max(count.fields(args[1], sep=","))
-	dist <- read.table(args[1], fill=T, sep=",", row.names=1, col.names=paste("V",seq_len(cols)))
-	dist <- dist[order(rownames(dist)),]
+    cols <- max(count.fields(args[1], sep=","))
+    dist <- read.table(args[1], fill=T, sep=",", row.names=1, col.names=paste("V",seq_len(cols)))
+    dist <- dist[order(rownames(dist)),]
+}
+if (! is.null(dim(dist)) && dim(dist)[2] > 2 && dim(dist)[1] > 1) {
+        
+    tmp <- dist
+    dist <- vector()
+    #throw out rows with single-value columns
+    for (i in 1:length(rownames(tmp))) {
+        r <- tmp[i,]
+        if (length(r[!is.na(r)]) > 1) {
+            dist <- rbind(dist, r)
+        }
+    }
 
-if (! is.null(dim(dist))) {
-	if (dim(dist)[2] > 2) {
-		
-		tmp <- dist
-		dist <- vector()
-		#throw out rows with single-value columns
-		for (i in 1:length(rownames(tmp))) {
-			r <- tmp[i,]
-			if (length(r[!is.na(r)]) > 1) {
-				dist <- rbind(dist, r)
-			}
-		}
+    pdf(args[3])
 
-		pdf(args[3])
-		#this is all so hacky - first we make a color topo.colors
-		n <- 1
-		r <- topo.colors(length(rownames(dist)))
-		#then we find the biggest y value
-		m <- 0
-		for (i in 1:length(rownames(dist))) {
-			x <- density(as.numeric(dist[i,]), na.rm=T)
-			m <- max(m, max(x$y))
-		}
-		#now we iterate over all of the mappers and plot based on the biggest y value and varying colors
-		plot(density(as.numeric(dist[1,]), na.rm=T, adjust=0.7), xlab="Identity", xlim=c(0,1), main=paste(args[2],"Identity by Mapper", sep="\n"), ylim=c(0,m), col=r[n])
-		if (dim(dist)[1] > 1) {
-			for (i in 2:length(rownames(dist))) {
-				n <- n + 1
-				lines(density(as.numeric(dist[i,]), na.rm=T, adjust=0.7), col = r[n])
-			}
-		}
-		legend(x="top", col=r, legend=rownames(dist), cex=0.7, lty=1)
+    hists <- list()
+    xmax <- 0
+    ymax <- 0
+    b <- 0
+    for (i in 1:length(rownames(dist))){
+        b <- max(b, nclass.FD(dist[i,][!is.na(dist[i,])]))
+    }
+    for (i in 1:length(rownames(dist))){
+        hists[[i]] <- hist(dist[i,][!is.na(dist[i,])], plot=F, breaks=b)
+        xmax <- max(xmax, hists[[i]]$mids)
+        ymax <- max(ymax, hists[[i]]$counts)
+    }
+    colmap <- expand.grid(1:length(hists), 15:15+ceiling(length(hists)/8))
+    #whatever
+    plot(1, xlim=c(0,xmax), ylim=c(0,ymax), main=paste(args[2],"Identity by Mapper", sep="\n"), xlab="Identity", type="n", ylab="Frequency")
 
-		dev.off()
-		}
-	}
+
+    q <- vector()
+    for (i in 1:length(hists)) {
+        x <- hists[[i]]
+        points(x$mids, x$counts, col=colmap[i,1], pch=colmap[i,2], cex=0.3)
+        lines(x$mids, x$counts, col=colmap[i,1], pch=colmap[i,2])
+        q[i] <- paste(as.character(round(100*mean(dist[i,][!is.na(dist[i,])]),1)), "%", sep= "")
+        n[i] <- paste("n = ", as.character(length(dist[i,])), sep="")
+
+    }
+
+    legend(x="top", col=c(colmap[,1], rep("NA", times=length(hists))), pch=colmap[,2], legend=cbind(rownames(dist),q), ncol=2, title="\t\tAverage % Identity", cex=0.6,bty="n")
+    
+
+
+    dev.off()
 }

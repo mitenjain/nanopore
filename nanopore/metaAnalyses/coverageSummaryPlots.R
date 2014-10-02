@@ -8,7 +8,7 @@ summary <- summary[order(rownames(summary)),]
 
 if (dim(summary)[1] >= 1) {
 
-    r <- topo.colors(length(rownames(summary)))
+    r <- 1:8
 
     pdf(args[3])
 

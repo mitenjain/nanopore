@@ -1,9 +1,7 @@
 from nanopore.metaAnalyses.abstractUnmappedAnalysis import AbstractUnmappedMetaAnalysis
 import os, sys
 import xml.etree.cElementTree as ET
-from jobTree.src.bioio import system, fastqRead
-from nanopore.analyses.utils import samIterator
-from itertools import product
+from jobTree.src.bioio import system
 import re
 from collections import OrderedDict as od
 

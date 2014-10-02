@@ -3,7 +3,7 @@ import os, sys
 import xml.etree.cElementTree as ET
 from jobTree.src.bioio import system
 import re
-from itertools import product
+from itertools import product, izip
 from collections import Counter
 
 class Entry(object):
@@ -59,11 +59,11 @@ class CoverageSummary(AbstractMetaAnalysis):
     def write_file_analyze(self, entries, name, multiple_read_types=False):
         path = os.path.join(self.outputDir, name + ".csv")
         outf = open(path, "w")
-        outf.write(",".join(["Mapper", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMismatchesPerReadBase", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
-        entries = sorted(entries, key = lambda x: x.mapper)
-        entries = self.resolve_duplicate_rownames(entries, multiple_read_types)
-        for entry in entries:
-            outf.write(",".join([entry.mapper, entry.readFastqFile, entry.referenceFastaFile,
+        outf.write(",".join(["Name", "Mapper", "ReadType", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMismatchesPerReadBase", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
+        entries = sorted(entries, key = lambda x: (x.mapper, x.readType))
+        names = self.resolve_duplicate_rownames(entries, multiple_read_types)
+        for entry, n in izip(entries, names):
+            outf.write(",".join([n, entry.mapper, entry.readType, entry.readFastqFile, entry.referenceFastaFile,
                                entry.XML.attrib["avgreadCoverage"], entry.XML.attrib["avgreferenceCoverage"],
                                entry.XML.attrib["avgidentity"], entry.XML.attrib["avgmismatchesPerReadBase"], 
                                entry.XML.attrib["avgdeletionsPerReadBase"],
@@ -74,8 +74,8 @@ class CoverageSummary(AbstractMetaAnalysis):
         outf.close()
         path2 = os.path.join(self.outputDir, name + "_distribution.csv")
         outf = open(path2, "w")
-        for entry in entries:
-            outf.write(",".join([entry.mapper] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
+        for entry, n in izip(entries, names):
+            outf.write(",".join([n] + entry.XML.attrib["distributionidentity"].split())); outf.write("\n")
         outf.close()
         system("Rscript nanopore/metaAnalyses/coverageSummaryPlots.R {} {} {}".format(path, name, os.path.join(self.outputDir, name + "_summary_plots.pdf")))
         system("Rscript nanopore/metaAnalyses/coveragePlots.R {} {} {}".format(path2, name, os.path.join(self.outputDir, name + "_distribution.pdf")))
@@ -83,24 +83,30 @@ class CoverageSummary(AbstractMetaAnalysis):
 
     def resolve_duplicate_rownames(self, entries, multiple_read_types=False):
         last_mapper = None; count = 1
+        names = list()
         for entry in entries:
-            print (last_mapper, entry.mapper)
             if multiple_read_types is True and entry.mapper + "_" + entry.readType == last_mapper:
                 last_mapper = entry.mapper + "_" + entry.readType
-                entry.mapper = entry.mapper + "_" + entry.readType + "." + str(count)
+                if count != 1:
+                    names.append(entry.mapper + "_" + entry.readType + "." + str(count))
+                else:
+                    names.append(entry.mapper + "_" + entry.readType)
                 count += 1
             elif multiple_read_types is True:
                 last_mapper = entry.mapper + "_" + entry.readType
-                entry.mapper = entry.mapper + "_" + entry.readType
+                names.append(entry.mapper + "_" + entry.readType)
                 count = 1
             elif multiple_read_types is False and entry.mapper == last_mapper:
                 last_mapper = entry.mapper
-                entry.mapper = entry.mapper + "." + str(count)
+                if count != 1:
+                    names.append(entry.mapper + "." + str(count))
+                else:
+                    names.append(entry.mapper)
                 count += 1
             else:
                 last_mapper = entry.mapper
                 count = 1
-        return entries
+        return names
 
 
     def run(self):

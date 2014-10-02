@@ -41,6 +41,8 @@ labels <- c(125, 126, 127, 128, 253, 254, 255, 256, 381, 382, 383, 384, 509, 510
            1, 2, 3, 4, 129, 130, 131, 132, 257, 258, 259, 260, 385, 386, 387, 388)
 
 
+g <- function(p, x) {p*(1-p)^(x-1)} #geometric parameterized to start at 1
+
 if (dim(data)[1] > 1) {
     
     sorted <- data[order(data$ReadCount, decreasing=T),]
@@ -48,8 +50,15 @@ if (dim(data)[1] > 1) {
 
     png(args[3], height=3000, width=3000, type="cairo")
 
-    q<- barplot(sorted, main=paste("Sorted Channel Mappability", paste("# Reporting = ", length(sorted[1,]), sep=""), sep="\n"), xlab="Channel", ylab="Read Counts", legend.text=T, xaxt="n", col=c("blue","red"), args.legend=c(cex=3), cex.names=3)
+    q<- barplot(sorted, main=paste("Sorted Channel Mappability", paste("# Reporting = ", length(sorted[1,]), "/512", sep=""), sep="     "), xlab="Channel", ylab="Read Counts", legend.text=T, xaxt="n", col=c("blue","red"), args.legend=c(cex=4), cex.names=3, cex.main=5)
     text(cex=0.5, x=q-.25, y=-1.25, colnames(sorted), xpd=T, srt=65)
+
+    #geometric fit - tried it, was not a good fit
+    #phat <-  1/mean(data$ReadCount)
+    #curve(length(data$ReadCount) * g(phat, x), add=T, col="blue", lwd=3)
+    #phat <- 1/mean(data$MappableReadCount)
+    #curve(length(data$MappableReadCount) * g(phat, x), add=T, col="red", lwd=3)
+
 
     dev.off()
 
@@ -102,6 +111,9 @@ if (dim(data)[1] > 1) {
     p <- levelplot(rotate(positions), main ="MinION Channel Percent Read Mappability Layout", col.regions=colorRampPalette(c("white","red"))(256))
 
     print(p)
+
+    dev.off()
+    png(args[5], height=1000, width=1000, type="cairo")
 
     #do it again except with total # of reads
     reads <- data$ReadCount

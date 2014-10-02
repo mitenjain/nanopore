@@ -71,12 +71,12 @@ class Substitutions(AbstractAnalysis):
         #Write out the substitution info
         open(os.path.join(self.outputDir, "substitutions.xml"), 'w').write(prettyXml(sM.getXML()))
         bases = "ACGT"
-        outf = open(os.path.join(self.getLocalTempDir(), "subst.tsv"), "w")
+        outf = open(os.path.join(self.outputDir, "subst.tsv"), "w")
         outf.write("A\tC\tG\tT\n")
         for x in bases:
             freqs = sM.getFreqs(x, bases)
             outf.write("{}\t{}\n".format(x, "\t".join(map(str,freqs)), "\n"))
         outf.close()
         analysis = self.outputDir.split("/")[-2].split("_")[-1] + "_Substitution_Levels"
-        system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.getLocalTempDir(), "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.pdf"), analysis))        
+        system("Rscript nanopore/analyses/substitution_plot.R {} {} {}".format(os.path.join(self.outputDir, "subst.tsv"), os.path.join(self.outputDir, "substitution_plot.pdf"), analysis))        
         self.finish()
