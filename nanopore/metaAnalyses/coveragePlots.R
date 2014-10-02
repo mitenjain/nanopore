@@ -24,8 +24,12 @@ if (! is.null(dim(dist)) && dim(dist)[2] > 2 && dim(dist)[1] > 1) {
     hists <- list()
     xmax <- 0
     ymax <- 0
+    b <- 0
     for (i in 1:length(rownames(dist))){
-        hists[[i]] <- hist(dist[i,][!is.na(dist[i,])], plot=F, breaks="FD")
+        b <- max(b, nclass.FD(dist[i,][!is.na(dist[i,])]))
+    }
+    for (i in 1:length(rownames(dist))){
+        hists[[i]] <- hist(dist[i,][!is.na(dist[i,])], plot=F, breaks=b)
         xmax <- max(xmax, hists[[i]]$mids)
         ymax <- max(ymax, hists[[i]]$counts)
     }
@@ -37,13 +41,14 @@ if (! is.null(dim(dist)) && dim(dist)[2] > 2 && dim(dist)[1] > 1) {
     q <- vector()
     for (i in 1:length(hists)) {
         x <- hists[[i]]
-        points(x$mids, x$counts, col=colmap[i,1], pch=colmap[i,2], cex=0.5)
+        points(x$mids, x$counts, col=colmap[i,1], pch=colmap[i,2], cex=0.3)
         lines(x$mids, x$counts, col=colmap[i,1], pch=colmap[i,2])
         q[i] <- paste(as.character(round(100*mean(dist[i,][!is.na(dist[i,])]),1)), "%", sep= "")
+        n[i] <- paste("n = ", as.character(length(dist[i,])), sep="")
 
     }
 
-    legend(x="top", col=c(colmap[,1], rep("NA", times=4)), pch=colmap[,2], legend=cbind(rownames(dist),q), ncol=2, title="\t\tAverage % Identity", cex=0.6,bty="n")
+    legend(x="top", col=c(colmap[,1], rep("NA", times=length(hists))), pch=colmap[,2], legend=cbind(rownames(dist),q), ncol=2, title="\t\tAverage % Identity", cex=0.6,bty="n")
     
 
 

@@ -20,8 +20,9 @@ if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1)
     lengths.sort <- lengths[order(lengths)]
     #remove the 5% longest reads so they don't skew the graph
     xmax <- lengths.sort[round(0.95*length(lengths.sort))]
-    m <- hist(data$MappedReadLengths, breaks = "FD", plot=F)
-    u <- hist(data$UnmappedReadLengths, breaks = "FD", plot=F)
+    b <- max(nclass.FD(data$MappedReadLengths), nclass.FD(data$UnmappedReadLengths))
+    m <- hist(data$MappedReadLengths, breaks = b, plot=F)
+    u <- hist(data$UnmappedReadLengths, breaks = b, plot=F)
     plot(m, main=paste("Mapped Read Length Distribution\nn = ", length(data$MappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
     plot(u, main=paste("Unmapped Read Length Distribution\nn = ", length(data$UnmappedReadLengths), sep=" "), xlab="Read Length", xlim=c(0,xmax), cex.main=0.8)
     #plot read coverage distribution
