@@ -19,7 +19,11 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                     if readFileReadType == readType:
                         for mapper in self.mappers:
                             analyses, resultsDir = self.experimentHash[((readFastqFile, readType), referenceFastaFile, mapper)]
-                            node = ET.parse(os.path.join(resultsDir, "analysis_MarginAlignSnpCaller", "marginaliseConsensus.xml")).getroot()
+                            try:
+                                node = ET.parse(os.path.join(resultsDir, "analysis_MarginAlignSnpCaller", "marginaliseConsensus.xml")).getroot()
+                            except:
+                                self.logToMaster("Parsing the file following failed: %s" % os.path.join(resultsDir, "analysis_MarginAlignSnpCaller", "marginaliseConsensus.xml"))
+                                continue
                             for c in node:
                                 coverage = int(c.attrib["coverage"])
                                 coverageLevels.add(coverage)
