@@ -105,6 +105,7 @@ class CoverageSummary(AbstractMetaAnalysis):
                 count += 1
             else:
                 last_mapper = entry.mapper
+                names.append(entry.mapper + "." + str(count))
                 count = 1
         return names
 
