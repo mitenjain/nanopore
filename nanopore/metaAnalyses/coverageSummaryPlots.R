@@ -28,7 +28,7 @@ if (dim(summary)[1] >= 1) {
         colmap <- c(colmap, rep(i, times=num))
     }
 
-    pchmap <- rep(15:(15+num-1), times=ceiling(length(hists)/num))
+    pchmap <- rep(15:(15+num-1), times=ceiling(length(summary)/num))
 
     pdf(args[3])
 
