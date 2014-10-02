@@ -48,6 +48,8 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
         
         fH2 = open(os.path.join(self.outputDir, "marginAlignSquares.txt"), 'w')
         coverageLevels = list(coverageLevels)
+        if 500 in coverageLevels: #Hack to reduce amount of fields
+            coverageLevels.remove(500)
         coverageLevels.sort()
         fH2.write("\t".join(["readType", "mapper", "caller", 
                             "%heldOut",
