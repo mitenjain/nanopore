@@ -60,7 +60,7 @@ class CoverageSummary(AbstractMetaAnalysis):
         path = os.path.join(self.outputDir, name + ".csv")
         outf = open(path, "w")
         outf.write(",".join(["Name", "Mapper", "ReadType", "ReadFile", "ReferenceFile",  "AvgReadCoverage", "AvgReferenceCoverage", "AvgIdentity", "AvgMismatchesPerReadBase", "AvgDeletionsPerReadBase", "AvgInsertionsPerReadBase", "NumberOfMappedReads", "NumberOfUnmappedReads", "NumberOfReads"])); outf.write("\n")
-        entries = sorted(entries, key = lambda x: (x.mapper, x.readType))
+        entries = sorted(entries, key = lambda x: (x.mapper, x.readType, x.readFastqFile))
         names = self.resolve_duplicate_rownames(entries, multiple_read_types)
         for entry, n in izip(entries, names):
             outf.write(",".join([n, entry.mapper, entry.readType, entry.readFastqFile, entry.referenceFastaFile,
@@ -82,29 +82,32 @@ class CoverageSummary(AbstractMetaAnalysis):
 
 
     def resolve_duplicate_rownames(self, entries, multiple_read_types=False):
-        last_mapper = None; count = 1
+        last_mapper = entries[0].mapper; count = 0; start = True
         names = list()
         for entry in entries:
             if multiple_read_types is True and entry.mapper + "_" + entry.readType == last_mapper:
+                count += 1
                 last_mapper = entry.mapper + "_" + entry.readType
-                if count != 1:
+                if start is not True:
                     names.append(entry.mapper + "_" + entry.readType + "." + str(count))
                 else:
                     names.append(entry.mapper + "_" + entry.readType)
-                count += 1
+                    start = False
             elif multiple_read_types is True:
                 last_mapper = entry.mapper + "_" + entry.readType
                 names.append(entry.mapper + "_" + entry.readType)
                 count = 1
             elif multiple_read_types is False and entry.mapper == last_mapper:
+                count += 1
                 last_mapper = entry.mapper
-                if count != 1:
+                if start is not True:
                     names.append(entry.mapper + "." + str(count))
                 else:
                     names.append(entry.mapper)
-                count += 1
+                    start = False
             else:
                 last_mapper = entry.mapper
+                names.append(entry.mapper)
                 count = 1
         return names
 
