@@ -53,9 +53,9 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
         coverageLevels.sort()
         fH2.write("\t".join(["readType", "mapper", "caller", 
                             "%heldOut",
-                           "\t".join([ ("min_recall_coverage_%s\t" % coverage) + ("avg_recall_coverage_%s\t" % coverage) + ("\tmax_recall_coverage_%s" % coverage) for coverage in coverageLevels]),
-                           "\t".join([ ("min_precision_coverage_%s\t" % coverage) + ("avg_precision_coverage_%s\t" % coverage) + ("\tmax_precision_coverage_%s" % coverage) for coverage in coverageLevels]),
-                           "\t".join([ ("min_fscore_coverage_%s\t" % coverage) + ("avg_fscore_coverage_%s\t" % coverage) + ("\tmax_fscore_coverage_%s" % coverage) for coverage in coverageLevels]), "\n" ]))
+                           "\t".join([ ("min_recall_coverage_%s\t" % coverage) + ("avg_recall_coverage_%s\t" % coverage) + ("max_recall_coverage_%s" % coverage) for coverage in coverageLevels]),
+                           "\t".join([ ("min_precision_coverage_%s\t" % coverage) + ("avg_precision_coverage_%s\t" % coverage) + ("max_precision_coverage_%s" % coverage) for coverage in coverageLevels]),
+                           "\t".join([ ("min_fscore_coverage_%s\t" % coverage) + ("avg_fscore_coverage_%s\t" % coverage) + ("max_fscore_coverage_%s" % coverage) for coverage in coverageLevels]), "\n" ]))
         
         keys = hash.keys()
         keys.sort()
@@ -79,7 +79,7 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                                    r(fScore), r(recall), r(precision), r(notCalled), r(actualCoverage)]) + "\n")
             
             fH2.write("\t".join([readType, mapper, algorithm, str(proportionHeldOut)]) + "\t")
-            f2 = lambda f, end : fH2.write(str(min(map(f, nodes[coverage]))) + "\t" + str(numpy.average(map(f, nodes[coverage]))) + "\t" + str(max(map(f, nodes[coverage]))) + end)
+            f2 = lambda f, end : fH2.write("\t".join(map(lambda coverage : str(min(map(f, nodes[coverage]))) + "\t" + str(numpy.average(map(f, nodes[coverage]))) + "\t" + str(max(map(f, nodes[coverage]))), coverageLevels)) + end)
             f2(recall, "\t")
             f2(precision, "\t")
             f2(fScore, "\n")
@@ -93,7 +93,7 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                 def merge(curves, fn):
                     return map(lambda i : fn(map(lambda curve : curve[i], curves)), range(len(curves[0])))
                 avgFalsePositiveRatesByProbability = merge(falsePositiveRateByProbability, numpy.average)
-                avgTruePositiveRatesByProbability = merge(falsePositiveRateByProbability, numpy.average)
+                avgTruePositiveRatesByProbability = merge(truePositiveRateByProbability, numpy.average)
                 avgPrecisionByProbability = merge(precisionByProbability, numpy.average)
                 rocCurvesHash[(readType, mapper, algorithm, proportionHeldOut, coverage)] = (avgFalsePositiveRatesByProbability, avgTruePositiveRatesByProbability, precisionByProbability)
         

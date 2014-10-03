@@ -181,7 +181,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         
                         def getPrecisionByProbability(self):
                             tPs = self.bucket(map(lambda x : x[0], self.truePositives)) 
-                            fPs = self.bucket(map(lambda x : x[0], self.truePositives))
+                            fPs = self.bucket(map(lambda x : x[0], self.falsePositives))
                             return map(lambda i : float(tPs[i]) / (tPs[i] + fPs[i]) if tPs[i] + fPs[i] != 0 else 0, xrange(len(tPs)))
                         
                         def getFalsePositiveRatesByProbability(self):
