@@ -118,4 +118,4 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
             outf.close()
             if not os.path.exists(os.path.join(self.outputDir, readType + "_" + mapper.__name__)):
                 os.mkdir(os.path.join(self.outputDir, readType + "_" + mapper.__name__))
-            system("Rscript nanopore/metaAnalyses/ROC_marginAlign.R {} {} {}".format(os.path.join(self.outputDir, readType + "_" + mapper.__name__ + ".tsv"), os.path.join(self.outputDir, readType + "_" + mapper.__name__), "_ROC_curves.pdf"))
+            system("Rscript nanopore/metaAnalyses/ROC_marginAlign.R {} {} {}".format(os.path.join(self.outputDir, readType + "_" + mapper.__name__ + ".tsv"), os.path.join(self.outputDir, readType + "_" + mapper.__name__) + "/", "_ROC_curves.pdf"))
