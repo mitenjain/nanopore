@@ -42,7 +42,7 @@ if (dim(summary)[1] >= 1) {
     
     #scatterplot of Avg identity coverage vs Avg # of indels per base
     plot(100 * summary$AvgIdentity, summary$AvgDeletionsPerReadBase + summary$AvgInsertionsPerReadBase, ylab="Avg. Indels Per Aligned Read Base", xlab="Avg. Match Identity", main=name, col=colmap, pch=pchmap, xlim=c(0,100), cex.main=0.9)
-    legend("topright", cex=0.75, legend=names, pch="*", col=1:8)
+    legend("topleft", cex=0.75, legend=names, pch="*", col=1:8)
 
     q <- barplot(height=summary$AvgInsertionsPerReadBase, xaxt="n", col=colmap, main=paste(name,"Avg. Insertions Per Aligned Base",sep="\n"), ylab="Avg. Insertions Per Aligned Base", cex.main=0.9)
     text(cex=0.8, x=q, y=-0.01, rownames(summary), xpd=T, srt=90)
@@ -62,7 +62,7 @@ if (dim(summary)[1] >= 1) {
     
     #scatterplot of Avg read coverage vs Avg match identity
     plot(100 * summary$AvgReadCoverage, 100 * summary$AvgIdentity, ylab="Avg. Match Identity", xlab="Avg. Read Coverage", main=name, col=colmap, pch=pchmap, xlim=c(0,100), ylim=c(0,100), cex.main=0.9)
-    legend("topright", cex=0.75, legend=names, pch="*", col=1:8)
+    legend("topleft", cex=0.75, legend=names, pch="*", col=1:8)
 
     ################################################
     ####Looking at unmapped reads - demonstrating last is doing a great job
