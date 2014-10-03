@@ -17,7 +17,7 @@ par(mfrow=c(2,2))
 #this corresponds to each row of plots
 for (i in seq(1, algorithms*heldout*coverage*2, heldout*coverage*2)) {
     #open a pdf for each algorithm, put into the folder for this readtype/mapper combination
-    pdf(paste(args[2], data[,2][i]), args[3], sep="")
+    pdf(paste(args[2], data[,2][i], args[3], sep=""))
     #loop over every fpr/tpr block, which happens every coverage*2
     #this corresponds to one plot in a row
     for (j in seq(i, i+heldout*coverage*2-heldout-coverage, coverage*2)) {
