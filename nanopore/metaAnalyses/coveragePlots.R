@@ -86,6 +86,25 @@ if (! is.null(dim(dist)) && dim(dist)[2] > 2 && dim(dist)[1] > 1) {
 
         coltmp <- rep(c(1:length(names), rep("NA", times=length(names))), times=10)
         legend("top", col=coltmp, pch="-", cex=0.55, legend=cbind(names, avgs), ncol=2, title="\t\tAverage % Identity", bty="n")
+    
+        #now we plot them added together
+        hists2 <- list()
+        xmax2 <- 0
+        ymax2 <- 0
+        for (i in seq(1, length(rownames(dist)), num)){
+            hists2[[i]] <- hist(dist[i:(i+num),][!is.na(dist[i:(i+num),])], plot=F, breaks=b)
+            xmax2 <- max(xmax2, hists2[[i]]$mids)
+            ymax2 <- max(ymax2, hists2[[i]]$counts)
+        }
+        plot(1, xlim=c(0,xmax2), ylim=c(0,ymax2), main=paste(args[2],"Identity by Mapper", sep="\n"), xlab="Identity", type="n", ylab="Frequency")
+        for (i in 1:length(hists2)) {
+            x <- hists2[[i]]
+            points(x$mids, x$counts, col=i, cex=0.4)
+            lines(x$mids, x$counts, col=i)
+        }
+        legend("top", col=1:8, pch="-", cex=0.55, legend=cbind(names, avgs), ncol=2, title="\t\tAverage % Identity", bty="n")
+    
+
     }
     dev.off()
 }
