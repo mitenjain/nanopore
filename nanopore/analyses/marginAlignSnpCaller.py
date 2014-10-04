@@ -225,8 +225,8 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                     if totalExpectation > 0.0: #expectationCallingThreshold:
                                         posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
                                                                evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
-                                        posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
                                         probs = [ posteriorProbs[base] for base in "ACGT" ]
+                                        posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
                                         maxPosteriorProb = max(posteriorProbs.values())
                                         chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
 
