@@ -48,8 +48,6 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
         
         fH2 = open(os.path.join(self.outputDir, "marginAlignSquares.txt"), 'w')
         coverageLevels = list(coverageLevels)
-        if 500 in coverageLevels: #Hack to reduce amount of fields
-            coverageLevels.remove(500)
         coverageLevels.sort()
         fH2.write("\t".join(["readType", "mapper", "caller", 
                             "%heldOut",
@@ -65,10 +63,10 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
         for readType, mapper, algorithm, proportionHeldOut, referenceFastaFile in keys:
             nodes = hash[(readType, mapper, algorithm, proportionHeldOut, referenceFastaFile)]
             
-            recall = lambda c : float(c.attrib["totalHeldOutCallsTrue"])/float(c.attrib["totalHeldOut"]) if float(c.attrib["totalHeldOut"]) != 0 else 0
-            precision = lambda c : float(c.attrib["totalHeldOutCallsTrue"])/(float(c.attrib["totalHeldOutCallsTrue"]) + float(c.attrib["totalFalsePositives"])) if float(c.attrib["totalHeldOutCallsTrue"]) + float(c.attrib["totalFalsePositives"]) != 0 else 0
+            recall = lambda c : float(c.attrib["recall"]) #float(c.attrib["totalTruePositives"])/float(c.attrib["totalHeldOut"]) if float(c.attrib["totalHeldOut"]) != 0 else 0
+            precision = lambda c : float(c.attrib["precision"]) # float(c.attrib["totalTruePositives"])/(float(c.attrib["totalTruePositives"]) + float(c.attrib["totalFalsePositives"])) if float(c.attrib["totalTruePositives"]) + float(c.attrib["totalFalsePositives"]) != 0 else 0
             fScore = lambda c : 2 * precision(c) * recall(c) / (precision(c) + recall(c)) if precision(c) + recall(c) > 0 else 0
-            notCalled = lambda c : (float(c.attrib["totalNonHeldOutNotCalled"])+float(c.attrib["totalHeldOutNotCalled"])) / (float(c.attrib["totalHeldOut"]) + float(c.attrib["totalNonHeldOut"]))
+            notCalled = lambda c : float(c.attrib["totalNoCalls"]) / (float(c.attrib["totalHeldOut"]) + float(c.attrib["totalNonHeldOut"]))
             actualCoverage = lambda c : float(c.attrib["actualCoverage"])
             
             for coverage in coverageLevels:
@@ -87,15 +85,13 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
             #Make ROC curves
             for coverage in coverageLevels:
                 #Get the median true positive / median false positives
-                falsePositiveRateByProbability = map(lambda c : map(float, c.attrib["falsePositiveRatesByProbability"].split()), nodes[coverage])
-                truePositiveRateByProbability = map(lambda c : map(float, c.attrib["truePositiveRatesByProbability"].split()), nodes[coverage])
+                recallByProbability = map(lambda c : map(float, c.attrib["recallByProbability"].split()), nodes[coverage])
                 precisionByProbability = map(lambda c : map(float, c.attrib["precisionByProbability"].split()), nodes[coverage])
                 def merge(curves, fn):
                     return map(lambda i : fn(map(lambda curve : curve[i], curves)), range(len(curves[0])))
-                avgFalsePositiveRatesByProbability = merge(falsePositiveRateByProbability, numpy.average)
-                avgTruePositiveRatesByProbability = merge(truePositiveRateByProbability, numpy.average)
+                avgRecallByProbability = merge(recallByProbability, numpy.average)
                 avgPrecisionByProbability = merge(precisionByProbability, numpy.average)
-                rocCurvesHash[(readType, mapper, algorithm, proportionHeldOut, coverage)] = (avgFalsePositiveRatesByProbability, avgTruePositiveRatesByProbability, precisionByProbability)
+                rocCurvesHash[(readType, mapper, algorithm, proportionHeldOut, coverage)] = (avgPrecisionByProbability, avgRecallByProbability)
         
         
         ####Ian todo ###
@@ -113,7 +109,7 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
             for algorithm in variantCallingAlgorithms:
                 for proportionHeldOut in proportionsHeldOut:
                     for coverage in coverageLevels:
-                        falsePositiveRatesByProbability, truePositiveRatesByProbability, avgPrecisionByProbability = rocCurvesHash[(readType, mapper.__name__, algorithm, proportionHeldOut, coverage)]
-                        outf.write("FPR\t{0}\t{1}\t{2}\t{3}\nTPR\t{0}\t{1}\t{2}\t{4}\n".format(str(algorithm), str(proportionHeldOut), str(coverage), "\t".join(map(str,falsePositiveRatesByProbability)), "\t".join(map(str,truePositiveRatesByProbability))))
+                        avgPrecisionByProbability, avgRecallByProbability = rocCurvesHash[(readType, mapper.__name__, algorithm, proportionHeldOut, coverage)]
+                        outf.write("FPR\t{0}\t{1}\t{2}\t{3}\nTPR\t{0}\t{1}\t{2}\t{4}\n".format(str(algorithm), str(proportionHeldOut), str(coverage), "\t".join(map(str,recallByProbability)), "\t".join(map(str,precisionByProbability))))
             outf.close()
             system("Rscript nanopore/metaAnalyses/ROC_marginAlign.R {} {}".format(os.path.join(self.outputDir, readType + "_" + mapper.__name__ + ".tsv"), os.path.join(self.outputDir, readType + "_" + mapper.__name__ + "_ROC_curves.pdf")))

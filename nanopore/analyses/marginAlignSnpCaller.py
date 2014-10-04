@@ -44,7 +44,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
         
         node = ET.Element("marginAlignComparison")
         for hmmType in ("cactus", "trained_0",  "trained_20", "trained_40"): 
-            for coverage in (1000000, 500, 120, 60, 30, 10): 
+            for coverage in (1000000, 120, 60, 30, 10): 
                 for replicate in xrange(3 if coverage < 1000000 else 1): #Do replicates, unless coverage is all
                     sam = pysam.Samfile(self.samFile, "r" )
                     
@@ -163,10 +163,12 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     
                     class SnpCalls:
                         def __init__(self):
-                            self.snpCalls = dict(zip(product("ACTGN", "ACTGN", "ACTGN"), [0.0]*(5**3)))
                             self.falsePositives = []
                             self.truePositives = []
                             self.falseNegatives = []
+                            self.heldOut = 0
+                            self.notHeldOut = 0
+                            self.notCalled = 0
                         
                         @staticmethod
                         def bucket(calls):
@@ -184,10 +186,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             fPs = self.bucket(map(lambda x : x[0], self.falsePositives))
                             return map(lambda i : float(tPs[i]) / (tPs[i] + fPs[i]) if tPs[i] + fPs[i] != 0 else 0, xrange(len(tPs)))
                         
-                        def getFalsePositiveRatesByProbability(self):
-                            return map(lambda i : i / (totalHeldOut + totalNotHeldOut), self.bucket(map(lambda x : x[0], self.falsePositives)))
-                        
-                        def getTruePositiveRatesByProbability(self):
+                        def getRecallByProbability(self):
                             return map(lambda i : i/totalHeldOut if totalHeldOut != 0 else 0, self.bucket(map(lambda x : x[0], self.truePositives)))
                         
                         def getTruePositiveLocations(self):
@@ -201,13 +200,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
             
                     #The different call sets
                     marginAlignMaxExpectedSnpCalls = SnpCalls()
-                    marginAlignMaxExpectedSnpCallsBias95 = SnpCalls()
-                    marginAlignMaxExpectedSnpCallsBias8 = SnpCalls()
-                    marginAlignMaxExpectedSnpCallsBias6 = SnpCalls()
                     marginAlignMaxLikelihoodSnpCalls = SnpCalls()
-                    marginAlignMaxLikelihoodSnpCallsBias95 = SnpCalls()
-                    marginAlignMaxLikelihoodSnpCallsBias8 = SnpCalls()
-                    marginAlignMaxLikelihoodSnpCallsBias6 = SnpCalls()
                     maxFrequencySnpCalls = SnpCalls()
                     maximumLikelihoodSnpCalls = SnpCalls()
                     
@@ -219,19 +212,20 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             trueRefBase = (mutatedRefBase if not (refSeqName, refPosition) in snpSet else snpSet[(refSeqName, refPosition)]).upper()
                             key = (refSeqName, refPosition)
                             
+                            
                             #Get base calls
-                            for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, biasFactor, snpCalls in \
-                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxExpectedSnpCalls),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.95, marginAlignMaxExpectedSnpCallsBias95),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.8, marginAlignMaxExpectedSnpCallsBias8),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.6, marginAlignMaxExpectedSnpCallsBias6),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 1.0, marginAlignMaxLikelihoodSnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.95, marginAlignMaxLikelihoodSnpCallsBias95),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.8, marginAlignMaxLikelihoodSnpCallsBias8),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, 0.6, marginAlignMaxLikelihoodSnpCallsBias6),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maxFrequencySnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, 1.0, maximumLikelihoodSnpCalls)):
-                                chosenBase = 'N'
+                            for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
+                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
+                                
+                                if trueRefBase != mutatedRefBase:
+                                    snpCalls.heldOut += 1
+                                else:
+                                    snpCalls.notHeldOut += 1
+                            
+                            
                                 if key in baseExpectations:
                                     #Get posterior likelihoods
                                     expectations = baseExpectations[key]
@@ -239,51 +233,33 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                     if totalExpectation > 0.0: #expectationCallingThreshold:
                                         posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
                                                                evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
-                                        posteriorProbs[mutatedRefBase] *= biasFactor
+                                        posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
                                         maxPosteriorProb = max(posteriorProbs.values())
                                         chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
-                                        if trueRefBase != mutatedRefBase:
-                                            if trueRefBase == chosenBase:
-                                                snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
-                                        elif chosenBase != mutatedRefBase: #This is a false positive as does not match either
+                                        if trueRefBase == chosenBase:
+                                            snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
+                                        else:
                                             snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
-                                    if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
-                                         snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
                                         
-                                #Add to margin-align max expected snp calls - "N" is a no-call.
-                                snpCalls.snpCalls[(trueRefBase, mutatedRefBase, chosenBase)] += 1
-                            
+                                        if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
+                                            snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
+                                else:
+                                    snpCalls.notCalled += 1
+                        
+                    #Now find max-fscore point
+                    
                     
                     for snpCalls, tagName in ((marginAlignMaxExpectedSnpCalls, "marginAlignMaxExpectedSnpCalls"), 
-                                              (marginAlignMaxExpectedSnpCallsBias95, "marginAlignMaxExpectedSnpCallsBias95"), 
-                                              (marginAlignMaxExpectedSnpCallsBias8, "marginAlignMaxExpectedSnpCallsBias8"), 
-                                              (marginAlignMaxExpectedSnpCallsBias6, "marginAlignMaxExpectedSnpCallsBias6"), 
-                                              (marginAlignMaxLikelihoodSnpCallsBias95, "marginAlignMaxLikelihoodSnpCallsBias95"), 
-                                              (marginAlignMaxLikelihoodSnpCallsBias8, "marginAlignMaxLikelihoodSnpCallsBias8"), 
-                                              (marginAlignMaxLikelihoodSnpCallsBias6, "marginAlignMaxLikelihoodSnpCallsBias6"), 
                                               (marginAlignMaxLikelihoodSnpCalls, "marginAlignMaxLikelihoodSnpCalls"),
                                               (maxFrequencySnpCalls, "maxFrequencySnpCalls"),
                                               (maximumLikelihoodSnpCalls, "maximumLikelihoodSnpCalls")):
-                        fraction = lambda selectionFn : sum([ snpCalls.snpCalls[(true, mut, call)] for true, mut, call in snpCalls.snpCalls if selectionFn(true, mut, call) ])
-                        
-                        #Total hold outs
-                        totalHeldOut = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut)
-                        #Total non-held out 
-                        totalNonHeldOut = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut)
-                        #How many of held out cases do we predict correctly?
-                        totalHeldOutCallsTrue = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and true == call)
-                        #How many of held out cases do we predict wrongly and choose the reference?
-                        totalHeldOutCallsFalseAndReference = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and mut == call)
-                        #How many of held out cases do we predict wrongly and not choose the reference 
-                        totalHeldOutCallsFalseAndNonReference = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and call != 'N' and true != mut and mut != call and true != call)
-                        #How many of held out cases do we not call?
-                        totalHeldOutNotCalled = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true != mut and call == 'N')
-                        #How many of non-held out cases do we predict correctly?
-                        totalNonHeldOutCallsTrue = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut and true == call)
-                        #How many of non-held out cases do we predict wrongly?
-                        totalNonHeldOutCallsFalse = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and call != 'N' and true == mut and true != call)
-                        #How many/proportion of non-held out cases do we not call?
-                        totalNonHeldOutNotCalled = fraction(lambda true, mut, call : true != 'N' and mut != 'N' and true == mut and call == 'N')
+                        recall = snpCalls.getRecallByProbability()
+                        precision = snpCalls.getPrecisionByProbability()
+                        assert len(recall) == len(precision)
+                        fScore, pIndex = max(map(lambda i : (recall[i] * precision[i] / (recall[i] + precision[i]) if recall[i] + precision[i] > 0 else 0.0, i), range(len(recall))))
+                        truePositives = snpCalls.getRecallByProbability()[pIndex]
+                        falsePositives = snpCalls.getPrecisionByProbability()[pIndex]
+                        optimumProbThreshold = float(pIndex)/100.0
                         
                         #Write out the substitution info
                         node2 = ET.SubElement(node, tagName + "_" + hmmType, {  
@@ -295,24 +271,22 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                 "totalReads":str(len(reads)),
                                 "avgSampledReadLength":str(float(totalReadLength)/totalSampledReads),
                                 "totalSampledReads":str(totalSampledReads),
-                                "totalHeldOut":str(totalHeldOut),
-                                "totalNonHeldOut":str(totalNonHeldOut),
-                                "totalHeldOutCallsTrue":str(totalHeldOutCallsTrue),
-                                "totalFalsePositives":str(len(snpCalls.falsePositives)),
-                                "totalHeldOutCallsFalseAndReference":str(totalHeldOutCallsFalseAndReference),
-                                "totalHeldOutCallsFalseAndNonReference":str(totalHeldOutCallsFalseAndNonReference),
-                                "totalHeldOutNotCalled":str(totalHeldOutNotCalled),
-                                "totalNonHeldOutCallsTrue":str(totalNonHeldOutCallsTrue),
-                                "totalNonHeldOutCallsFalse":str(totalNonHeldOutCallsFalse),
-                                "totalNonHeldOutNotCalled":str(totalNonHeldOutNotCalled),
-                                "falsePositiveRatesByProbability":" ".join(map(str, snpCalls.getFalsePositiveRatesByProbability())),
-                                "truePositiveRatesByProbability":" ".join(map(str, snpCalls.getTruePositiveRatesByProbability())),
+                                
+                                "totalHeldOut":str(snpCalls.heldOut),
+                                "totalNonHeldOut":str(snpCalls.notHeldOut),
+                                
+                                "recall":str(recall[pIndex]),
+                                "precision":str(precision[pIndex]),
+                                "fScore":str(fScore),
+                                "optimumProbThreshold":str(optimumProbThreshold),
+                                "totalNoCalls":str(snpCalls.notCalled),
+
+                                "recallByProbability":" ".join(map(str, snpCalls.getRecallByProbability())),
                                 "precisionByProbability":" ".join(map(str, snpCalls.getPrecisionByProbability())),
+                                
                                 "falsePositiveLocations":" ".join(map(str, snpCalls.getFalsePositiveLocations())),
                                 "falseNegativeLocations":" ".join(map(str, snpCalls.getFalseNegativeLocations())),
                                 "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
-                        for snpCall in snpCalls.snpCalls:
-                            ET.SubElement(node2, "%s_%s_%s" % snpCall, { "total":str(snpCalls.snpCalls[snpCall])})
                         for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives:
                             ET.SubElement(node2, "falseNegative_%s_%s" % (trueRefBase, mutatedRefBase), { "posteriorProbs":" ".join(map(str, posteriorProbs))})
                         for falseNegativeBase in bases:
