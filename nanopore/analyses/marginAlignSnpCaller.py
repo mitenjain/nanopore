@@ -166,8 +166,6 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             self.falsePositives = []
                             self.truePositives = []
                             self.falseNegatives = []
-                            self.heldOut = 0
-                            self.notHeldOut = 0
                             self.notCalled = 0
                         
                         @staticmethod
@@ -220,12 +218,6 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                              (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
                              (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
                                 
-                                if trueRefBase != mutatedRefBase:
-                                    snpCalls.heldOut += 1
-                                else:
-                                    snpCalls.notHeldOut += 1
-                            
-                            
                                 if key in baseExpectations:
                                     #Get posterior likelihoods
                                     expectations = baseExpectations[key]
@@ -236,13 +228,14 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                         posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
                                         maxPosteriorProb = max(posteriorProbs.values())
                                         chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
-                                        if trueRefBase == chosenBase:
-                                            snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
+
+                                        if trueRefBase != mutatedRefBase:
+                                            if trueRefBase == chosenBase:
+                                                snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
+                                            else:
+                                                snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
                                         else:
                                             snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
-                                        
-                                        if trueRefBase != mutatedRefBase and trueRefBase != chosenBase:
-                                            snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
                                 else:
                                     snpCalls.notCalled += 1
                         
@@ -272,8 +265,8 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                 "avgSampledReadLength":str(float(totalReadLength)/totalSampledReads),
                                 "totalSampledReads":str(totalSampledReads),
                                 
-                                "totalHeldOut":str(snpCalls.heldOut),
-                                "totalNonHeldOut":str(snpCalls.notHeldOut),
+                                "totalHeldOut":str(totalHeldOut),
+                                "totalNonHeldOut":str(totalNotHeldOut),
                                 
                                 "recall":str(recall[pIndex]),
                                 "precision":str(precision[pIndex]),
@@ -282,11 +275,11 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                 "totalNoCalls":str(snpCalls.notCalled),
 
                                 "recallByProbability":" ".join(map(str, snpCalls.getRecallByProbability())),
-                                "precisionByProbability":" ".join(map(str, snpCalls.getPrecisionByProbability())),
+                                "precisionByProbability":" ".join(map(str, snpCalls.getPrecisionByProbability())) })
                                 
-                                "falsePositiveLocations":" ".join(map(str, snpCalls.getFalsePositiveLocations())),
-                                "falseNegativeLocations":" ".join(map(str, snpCalls.getFalseNegativeLocations())),
-                                "truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
+                                #"falsePositiveLocations":" ".join(map(str, snpCalls.getFalsePositiveLocations())),
+                                #"falseNegativeLocations":" ".join(map(str, snpCalls.getFalseNegativeLocations())),
+                                #"truePositiveLocations":" ".join(map(str, snpCalls.getTruePositiveLocations())) })
                         for refPosition, trueRefBase, mutatedRefBase, posteriorProbs in snpCalls.falseNegatives:
                             ET.SubElement(node2, "falseNegative_%s_%s" % (trueRefBase, mutatedRefBase), { "posteriorProbs":" ".join(map(str, posteriorProbs))})
                         for falseNegativeBase in bases:
