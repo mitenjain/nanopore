@@ -26,6 +26,8 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                                 continue
                             for c in node:
                                 coverage = int(c.attrib["coverage"])
+                                if coverage == 10:
+                                    continue #Remove the dead coverage plot
                                 if coverage > 1000:
                                     coverage = "ALL"
                                 coverageLevels.add(coverage)
