@@ -13,6 +13,8 @@ plot(smooth.spline(unlist(depthFile[2]), unlist(depthFile[3])), main="Coverage a
 
 hist(unlist(depthFile[3]), main="Coverage histogram", xlab="Coverage", ylab="Frequency", col = "blue")
 
+plot(density(unlist(depthFile[3])), main="Coverage density", xlab="Coverage", ylab="Frequency", col = "green")
+
 cov_change <- diff(unlist(depthFile[3]))
 plot(cov_change, main="Coverage derivative across reference", xlab="Position across reference", ylab="Coverage Change", type = "l", col = "blue")
 
