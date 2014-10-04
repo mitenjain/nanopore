@@ -226,6 +226,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                         posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
                                                                evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
                                         posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
+                                        probs = [ posteriorProbs[base] for base in "ACGT" ]
                                         maxPosteriorProb = max(posteriorProbs.values())
                                         chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
 
@@ -233,7 +234,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                             if trueRefBase == chosenBase:
                                                 snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
                                             else:
-                                                snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, [ posteriorProbs[base] for base in "ACGT" ])) #False negative
+                                                snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, probs)) #False negative
                                         else:
                                             snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
                                 else:
