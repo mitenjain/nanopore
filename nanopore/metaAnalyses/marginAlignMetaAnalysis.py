@@ -28,6 +28,8 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                                 coverage = int(c.attrib["coverage"])
                                 coverageLevels.add(coverage)
                                 proportionHeldOut = float(c.attrib["totalHeldOut"]) / (float(c.attrib["totalHeldOut"]) + float(c.attrib["totalNonHeldOut"]))
+                                if proportionHeldOut == 0:
+                                    continue
                                 key = (readType, mapper.__name__, c.tag, proportionHeldOut, referenceFastaFile)
                                 variantCallingAlgorithms.add(c.tag)
                                 proportionsHeldOut.add(proportionHeldOut)

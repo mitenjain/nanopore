@@ -35,7 +35,7 @@ for (i in seq(1, algorithms*heldout*coverage*2, heldout*coverage*2)) {
         tprs <- tprs[,-(1:4)]
         fprs <- fprs[,-(1:4)]
         #plot and draw legend
-        matplot(t(fprs), t(tprs), type="l", col=c(1:length(coverages)), main=paste("VariantCaller:\n", algorithm, "\nProportionHeldOut: ", held_out, sep=""), cex.main=0.8, cex.axis=0.7, xlab="False Positive Rate", ylab="True Positive Rate")
+        matplot(t(fprs), t(tprs), type="l", col=c(1:length(coverages)), main=paste("VariantCaller:\n", algorithm, "\nProportionHeldOut: ", held_out, sep=""), cex.main=0.8, cex.axis=0.7, xlab="Precision", ylab="Recall")
         legend("bottomright", legend=coverages, col=c(1:length(coverages)), cex=0.8, pch="-", title="Coverage")
     }
     dev.off()
