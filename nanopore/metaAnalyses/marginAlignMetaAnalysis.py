@@ -110,7 +110,7 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                 for proportionHeldOut in proportionsHeldOut:
                     for coverage in coverageLevels:
                         avgPrecisionByProbability, avgRecallByProbability = rocCurvesHash[(readType, mapper.__name__, algorithm, proportionHeldOut, coverage)]
-                        outf.write("FPR\t{0}\t{1}\t{2}\t{3}\nTPR\t{0}\t{1}\t{2}\t{4}\n".format(str(algorithm), str(proportionHeldOut), str(coverage), "\t".join(map(str,recallByProbability)), "\t".join(map(str,precisionByProbability))))
+                        outf.write("FPR\t{0}\t{1}\t{2}\t{3}\nTPR\t{0}\t{1}\t{2}\t{4}\n".format(str(algorithm), str(proportionHeldOut), str(coverage), "\t".join(map(str,avgRecallByProbability)), "\t".join(map(str,avgPrecisionByProbability))))
             outf.close()
             if not os.path.exists(os.path.join(self.outputDir, readType + "_" + mapper.__name__)):
                 os.mkdir(os.path.join(self.outputDir, readType + "_" + mapper.__name__))
