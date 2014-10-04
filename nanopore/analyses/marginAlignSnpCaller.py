@@ -250,7 +250,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                         recall = snpCalls.getRecallByProbability()
                         precision = snpCalls.getPrecisionByProbability()
                         assert len(recall) == len(precision)
-                        fScore, pIndex = max(map(lambda i : (recall[i] * precision[i] / (recall[i] + precision[i]) if recall[i] + precision[i] > 0 else 0.0, i), range(len(recall))))
+                        fScore, pIndex = max(map(lambda i : (2 * recall[i] * precision[i] / (recall[i] + precision[i]) if recall[i] + precision[i] > 0 else 0.0, i), range(len(recall))))
                         truePositives = snpCalls.getRecallByProbability()[pIndex]
                         falsePositives = snpCalls.getPrecisionByProbability()[pIndex]
                         optimumProbThreshold = float(pIndex)/100.0
