@@ -112,4 +112,6 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                         avgPrecisionByProbability, avgRecallByProbability = rocCurvesHash[(readType, mapper.__name__, algorithm, proportionHeldOut, coverage)]
                         outf.write("FPR\t{0}\t{1}\t{2}\t{3}\nTPR\t{0}\t{1}\t{2}\t{4}\n".format(str(algorithm), str(proportionHeldOut), str(coverage), "\t".join(map(str,recallByProbability)), "\t".join(map(str,precisionByProbability))))
             outf.close()
-            system("Rscript nanopore/metaAnalyses/ROC_marginAlign.R {} {}".format(os.path.join(self.outputDir, readType + "_" + mapper.__name__ + ".tsv"), os.path.join(self.outputDir, readType + "_" + mapper.__name__ + "_ROC_curves.pdf")))
+            if not os.path.exists(os.path.join(self.outputDir, readType + "_" + mapper.__name__)):
+                os.mkdir(os.path.join(self.outputDir, readType + "_" + mapper.__name__))
+            system("Rscript nanopore/metaAnalyses/ROC_marginAlign.R {} {} {}".format(os.path.join(self.outputDir, readType + "_" + mapper.__name__ + ".tsv"), os.path.join(self.outputDir, readType + "_" + mapper.__name__) + "/", "_ROC_curves.pdf"))
