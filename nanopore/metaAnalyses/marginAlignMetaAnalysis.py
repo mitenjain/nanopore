@@ -99,13 +99,13 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                 #Get the median true positive / median false positives
                 recallByProbability = map(lambda c : map(float, c.attrib["recallByProbability"].split()), nodes[coverage])
                 precisionByProbability = map(lambda c : map(float, c.attrib["precisionByProbability"].split()), nodes[coverage])
-                while len(recallByProbability) > 0 and recallByProbability[0] == 0.0:
-                    recallByProbability = recallByProbability[1:]
-                    precisionByProbability = precisionByProbability[1:] 
                 def merge(curves, fn):
                     return map(lambda i : fn(map(lambda curve : curve[i], curves)), range(len(curves[0])))
                 avgRecallByProbability = merge(recallByProbability, numpy.average)
                 avgPrecisionByProbability = merge(precisionByProbability, numpy.average)
+                while len(avgRecallByProbability) > 0 and avgRecallByProbability[-1] == 0.0:
+                    avgRecallByProbability = avgRecallByProbability[:-1]
+                    avgPrecisionByProbability = avgPrecisionByProbability[:-1] 
                 rocCurvesHash[(readType, mapper, algorithm, proportionHeldOut, coverage)] = (avgPrecisionByProbability, avgRecallByProbability)
         
         
