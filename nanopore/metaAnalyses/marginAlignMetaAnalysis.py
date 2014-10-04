@@ -26,10 +26,20 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                                 continue
                             for c in node:
                                 coverage = int(c.attrib["coverage"])
+                                if coverage > 1000:
+                                    coverage = "ALL"
                                 coverageLevels.add(coverage)
                                 proportionHeldOut = float(c.attrib["totalHeldOut"]) / (float(c.attrib["totalHeldOut"]) + float(c.attrib["totalNonHeldOut"]))
                                 if proportionHeldOut == 0:
                                     continue
+                                if proportionHeldOut < 4.0:
+                                    proportionHeldOut = 0.01
+                                elif proportionHeldOut < 9.0:
+                                    proportionHeldOut = 0.05
+                                elif proportionHeldOut < 18:
+                                    proportionHeldOut = 0.1
+                                else:
+                                    proportionHeldOut = 0.2
                                 key = (readType, mapper.__name__, c.tag, proportionHeldOut, referenceFastaFile)
                                 variantCallingAlgorithms.add(c.tag)
                                 proportionsHeldOut.add(proportionHeldOut)
@@ -89,6 +99,9 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                 #Get the median true positive / median false positives
                 recallByProbability = map(lambda c : map(float, c.attrib["recallByProbability"].split()), nodes[coverage])
                 precisionByProbability = map(lambda c : map(float, c.attrib["precisionByProbability"].split()), nodes[coverage])
+                while len(recallByProbability) > 0 and recallByProbability[0] == 0.0:
+                    recallByProbability = recallByProbability[1:]
+                    precisionByProbability = precisionByProbability[1:] 
                 def merge(curves, fn):
                     return map(lambda i : fn(map(lambda curve : curve[i], curves)), range(len(curves[0])))
                 avgRecallByProbability = merge(recallByProbability, numpy.average)
