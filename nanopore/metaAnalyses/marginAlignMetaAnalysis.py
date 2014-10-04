@@ -32,14 +32,14 @@ class MarginAlignMetaAnalysis(AbstractMetaAnalysis):
                                 proportionHeldOut = float(c.attrib["totalHeldOut"]) / (float(c.attrib["totalHeldOut"]) + float(c.attrib["totalNonHeldOut"]))
                                 if proportionHeldOut == 0:
                                     continue
-                                if proportionHeldOut < 4.0:
-                                    proportionHeldOut = 1
-                                elif proportionHeldOut < 9.0:
-                                    proportionHeldOut = 5
-                                elif proportionHeldOut < 18:
-                                    proportionHeldOut = 10
+                                if proportionHeldOut < 0.04:
+                                    proportionHeldOut = 0.01
+                                elif proportionHeldOut < 0.09:
+                                    proportionHeldOut = 0.05
+                                elif proportionHeldOut < 0.18:
+                                    proportionHeldOut = 0.1
                                 else:
-                                    proportionHeldOut = 20
+                                    proportionHeldOut = 0.2
                                 key = (readType, mapper.__name__, c.tag, proportionHeldOut, referenceFastaFile)
                                 variantCallingAlgorithms.add(c.tag)
                                 proportionsHeldOut.add(proportionHeldOut)
