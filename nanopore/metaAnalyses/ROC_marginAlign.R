@@ -36,8 +36,8 @@ for (i in seq(1, algorithms*heldout*coverage*2, heldout*coverage*2)) {
         tprs <- tprs[,-(1:4)]
         fprs <- fprs[,-(1:4)]
         #plot and draw legend
-        matplot(t(fprs), t(tprs), type="l", col=c(1:length(coverages)), main=paste("ProportionHeldOut: ", held_out, sep=""), cex.main=0.8, cex.axis=0.7, xlab="Recall", ylab="Precision", xlim=c(0.5,1), ylim=c(0.5,1))
-        legend("bottomleft", legend=coverages, col=c(1:length(coverages)), cex=0.8, pch="-", title="Coverage")
+        matplot(t(fprs), t(tprs), type="l", col=rev(c(1:length(coverages))), lty=1, lwd=1.1, main=paste("ProportionHeldOut: ", held_out, sep=""), cex.main=0.8, cex.axis=0.7, xlab="Recall", ylab="Precision", xlim=c(0.5,1), ylim=c(0.5,1))
+        legend("bottomleft", legend=coverages, col=rev(c(1:length(coverages))), cex=0.8, pch="-", title="Coverage")
     }
     dev.off()
 }
