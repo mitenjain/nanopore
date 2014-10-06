@@ -13,7 +13,7 @@ Reports the BLAST results as well as the raw hits, and also reports a fasta of t
 and generates a summary barplot."""
 
 readTypes = ["2D", "template", "complement"]
-combinedAnalyses = ["CombinedMapper", "CombinedMapperChain", "CombinedMapperRealign", "CombinedMapperRealignTrainedModel", "CombinedMapperRealignEm"]
+combinedAnalyses = ["CombinedMapperChain", "CombinedMapperRealign", "CombinedMapperRealignTrainedModel", "CombinedMapperRealignEm"]
 
 def parse_blast(blast_handle):
     """generator to yield blast results for each read, iterating over blast with outfmt="7 qseqid sseqid sscinames stitle"
