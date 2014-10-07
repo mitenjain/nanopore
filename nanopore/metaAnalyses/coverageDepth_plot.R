@@ -9,7 +9,7 @@ outFile_2 <- args[3]
 
 depthFile = read.delim(inFile, sep="\t")
 
-outliers <- length(boxplot.stats(c(unlist(depthFile[3], dpois(unlist(depthFile[3]), mean(unlist(depthFile[3]), "pois", "mle")$estimate))))$out)
+outliers <- length(boxplot.stats(c(unlist(unlist(depthFile[3]), dpois(unlist(depthFile[3]), mean(unlist(depthFile[3]))))))$out)
 proportion <- round((outliers / length(unlist(depthFile[3]))) * 100, 2)
 
 pdf(args[2])
