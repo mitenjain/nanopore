@@ -4,7 +4,8 @@ args <- commandArgs(trailingOnly = T)
 library(lattice)
 
 inFile <- args[1]
-outFile <- args[2]
+outFile_1 <- args[2]
+outFile_2 <- args[3]
 
 depthFile = read.delim(inFile, sep="\t")
 
