@@ -93,6 +93,6 @@ class CoverageDepth(AbstractMetaAnalysis):
  	
  					depth_file.close()
  					cov_stats.close()
- 					system("Rscript nanopore/metaAnalyses/coverageDepth_plot.R {} {}".format(depthFile, os.path.join(self.outputDir, experiment + ".pdf")))
+ 					system("Rscript nanopore/metaAnalyses/coverageDepth_plot.R {} {}".format(depthFile, os.path.join(self.outputDir, experiment + "_Coverage_Distribution.pdf", experiment + "_Coverage_Depth.pdf")))
 				except:
 					continue
