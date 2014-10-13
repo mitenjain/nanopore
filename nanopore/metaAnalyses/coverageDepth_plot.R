@@ -6,7 +6,7 @@ library(lattice)
 inFile <- args[1]
 pdf(args[2])
 
-depthFile = read.delim(inFile, sep="\t")
+depthFile = read.delim(inFile, sep="\t", header=F)
 
 outliers <- length(boxplot.stats(c(unlist(unlist(depthFile[3]), dpois(unlist(depthFile[3]), mean(unlist(depthFile[3]))))))$out)
 proportion <- round((outliers / length(unlist(depthFile[3]))) * 100, 2)
