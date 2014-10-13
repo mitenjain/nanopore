@@ -34,7 +34,7 @@ class Fastaseq():
 
 class CoverageDepth(AbstractMetaAnalysis):
 	"""
-	Uses samtoold depth to obtain and plot coverage depth per base across reference
+	Uses samtools depth to obtain and plot coverage depth per base across reference
 	"""
 	def __init__(self, outputDir, experiments):
 		AbstractMetaAnalysis.__init__(self, outputDir, experiments)
@@ -93,6 +93,6 @@ class CoverageDepth(AbstractMetaAnalysis):
  	
  					depth_file.close()
  					cov_stats.close()
- 					system("Rscript nanopore/metaAnalyses/coverageDepth_plot.R {} {} {}".format(depthFile, os.path.join(self.outputDir, experiment + "_Coverage_Distribution.pdf"),  os.path.join(self.outputDir, experiment + "_Coverage_Depth.pdf")))
+ 					system("Rscript nanopore/metaAnalyses/coverageDepth_plot.R {} {} {} {}".format(depthFile, os.path.join(self.outputDir, experiment + "_Coverage_Distribution.pdf"),  os.path.join(self.outputDir, experiment + "_Coverage_Depth.pdf"), os.path.join(self.outputDir, experiment + "_Coverage_Outliers.tsv")))
 				except:
 					continue
