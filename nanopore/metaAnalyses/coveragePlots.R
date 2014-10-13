@@ -94,7 +94,7 @@ if (! is.null(dim(dist)) && dim(dist)[2] > 2 && dim(dist)[1] > 1) {
             for (i in seq(1, length(rownames(dist)), num)){
                 t <- ceiling(i/num)
                 tmp <- vector()
-                for (q in 0:num-1) {
+                for (q in 0:(num-1)) {
                     tmp <- c(tmp,dist[i+q,][!is.na(dist[i+q,])])
                 }
                 hists2[[t]] <- hist(tmp, plot=F, breaks=b)
