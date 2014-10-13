@@ -8,26 +8,24 @@ pdf(args[2])
 
 depthFile = read.delim(inFile, sep="\t", header=F)
 
-outlier_pos <- boxplot.stats(c(unlist(unlist(depthFile[3]), dpois(unlist(depthFile[3]), mean(unlist(depthFile[3]))))))$out
-write(paste(names(outlier_pos), outlier_pos), args[4])
-
-outliers <- length(outlier_pos)
-proportion <- round((outliers / length(unlist(depthFile[3]))) * 100, 2)
-
-par(mfrow <- c(1,1))
 obs_cov <- unlist(depthFile[3])
 avg <- mean(unlist(depthFile[3]))
 dev <- sd(unlist(depthFile[3]))
 
-samples <- length(unlist(depthFile[3]))
+samples <- length(obs_cov)
 
+outlier_pos <- boxplot.stats(c(unlist(obs_cov, dpois(obs_cov, avg))))$out
+
+outliers <- length(outlier_pos)
+proportion <- round((outliers / length(unlist(depthFile[3]))) * 100, 2)
 xmax <- max(obs_cov) + 1000
 
-x <- seq(min(obs_cov),max(obs_cov))
-y <- dnorm(x,mean=avg, sd=dev)
-
+par(mfrow <- c(1,1))
 hist(obs_cov, freq=F, main=paste("Coverage distribution\n Number of under-represented sites = ", outliers, "(", proportion, "%)"), xlab="Coverage", ylab="Density", xlim=c(0, xmax), col = "green", breaks="FD")
-lines(x,y, lwd=1, col="red")
+library(MASS)
+d <- fitdistr(obs_cov, "Weibull")
+lines(1:max(obs_cov) + 1000,dweibull(1:max(obs_cov) + 1000,shape=d$estimate[1],scale=d$estimate[2]), col="red")
+
 legend("topleft",legend=c("Expected","Observed"),col=c("red","green"),pch="-")
 
 dev.off()
@@ -35,8 +33,8 @@ dev.off()
 pdf(args[3])
 par(mfrow <- c(1,1))
 
-plot(smooth.spline(unlist(depthFile[2]), unlist(depthFile[3])), main="Coverage across reference", xlab="Position across reference", ylab="Coverage", type = "l", col = "red")
-cov_change <- diff(unlist(depthFile[3]))
+plot(smooth.spline(unlist(depthFile[2]), obs_cov), main="Coverage across reference", xlab="Position across reference", ylab="Coverage", type = "l", col = "red")
 
 dev.off()
 
+write(paste(names(outlier_pos), outlier_pos), args[4])
