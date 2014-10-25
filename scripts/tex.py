@@ -42,7 +42,7 @@ def writeEnd(fileHandle, tableLabel, caption):
     fileHandle.write("\\end{tabular}\n")
     fileHandle.write("\caption{%s}\n" % caption)
     fileHandle.write("\label{%s}\n" % tableLabel)
-    fileHandle.write("\end{sidewaystable}\n")
+    fileHandle.write("\end{sidewaystable}\n\n")
 
 def writeLine(columnNumber, rowNumber, entries, fileHandle, trailingLines=1):
     updatedEntries = []
@@ -76,3 +76,7 @@ def writeLine(columnNumber, rowNumber, entries, fileHandle, trailingLines=1):
 
 def writeRow(entries, fileHandle):
     fileHandle.write("%s \\\\\n" % " & ".join(entries))
+    
+def writeFigure(fileHandle, imageFile, caption, label, width=10):
+    fileHandle.write("\\clearpage\n")
+    fileHandle.write("\\begin{figure}[h!]\n\\begin{center}\n\\includegraphics[width=%scm]{%s}\n\\caption{%s}\n\\label{%s}\n\\end{center}\n\\end{figure}\n\n" % (width, imageFile, caption, label))

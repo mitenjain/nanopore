@@ -32,7 +32,7 @@ def getNullSubstitutionMatrix():
     return dict(zip(product(bases, bases), [1.0]*len(bases)**2))
 
 def getJukesCantorTypeSubstitutionMatrix():
-    return dict(zip(product(bases, bases), map(lambda x : 0.75 if x[0] == x[1] else (0.25/3), product(bases, bases))))
+    return dict(zip(product(bases, bases), map(lambda x : 0.8 if x[0] == x[1] else (0.2/3), product(bases, bases))))
 
 class MarginAlignSnpCaller(AbstractAnalysis):
     """Calculates stats on snp calling.
@@ -213,10 +213,10 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             
                             #Get base calls
                             for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
-                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
-                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
-                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
+                            ((flatSubstitutionMatrix, flatSubstitutionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
+                             (hmmErrorSubstitutionMatrix, flatSubstitutionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
+                             (flatSubstitutionMatrix, flatSubstitutionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
+                             (hmmErrorSubstitutionMatrix, flatSubstitutionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
                                 
                                 if key in baseExpectations:
                                     #Get posterior likelihoods
@@ -226,17 +226,27 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                         posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
                                                                evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
                                         probs = [ posteriorProbs[base] for base in "ACGT" ]
-                                        posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
-                                        maxPosteriorProb = max(posteriorProbs.values())
-                                        chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
+                                        #posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
+                                        #maxPosteriorProb = max(posteriorProbs.values())
+                                        #chosenBase = random.choice([ base for base in posteriorProbs if posteriorProbs[base] == maxPosteriorProb ]).upper() #Very naive way to call the base
 
-                                        if trueRefBase != mutatedRefBase:
-                                            if trueRefBase == chosenBase:
-                                                snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
-                                            else:
-                                                snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, probs)) #False negative
-                                        else:
-                                            snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
+                                        for chosenBase in "ACGT":
+                                            if chosenBase != mutatedRefBase:
+                                                maxPosteriorProb = posteriorProbs[chosenBase]
+                                                if trueRefBase != mutatedRefBase and trueRefBase == chosenBase:
+                                                    snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
+                                                else:
+                                                    snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
+                                                """
+                                                    snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, probs)) #False negative
+                                                if trueRefBase != mutatedRefBase:
+                                                    if trueRefBase == chosenBase:
+                                                        snpCalls.truePositives.append((maxPosteriorProb, refPosition)) #True positive
+                                                    else:
+                                                        snpCalls.falseNegatives.append((refPosition, trueRefBase, mutatedRefBase, probs)) #False negative
+                                                else:
+                                                    snpCalls.falsePositives.append((maxPosteriorProb, refPosition)) #False positive
+                                                """
                                 else:
                                     snpCalls.notCalled += 1
                         
