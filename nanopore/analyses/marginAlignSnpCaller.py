@@ -213,7 +213,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             
                             #Get base calls
                             for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
-                            ((flatSubstitutionMatrix, flatSubstitutionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
+                            ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
                              (hmmErrorSubstitutionMatrix, flatSubstitutionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
                              (flatSubstitutionMatrix, flatSubstitutionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
                              (hmmErrorSubstitutionMatrix, flatSubstitutionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
@@ -223,7 +223,7 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                                     expectations = baseExpectations[key]
                                     totalExpectation = sum(expectations.values())
                                     if totalExpectation > 0.0: #expectationCallingThreshold:
-                                        posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), trueRefBase, 
+                                        posteriorProbs = calcBasePosteriorProbs(dict(zip(bases, map(lambda x : float(expectations[x])/totalExpectation, bases))), mutatedRefBase, 
                                                                evolutionarySubstitutionMatrix, errorSubstitutionMatrix)
                                         probs = [ posteriorProbs[base] for base in "ACGT" ]
                                         #posteriorProbs.pop(mutatedRefBase) #Remove the ref base.
