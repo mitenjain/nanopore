@@ -214,9 +214,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                             #Get base calls
                             for errorSubstitutionMatrix, evolutionarySubstitutionMatrix, baseExpectations, snpCalls in \
                             ((flatSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxExpectedSnpCalls),
-                             (hmmErrorSubstitutionMatrix, flatSubstitutionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
-                             (flatSubstitutionMatrix, flatSubstitutionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
-                             (hmmErrorSubstitutionMatrix, flatSubstitutionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, expectationsOfBasesAtEachPosition, marginAlignMaxLikelihoodSnpCalls),
+                             (flatSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maxFrequencySnpCalls),
+                             (hmmErrorSubstitutionMatrix, nullSubstitionMatrix, frequenciesOfAlignedBasesAtEachPosition, maximumLikelihoodSnpCalls)):
                                 
                                 if key in baseExpectations:
                                     #Get posterior likelihoods
