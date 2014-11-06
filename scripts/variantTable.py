@@ -64,9 +64,9 @@ while 1:
     elif mapper == "BlasrParamsRealignTrainedModel40":
         mapperName = "Blasr/Cactus (Blasr run using the `-x pacbio' flags, realignment done using the described trained EM model)"
     
-    mapperDescription = [ "Variant calling results shown for a P-value that gives the optimal F-score." ]
+    mapperDescription = [ "Variant calling results shown for a posterior-probability threshold that gives the optimal F-score." ]
     if "marginAlign" in algorithm:
-        mapperDescription.append("Variant calling was performed by summing over all the possible alignments of each read.")
+        mapperDescription.append("Variant calling was performed by summing over all the possible alignments of each read to the mutated reference sequence.")
     else:
         mapperDescription.append("Variant calling was performed by considering the single best AMAP alignment of each read.")
     if "ikelihood" in algorithm:
@@ -78,13 +78,13 @@ while 1:
     if "trained_0" in algorithm:
         mapperDescription.append("Realignment done using the EM trained HMM model, without accounting for substitution differences between the given reference and true underlying reference.")
     if "trained_20" in algorithm:
-        mapperDescription.append("Realignment done using the EM trained HMM model, accounting for substitution differences between the given reference and true underlying reference, assuming 20\% divergence.")
+        mapperDescription.append("Realignment done using the EM trained HMM model, accounting for substitution differences between the mutated reference and true underlying reference, assuming 20\% divergence.")
     if "trained_40" in algorithm:
-        mapperDescription.append("Realignment done using the EM trained HMM model, accounting for substitution differences between the given reference and true underlying reference, assuming 40\% divergence.")
+        mapperDescription.append("Realignment done using the EM trained HMM model, accounting for substitution differences between the mutated reference and true underlying reference, assuming 40\% divergence.")
     
     mapperDescription.append("Mutation frequency is the approximate proportion of sites mutated in the reference to which reads where aligned, and for which variants were called.")
     mapperDescription.append("Coverage is the total length of reads sampled divided by the length of the reference. ALL corresponds to using all the reads for a given experiment.")
-    mapperDescription.append("All results shown are across three replicate experiments, and, at each coverage value, three different samplings of the reads. Raw results are available in the supplementary spread-sheet.")
+    mapperDescription.append("Results shown are across three replicate experiments, and, at each coverage value, three different samplings of the reads. Raw results are available in the supplementary spread-sheet.")
     
     writeEnd(fileHandle, "variantCallingTable%i" % tableNumber, "Variant calling on M13 using %s reads with the %s mapping algorithm. %s" % (readType, mapperName, " ".join(mapperDescription)))
     
