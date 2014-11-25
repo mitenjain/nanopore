@@ -6,6 +6,7 @@ library(lattice)
 inFile <- args[1]
 pdf(args[2])
 
+library(boot)
 depthFile = read.delim(inFile, sep="\t", header=F)
 
 obs_cov <- unlist(depthFile[3])
@@ -32,8 +33,7 @@ dev.off()
 
 pdf(args[3])
 par(mfrow <- c(1,1))
-
-plot(smooth.spline(unlist(depthFile[2]), obs_cov), main="Coverage across reference", xlab="Position across reference", ylab="Coverage", type = "l", col = "red")
+plot(spline(unlist(depthFile[2]), obs_cov/max(obs_cov)), main="Coverage across reference", xlab="Position across reference", ylab="Normalized Coverage", type = "l", col = "red")
 
 dev.off()
 
