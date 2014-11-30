@@ -510,9 +510,9 @@ def learnModelFromSamFileTargetFn(target, samFile, readFastqFile, referenceFasta
     options.modelType="fiveStateAsymmetric" #"threeStateAsymmetric"
     options.optionsToRealign="--diagonalExpansion=10 --splitMatrixBiggerThanThis=300" 
     options.randomStart = True
-    options.trials = 5
+    options.trials = 3
     options.outputTrialHmms = True
-    options.iterations = 200
+    options.iterations = 100
     options.numberOfAlignmentsPerJob=200
     options.outputXMLModelFile = outputModel + ".xml"
     #options.updateTheBand = True
