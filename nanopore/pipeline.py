@@ -75,13 +75,16 @@ mappers = [ #Bwa,
            #CombinedMapperRealign ]
            #CombinedMapperRealignEm,
            #CombinedMapperRealignTrainedModel ]
+           
+
 
 analyses = [ Hmm, GlobalCoverage, LocalCoverage, Substitutions, Indels, AlignmentUncertainty, ChannelMappability, KmerAnalysis, IndelKmerAnalysis ] #, FastQC, QualiMap, Consensus]
 
 metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributionAnalysis, ComparePerReadMappabilityByMapper, HmmMetaAnalysis ]# CustomTrackAssemblyHub ]
 
-#analyses = [ GlobalCoverage, Indels ]
-#metaAnalyses = []
+mappers = [ LastParamsRealignEm ]
+analyses = [ GlobalCoverage, Indels ]
+metaAnalyses = []
 #analyses = [ MarginAlignSnpCaller ]
 #metaAnalyses = [ MarginAlignMetaAnalysis ] 
 #mappers = [ LastParamsChain, LastParamsRealignTrainedModel ] #, LastParamsRealignTrainedModel,
