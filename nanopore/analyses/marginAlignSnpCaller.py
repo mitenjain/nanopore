@@ -49,9 +49,9 @@ class MarginAlignSnpCaller(AbstractAnalysis):
                     sam = pysam.Samfile(self.samFile, "r" )
                     
                     #Trained hmm file to use.q
-                    hmmFile0 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_0.txt")
-                    hmmFile20 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_20.txt")
-                    hmmFile40 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_40.txt")
+                    hmmFile0 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "blasr_hmm_0.txt")
+                    hmmFile20 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "blasr_hmm_20.txt")
+                    hmmFile40 = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "blasr_hmm_40.txt")
               
                     #Get substitution matrices
                     nullSubstitionMatrix = getNullSubstitutionMatrix()

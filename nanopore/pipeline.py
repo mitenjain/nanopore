@@ -85,9 +85,11 @@ metaAnalyses = [ UnmappedKmerAnalysis, CoverageSummary, UnmappedLengthDistributi
 #mappers = [ LastParamsRealignEm ]
 #analyses = [ GlobalCoverage, Indels ]
 #metaAnalyses = []
-#analyses = [ MarginAlignSnpCaller ]
+
+####Enable these to do variant calling
+#analyses = [ MarginAlignSnpCaller, AlignmentUncertainty ]
 #metaAnalyses = [ MarginAlignMetaAnalysis ] 
-#mappers = [ LastParamsChain, LastParamsRealignTrainedModel ] #, LastParamsRealignTrainedModel,
+#mappers = [ LastParamsChain, LastParamsRealignTrainedModel,
 #            LastParamsRealignTrainedModel20, LastParamsRealignTrainedModel40, 
 #            BlasrParamsChain, BlasrParamsRealignTrainedModel, 
 #            BlasrParamsRealignTrainedModel20, BlasrParamsRealignTrainedModel40,   ]

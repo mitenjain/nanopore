@@ -22,7 +22,7 @@ class AbstractMapper(Target):
         system("cp %s %s" % (self.outputSamFile, tempSamFile))
         chainSamFile(tempSamFile, self.outputSamFile, self.readFastqFile, self.referenceFastaFile)
     
-    def realignSamFile(self, gapGamma=0.5, matchGamma=0.0, doEm=False,  useTrainedModel=False, trainedModelFile="BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_0.txt"):
+    def realignSamFile(self, gapGamma=0.5, matchGamma=0.0, doEm=False,  useTrainedModel=False, trainedModelFile="blasr_hmm_0.txt"):
         """Chains and then realigns the resulting global alignments.
         """
         tempSamFile = os.path.join(self.getGlobalTempDir(), "temp.sam")

@@ -35,7 +35,7 @@ class AlignmentUncertainty(AbstractAnalysis):
             fastaWrite(tempReadFile, aR.qname, aR.query)
             
             #Trained hmm file to use.
-            hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "BLASR_DD_575_R7_M13_08_03_14_R72D_V1.3.1_hmm_0.txt")
+            hmmFile = os.path.join(pathToBaseNanoporeDir(), "nanopore", "mappers", "blasr_hmm_0.txt")
             
             #Call to cactus_realign
             system("echo %s | cactus_realign %s %s --rescoreByPosteriorProbIgnoringGaps --rescoreOriginalAlignment --diagonalExpansion=10 --splitMatrixBiggerThanThis=100 --outputPosteriorProbs=%s --loadHmm=%s > %s" % \
