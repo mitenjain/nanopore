@@ -10,6 +10,12 @@ data <- lapply(data, as.numeric)
 
 library(lattice)
 
+for (i in 1:length(data)) {
+    if ( sum(data[[i]], na.rm=T) == 0 ) {
+        quit()
+    }
+}
+
 if ( length(data$MappedReadLengths) > 1 && length(data$UnmappedReadLengths) > 1) {
     #open a pdf
     pdf(args[2])
