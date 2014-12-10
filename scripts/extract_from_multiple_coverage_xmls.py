@@ -11,6 +11,7 @@ insertions = list()
 deletions = list()
 mismatches = list()
 
+
 outf = open(sys.argv[4],"w")
 
 for c in f1.getchildren():

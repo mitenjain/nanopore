@@ -131,6 +131,28 @@ if (dim(data)[1] > 1) {
 
     print(p)
 
+    #plot that checks for independence of read amount by position
+    xvals <- vector()
+    yvals <- vector()
+    #grid of (y) positions
+    around <- expand.grid(c(-1,0,1),c(-1,0,1))
+    #remove the one position where x = y = 0
+    around <- around[-5,]
+    for (y in 1:16) {
+      for (x in 1:32) {
+        for (z in 1:8){
+          yoffset <- around[z,1]
+          xoffset <- around[z,2]
+          #ensure we are not on the edge of the grid
+          if ( ! x + xoffset < 1 && ! y + yoffset < 1 && ! x + xoffset > 32 && ! y + yoffset > 16){
+            xvals <- c(xvals, positions[y,x])
+            yvals <- c(yvals, positions[y+yoffset,x+xoffset])
+          }
+        }
+      }
+    }
+    p <- xyplot(yvals~xvals, xlab="# Of Reads", ylab="# Of Reads In Adjacent Channels", main="Comparing The Number of Reads In Individual Channels\nTo All Adjacent Channels",panel=panel.smoothScatter)
+    print(p)
     dev.off()
 
 }
