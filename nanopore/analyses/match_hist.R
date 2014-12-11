@@ -4,7 +4,7 @@ args <- commandArgs(trailingOnly = T)
 
 data <- read.table(args[1], sep="\t")
 
-if ( dim(data)[1] > 0 ) {
+if ( dim(data)[1] > 0 & sum(data, na.rm=T) > 0 ) {
 
     pdf(args[2])
 
