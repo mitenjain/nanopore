@@ -1,5 +1,5 @@
 # order is important, libraries first
-modules = sonLib jobTree bwa lastz last cactus samtools-0.1.19 
+modules = sonLib jobTree bwa lastz last cPecan samtools-0.1.19 
 #hdf5 blasr
 .PHONY: all %.all clean %.clean
 
