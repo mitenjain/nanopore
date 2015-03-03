@@ -31,3 +31,6 @@
 [submodule "submodules/cactus"]
 	path = submodules/cactus
 	url = git@github.com:benedictpaten/cactus.git
+[submodule "submodules/cPecan"]
+	path = submodules/cPecan
+	url = git@github.com:benedictpaten/cPecan.git
