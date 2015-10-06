@@ -1,33 +1,33 @@
 [submodule "submodules"]
 	path = submodules
-	url = git@github.com:benedictpaten/jobTree.git
+	url = https://github.com/benedictpaten/jobTree.git
 [submodule "subModules/jobTree"]
 	path = subModules/jobTree
-	url = git@github.com:benedictpaten/jobTree.git
+	url = https://github.com/benedictpaten/jobTree.git
 [submodule "subModules/sonLib"]
 	path = subModules/sonLib
-	url = git@github.com:benedictpaten/sonLib.git
+	url = https://github.com/benedictpaten/sonLib.git
 [submodule "submodules/bwa"]
 	path = submodules/bwa
-	url = git@github.com:lh3/bwa.git
+	url = https://github.com/lh3/bwa.git
 [submodule "submodules/lastz"]
 	path = submodules/lastz
-	url = git@github.com:UCSCReconGroup/lastz.git
+	url = https://github.com/UCSCReconGroup/lastz.git
 [submodule "submodules/jobTree"]
 	path = submodules/jobTree
-	url = git@github.com:benedictpaten/jobTree.git
+	url = https://github.com/benedictpaten/jobTree.git
 [submodule "submodules/sonLib"]
 	path = submodules/sonLib
-	url = git@github.com:benedictpaten/sonLib.git
+	url = https://github.com/benedictpaten/sonLib.git
 [submodule "submodules/last"]
 	path = submodules/last
-	url = git@github.com:UCSCReconGroup/last.git
+	url = https://github.com/UCSCReconGroup/last.git
 [submodule "submodules/blasr"]
 	path = submodules/blasr
-	url = git@github.com:PacificBiosciences/blasr.git
+	url = https://github.com/PacificBiosciences/blasr.git
 [submodule "submodules/hdf5"]
 	path = submodules/hdf5
-	url = git@github.com:UCSCReconGroup/hdf5.git
+	url = https://github.com/UCSCReconGroup/hdf5.git
 [submodule "submodules/cactus"]
 	path = submodules/cactus
-	url = git@github.com:benedictpaten/cactus.git
+	url = https://github.com/benedictpaten/cactus.git
